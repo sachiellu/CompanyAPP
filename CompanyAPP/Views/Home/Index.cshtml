@@ -1,0 +1,41 @@
+﻿@{
+    ViewData["Title"] = "系統首頁";
+}
+
+<div class="text-center mb-5">
+    <h1 class="display-4 fw-bold text-primary">企業資源管理中心</h1>
+    <p class="lead text-muted">整合客戶資料、人力資源與權限管理的一站式平台</p>
+    <hr />
+</div>
+
+<div class="container">
+    <h2 class="text-center my-4">企業人力分布圖</h2>
+    <div style="width: 80%; margin: auto;">
+        <canvas id="myChart"></canvas>
+    </div>
+</div>
+
+<script>
+    var names = @Html.Raw(Json.Serialize(ViewBag.CompanyNames));
+    var counts = @Html.Raw(Json.Serialize(ViewBag.EmployeeCounts));
+
+    var ctx = document.getElementById('myChart').getContext('2d');
+    var myChart = new Chart(ctx, {
+        type: 'bar', // 長條圖 ( 'pie' 圓餅圖)
+        data: {
+            labels: names,
+            datasets: [{
+                label: '員工人數',
+                data: counts,
+                backgroundColor: 'rgba(54, 162, 235, 0.6)',
+                borderColor: 'rgba(54, 162, 235, 1)',
+                borderWidth: 1
+            }]
+        },
+        options: {
+            scales: {
+                y: { beginAtZero: true }
+            }
+        }
+    });
+</script>

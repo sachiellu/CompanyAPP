@@ -1,0 +1,21 @@
+## 忽略 Visual Studio 暫存檔
+.vs/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+## 忽略編譯產生的垃圾桶
+bin/
+obj/
+Debug/
+Release/
+
+## 忽略 SQLite 資料庫
+*.db
+*.db-shm
+*.db-wal
+
+## 忽略環境設定檔
+appsettings.Development.json
+.env

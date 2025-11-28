@@ -1,0 +1,64 @@
+﻿@model List<CompanyAPP.Models.UserRolesViewModel>
+
+@{
+    ViewData["Title"] = "帳號管理";
+}
+
+<div class="container mt-4">
+    <h2> 系統帳號與權限管理</h2>
+
+    <div class="card shadow-sm mt-3">
+        <div class="card-body">
+            <table class="table table-hover align-middle">
+                <thead class="table-dark">
+                    <tr>
+                        <th>帳號 (Email)</th>
+                        <th>目前身分 (Roles)</th>
+                        <th class="text-center">操作</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var user in Model)
+                    {
+                        <tr>
+                            <td>@user.Email</td>
+                            <td>
+                                @if (user.Roles.Contains("Admin"))
+                                {
+                                    <span class="badge bg-danger">管理員</span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-secondary">一般用戶</span>
+                                }
+                            </td>
+
+                            <td class="text-center">
+                                <div class="btn-group">
+
+                                    @if (user.Email == "abccmick@gmail.com")
+                                    {
+                                        <span class="text-muted fst-italic">由系統保護</span>
+                                    }
+                                    else
+                                    {
+                                        <a asp-action="ManageRoles" asp-route-userId="@user.UserId" class="btn btn-outline-primary btn-sm">
+                                            🔑 分配權限
+                                        </a>
+                                        @* 保護機制 *@
+                                        @if (User.Identity.Name != user.Email)
+                                        {
+                                            <a asp-action="Delete" asp-route-id="@user.UserId"
+                                            class="btn btn-outline-danger btn-sm"
+                                            onclick="return confirm('確定要刪除此帳號？');">刪除</a>
+                                        }
+                                    }
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

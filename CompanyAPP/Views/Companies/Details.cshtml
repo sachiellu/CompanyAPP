@@ -1,0 +1,89 @@
+﻿@model CompanyAPP.Models.Company
+@inject CompanyAPP.Data.CompanyAppContext _context
+
+@{
+    ViewData["Title"] = "廠商詳情";
+
+    var employees = _context.Employee.Where(e => e.CompanyId == Model.Id).ToList();
+}
+
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow">
+                <div class="card-header bg-secondary text-white">
+                    <h4 class="mb-0">廠商詳細資料</h4>
+                </div>
+                <div class="card-body">
+
+                    <div class="row mb-4">
+                        @* 左邊放圖片 *@
+                        <div class="col-md-4 text-center mb-3">
+                            <img src="@(string.IsNullOrEmpty(Model.LogoPath) ? "https://via.placeholder.com/150?text=No+Logo" : Url.Content("~/images/" + Model.LogoPath))"
+                                 class="img-fluid rounded border p-1" style="max-height: 150px;" />
+                        </div>
+
+                        @* 右邊放主要資訊 *@
+                        <div class="col-md-8">
+                            <h2 class="fw-bold text-primary">@Model.Name</h2>
+                            <hr />
+                            <div class="row">
+                                <div class="col-sm-4 fw-bold">統一編號</div>
+                                <div class="col-sm-8">@Html.DisplayFor(model => model.TaxId)</div>
+                            </div>
+                            <div class="row mt-2">
+                                <div class="col-sm-4 fw-bold">產業類別</div>
+                                <div class="col-sm-8">@Html.DisplayFor(model => model.Industry)</div>
+                            </div>
+                            <div class="row mt-2">
+                                <div class="col-sm-4 fw-bold">成立日期</div>
+                                <div class="col-sm-8">@Html.DisplayFor(model => model.FoundedDate)</div>
+                            </div>
+                            <div class="row mt-2">
+                                <div class="col-sm-4 fw-bold">地址</div>
+                                <div class="col-sm-8">@Html.DisplayFor(model => model.Address)</div>
+                            </div>
+                        </div>
+                    </div>
+
+                     @* 員工列表區塊 *@
+                    <div class="mt-4">
+                        <h5 class="border-bottom pb-2">員工列表</h5>
+                        @if (employees.Any())
+                        {
+                            <table class="table table-sm table-hover mt-2">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>姓名</th>
+                                        <th>職位</th>
+                                        <th>Email</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var emp in employees)
+                                    {
+                                        <tr>
+                                            <td>@emp.Name</td>
+                                            <td>@emp.Position</td>
+                                            <td>@emp.Email</td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        }
+                        else
+                        {
+                            <p class="text-muted">目前無員工資料。</p>
+                        }
+                    </div>
+
+                    <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-4">
+                        <a asp-action="Index" class="btn btn-secondary me-2">返回列表</a>
+                        <a asp-action="Edit" asp-route-id="@Model?.Id" class="btn btn-primary px-4">編輯資料</a>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

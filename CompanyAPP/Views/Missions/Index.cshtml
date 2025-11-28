@@ -1,0 +1,78 @@
+﻿@model IEnumerable<CompanyAPP.Models.Mission>
+
+@{
+    ViewData["Title"] = "派工任務管理";
+}
+
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h1> 派工任務管理</h1>
+        <a asp-action="Create" class="btn btn-primary btn-lg">
+            + 新增派工任務
+        </a>
+    </div>
+
+    <div class="card shadow-sm">
+        <div class="card-body p-0">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-dark">
+                    <tr>
+                        <th>@Html.DisplayNameFor(model => model.Title)</th>
+                        <th>@Html.DisplayNameFor(model => model.Company)</th>
+                        <th>@Html.DisplayNameFor(model => model.Employee)</th>
+                        <th>@Html.DisplayNameFor(model => model.Status)</th>
+                        <th>@Html.DisplayNameFor(model => model.Deadline)</th>
+                        <th class="text-center">操作功能</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model)
+                    {
+                        <tr>
+                            <td class="fw-bold">@Html.DisplayFor(modelItem => item.Title)</td>
+                            <td>
+                                <span class="badge bg-primary">@Html.DisplayFor(modelItem => item.Company.Name)</span>
+                            </td>
+                            <td>@Html.DisplayFor(modelItem => item.Employee.Name)</td>
+                            <td>
+                                @if (item.Status == CompanyAPP.Models.MissionStatus.Pending)
+                                {
+                                    <span class="badge bg-danger">待處理</span>
+                                }
+                                else if (item.Status == CompanyAPP.Models.MissionStatus.Processing)
+                                {
+                                    <span class="badge bg-warning text-dark">處理中</span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-success">已完成</span>
+                                }
+                            </td>
+                            <td>
+                                 @* 剩3天內，顯示紅色  *@
+                                @if (item.Deadline < DateTime.Now.AddDays(3) && item.Status != CompanyAPP.Models.MissionStatus.Completed)
+                                {
+                                    <span class="text-danger fw-bold">@item.Deadline.ToString("yyyy/MM/dd")</span>
+                                }
+                                else
+                                {
+                                    @item.Deadline.ToString("yyyy/MM/dd")
+                                }
+                            </td>
+                            <td class="text-center">
+                                <div class="btn-group" role="group">
+                                    <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-outline-primary btn-sm">編輯</a>
+                                    <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-outline-info btn-sm">詳情</a>
+                                    @if (User.IsInRole("Admin"))
+                                    {
+                                        <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-outline-danger btn-sm">刪除</a>
+                                    }
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

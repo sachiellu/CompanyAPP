@@ -1,0 +1,52 @@
+﻿@model List<CompanyAPP.Models.ManageUserRolesViewModel>
+
+@{
+    ViewData["Title"] = "權限分配";
+    var userId = ViewBag.UserId;
+}
+
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0">設定權限: @ViewBag.UserName</h4>
+                </div>
+                <div class="card-body">
+
+                    <form method="post" asp-action="ManageRoles" asp-route-userId="@ViewBag.UserId">
+                        <div class="mb-3">
+                            <label class="form-label fw-bold mb-3">請選擇該帳號的身分（單選）：</label>
+
+                            @foreach (var role in Model)
+                            {
+                                <div class="form-check p-3 border rounded mb-2 @(role.IsSelected ? "bg-light border-primary" : "")">
+                                    <input class="form-check-input ms-1" type="radio"
+                                           name="selectedRole"
+                                           id="role_@role.RoleId"
+                                           value="@role.RoleName"
+                                           @(role.IsSelected ? "checked" : "")>
+
+                                    <label class="form-check-label ms-2 fw-bold" for="role_@role.RoleId">
+                                        @role.RoleName
+                                        @if (role.RoleName == "Admin")
+                                        {
+                                            <span class="text-success">(高權限)</span>
+                                        }
+                                    </label>
+                                </div>
+                            }
+                        </div>
+
+                        <div asp-validation-summary="All" class="text-danger"></div>
+
+                        <div class="d-grid gap-2 mt-4">
+                            <button type="submit" class="btn btn-primary">保存設定</button>
+                            <a asp-action="Index" class="btn btn-secondary">取消</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,99 @@
+﻿@model CompanyAPP.Models.Company
+
+@{
+    ViewData["Title"] = "編輯廠商";
+}
+
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow">
+                <div class="card-header bg-success text-white">
+                    <h4 class="mb-0">編輯廠商資料</h4>
+                </div>
+                <div class="card-body">
+                    <form asp-action="Edit" enctype="multipart/form-data">
+                        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+                        <input type="hidden" asp-for="Id" />
+                        <input type="hidden" asp-for="LogoPath" />
+
+                        <div class="mb-3">
+                            <label asp-for="Name" class="form-label fw-bold"></label>
+                            <input asp-for="Name" class="form-control" />
+                            <span asp-validation-for="Name" class="text-danger"></span>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label asp-for="TaxId" class="form-label"></label>
+                                <input asp-for="TaxId" class="form-control" />
+                                <span asp-validation-for="TaxId" class="text-danger"></span>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label asp-for="Industry" class="form-label"></label>
+                                <input asp-for="Industry" class="form-control" />
+                                <span asp-validation-for="Industry" class="text-danger"></span>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="FoundedDate" class="form-label"></label>
+                            <input asp-for="FoundedDate" class="form-control" />
+                            <span asp-validation-for="FoundedDate" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="Address" class="form-label"></label>
+                            <input asp-for="Address" class="form-control" />
+                            <span asp-validation-for="Address" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3 card p-3 bg-light">
+                            <label class="fw-bold mb-2">Logo 預覽</label>
+
+                            <div class="mb-2 text-center">
+                                <img id="imgPreview"
+                                     src="@(string.IsNullOrEmpty(Model.LogoPath) ? "https://via.placeholder.com/150?text=No+Image" : Url.Content("~/images/" + Model.LogoPath))"
+                                     style="max-width: 200px; max-height: 200px; border-radius: 10px; border: 1px solid #ddd; object-fit: cover;" />
+                            </div>
+
+                            <label asp-for="ImageFile" class="form-label mt-2">更換圖片</label>
+                            <input asp-for="ImageFile" class="form-control" type="file" accept="image/*" onchange="previewImage(this)" />
+                            <span asp-validation-for="ImageFile" class="text-danger"></span>
+                        </div>
+
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-4">
+                            <a asp-action="Index" class="btn btn-secondary me-2">取消返回</a>
+                            <input type="submit" value="保存修改" class="btn btn-success px-4" />
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+
+    <script>
+        function previewImage(input) {
+             // 檢查使用者有沒有選檔案
+            if (input.files && input.files[0]) {
+                var reader = new FileReader();
+
+                // 當檔案讀取完成後，執行這個動作
+                reader.onload = function (e) {
+                    // 把圖片的 src 換成剛剛讀到的檔案內容
+                    document.getElementById('imgPreview').src = e.target.result;
+                }
+
+                // 開始讀取檔案
+                reader.readAsDataURL(input.files[0]);
+            }
+        }
+    </script>
+}
