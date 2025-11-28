@@ -4,7 +4,7 @@
 
 <div class="text-center mb-5">
     <h1 class="display-4 fw-bold text-primary">企業資源管理中心</h1>
-    <p class="lead text-muted">整合客戶資料、人力資源與權限管理的一站式平台</p>
+    <p class="lead text-muted">整合客戶資料、人力資源與權限管理平台</p>
     <hr />
 </div>
 
@@ -15,27 +15,45 @@
     </div>
 </div>
 
-<script>
-    var names = @Html.Raw(Json.Serialize(ViewBag.CompanyNames));
-    var counts = @Html.Raw(Json.Serialize(ViewBag.EmployeeCounts));
+@section Scripts {
+    <!-- 引入 Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
-    var ctx = document.getElementById('myChart').getContext('2d');
-    var myChart = new Chart(ctx, {
-        type: 'bar', // 長條圖 ( 'pie' 圓餅圖)
-        data: {
-            labels: names,
-            datasets: [{
-                label: '員工人數',
-                data: counts,
-                backgroundColor: 'rgba(54, 162, 235, 0.6)',
-                borderColor: 'rgba(54, 162, 235, 1)',
-                borderWidth: 1
-            }]
-        },
-        options: {
-            scales: {
-                y: { beginAtZero: true }
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            var companyNames = @Html.Raw(Json.Serialize(ViewBag.CompanyNames));
+            var employeeCounts = @Html.Raw(Json.Serialize(ViewBag.EmployeeCounts));
+
+            console.log("廠商名單:", companyNames);
+            console.log("員工數量:", employeeCounts);
+
+            var ctx = document.getElementById('myChart');
+            if (ctx) {
+                new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: companyNames,
+                        datasets: [{
+                            label: '員工人數',
+                            data: employeeCounts,
+                            backgroundColor: 'rgba(54, 162, 235, 0.6)',
+                            borderColor: 'rgba(54, 162, 235, 1)',
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                ticks: { stepSize: 1 } // 強制整數刻度
+                            }
+                        }
+                    }
+                });
+            } else {
+                console.error("找不到 ID 為 'myChart' 的資訊");
             }
-        }
-    });
-</script>
+        });
+    </script>
+}

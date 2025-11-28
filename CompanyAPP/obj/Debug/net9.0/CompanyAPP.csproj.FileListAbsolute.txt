@@ -428,3 +428,4 @@ C:\Users\呂瑜\source\repos\CompanyAPP\CompanyAPP\obj\Debug\net9.0\refint\Compa
 C:\Users\呂瑜\source\repos\CompanyAPP\CompanyAPP\obj\Debug\net9.0\CompanyAPP.pdb
 C:\Users\呂瑜\source\repos\CompanyAPP\CompanyAPP\obj\Debug\net9.0\CompanyAPP.genruntimeconfig.cache
 C:\Users\呂瑜\source\repos\CompanyAPP\CompanyAPP\obj\Debug\net9.0\ref\CompanyAPP.dll
+C:\Users\呂瑜\source\repos\CompanyAPP\CompanyAPP\obj\Debug\net9.0\CompanyAPP.sourcelink.json
