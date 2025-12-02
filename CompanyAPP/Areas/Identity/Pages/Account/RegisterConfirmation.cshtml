@@ -1,23 +1,41 @@
 ﻿@page
 @model RegisterConfirmationModel
 @{
-    ViewData["Title"] = "Register confirmation";
+    ViewData["Title"] = "註冊確認";
 }
 
-<h1>@ViewData["Title"]</h1>
-@{
-    if (@Model.DisplayConfirmAccountLink)
-    {
-<p>
-    This app does not currently have a real email sender registered, see <a href="https://aka.ms/aspaccountconf">these docs</a> for how to configure a real email sender.
-    Normally this would be emailed: <a id="confirm-link" href="@Model.EmailConfirmationUrl">Click here to confirm your account</a>
-</p>
-    }
-    else
-    {
-<p>
-        Please check your email to confirm your account.
-</p>
-    }
-}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card shadow">
+                <div class="card-header bg-info text-white text-center">
+                    <h4 class="mb-0">📧 @ViewData["Title"]</h4>
+                </div>
 
+                <div class="card-body p-4">
+                    @{
+                        if (@Model.DisplayConfirmAccountLink)
+                        {
+                            <!-- 開發模式：顯示直接驗證連結 (這就是你剛剛問的後門) -->
+                            <div class="alert alert-warning">
+                                <p><strong>開發模式提示：</strong></p>
+                                <p>因為尚未串接真實 Email 服務，請點擊下方連結進行驗證：</p>
+                                <a id="confirm-link" href="@Model.EmailConfirmationUrl" class="btn btn-success w-100">點擊驗證帳號</a>
+                            </div>
+                        }
+                        else
+                        {
+                            <!-- 正式模式/已設定EmailSender：顯示去收信 -->
+                            <div class="text-center">
+                                <h3 class="mb-3 text-primary">請檢查您的 Email</h3>
+                                <p class="lead">我們已發送一封驗證信至 <strong>@Model.Email</strong></p>
+                                <p class="text-muted">請點擊信件中的連結以啟用您的帳號。</p>
+                                <small>沒收到？請檢查垃圾郵件或 <a asp-page="./ResendEmailConfirmation">補寄驗證信</a></small>
+                            </div>
+                        }
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

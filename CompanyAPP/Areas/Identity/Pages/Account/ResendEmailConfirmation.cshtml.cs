@@ -64,7 +64,7 @@ namespace CompanyAPP.Areas.Identity.Pages.Account
             var user = await _userManager.FindByEmailAsync(Input.Email);
             if (user == null)
             {
-                ModelState.AddModelError(string.Empty, "Verification email sent. Please check your email.");
+                ModelState.AddModelError(string.Empty, "驗證電子郵件已寄出。請檢查您的信箱。");
                 return Page();
             }
 
@@ -78,10 +78,10 @@ namespace CompanyAPP.Areas.Identity.Pages.Account
                 protocol: Request.Scheme);
             await _emailSender.SendEmailAsync(
                 Input.Email,
-                "Confirm your email",
-                $"Please confirm your account by <a href='{HtmlEncoder.Default.Encode(callbackUrl)}'>clicking here</a>.");
+                "確認您的電子郵件信箱",
+                $"請點擊<a href='{HtmlEncoder.Default.Encode(callbackUrl)}'>此處</a>來確認您的帳號");
 
-            ModelState.AddModelError(string.Empty, "Verification email sent. Please check your email.");
+            ModelState.AddModelError(string.Empty, "驗證電子郵件已寄出。請檢查您的信箱。");
             return Page();
         }
     }

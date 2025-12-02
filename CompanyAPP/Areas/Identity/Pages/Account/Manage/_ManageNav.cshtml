@@ -2,14 +2,41 @@
 @{
     var hasExternalLogins = (await SignInManager.GetExternalAuthenticationSchemesAsync()).Any();
 }
-<ul class="nav nav-pills flex-column">
-    <li class="nav-item"><a class="nav-link @ManageNavPages.IndexNavClass(ViewContext)" id="profile" asp-page="./Index">Profile</a></li>
-    <li class="nav-item"><a class="nav-link @ManageNavPages.EmailNavClass(ViewContext)" id="email" asp-page="./Email">Email</a></li>
-    <li class="nav-item"><a class="nav-link @ManageNavPages.ChangePasswordNavClass(ViewContext)" id="change-password" asp-page="./ChangePassword">Password</a></li>
-    @if (hasExternalLogins)
-    {
-        <li id="external-logins" class="nav-item"><a id="external-login" class="nav-link @ManageNavPages.ExternalLoginsNavClass(ViewContext)" asp-page="./ExternalLogins">External logins</a></li>
-    }
-    <li class="nav-item"><a class="nav-link @ManageNavPages.TwoFactorAuthenticationNavClass(ViewContext)" id="two-factor" asp-page="./TwoFactorAuthentication">Two-factor authentication</a></li>
-    <li class="nav-item"><a class="nav-link @ManageNavPages.PersonalDataNavClass(ViewContext)" id="personal-data" asp-page="./PersonalData">Personal data</a></li>
+<ul class="nav nav-pills flex-column list-group">
+    <li class="nav-item list-group-item border-0 mb-1">
+        <a class="nav-link @ManageNavPages.IndexNavClass(ViewContext) text-dark" id="profile" asp-page="./Index">
+             個人基本資料
+        </a>
+    </li>
+
+    <li class="nav-item list-group-item border-0 mb-1">
+        <a class="nav-link @ManageNavPages.ChangePasswordNavClass(ViewContext) text-dark" id="change-password" asp-page="./ChangePassword">
+             修改密碼
+        </a>
+    </li>
+
+    <li class="nav-item list-group-item border-0 mb-1">
+    <a class="nav-link @ManageNavPages.EmailNavClass(ViewContext) text-dark" id="email" asp-page="./Email">
+         更改電子信箱
+    </a>
+    </li>
+    
+    </li>
+    <li class="nav-item list-group-item border-0 mb-1">
+        <a class="nav-link @ManageNavPages.TwoFactorAuthenticationNavClass(ViewContext) text-dark" id="two-factor" asp-page="./TwoFactorAuthentication">
+            雙重驗證 (2FA)
+        </a>
+    </li>
+
+    <li class="nav-item list-group-item border-0 mb-1">
+        <a class="nav-link @ManageNavPages.ExternalLoginsNavClass(ViewContext) text-dark" id="external-login" asp-page="./ExternalLogins">
+            綁定外部帳號 (Google)
+        </a>
+    </li>
+
+    <li class="nav-item list-group-item border-0 mb-1">
+        <a class="nav-link @ManageNavPages.PersonalDataNavClass(ViewContext) text-dark" id="personal-data" asp-page="./PersonalData">
+             下載個人數據
+        </a>
+    </li>
 </ul>

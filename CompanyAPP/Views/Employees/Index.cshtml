@@ -5,27 +5,31 @@
 }
 
 <div class="container mt-4">
+    @* 標題與功能列 *@
     <div class="d-flex justify-content-between align-items-center mb-3">
         <h1> 員工管理</h1>
-        <a asp-action="Create" class="btn btn-primary btn-lg">
-            + 新增員工
-        </a>
+        <div>
+            @* 批次刪除按鈕 (預設隱藏) *@
+            <button type="button" class="btn btn-danger me-2" onclick="submitBatchDelete()">
+                刪除選取項目
+            </button>
+            <a asp-action="Create" class="btn btn-primary me-2">
+                + 新增員工
+             </a>
+        </div>
     </div>
 
-    @* 搜尋框，JS 控制 *@
+    @* 搜尋框 *@
     <div class="input-group mb-4 shadow-sm">
         <span class="input-group-text bg-white border-end-0">🔍</span>
-
-@*         id="searchInput" 是給 JS 抓的重點
-        oninput="searchEmployees()" 代表打字就觸發 *@
         <input type="text" id="searchInput" class="form-control border-start-0"
                placeholder="請輸入姓名、職位或 Email (即時搜尋)..."
                oninput="searchEmployees()">
     </div>
 
+    @* 表格容器 *@
     <div class="card shadow-sm">
         <div class="card-body p-0" id="tableContainer">
-            @* 剛進來時，先載入預設的表格 *@
             <partial name="_EmployeeTable" model="Model" />
         </div>
     </div>
@@ -33,24 +37,44 @@
 
 @section Scripts {
     <script>
-        // 防止使用者打字太快，防抖動(Debounce)機制
+        // 1. 搜尋功能的防抖動機制
         let timeout = null;
-
         function searchEmployees() {
-
             let keyword = document.getElementById("searchInput").value;
             clearTimeout(timeout);
             timeout = setTimeout(function () {
-
                 let url = `/Employees/Filter?searchString=${keyword}`;
-
                 $("#tableContainer").load(url, function(response, status, xhr) {
                     if (status == "error") {
-                        console.log("搜尋失敗: " + xhr.status + " " + xhr.statusText);
+                        console.log("搜尋失敗");
                     }
                 });
-
             }, 300);
+        }
+
+            // 2. 全選 Checkbox 控制 
+        function toggleSelectAll(source) {
+            let checkboxes = document.querySelectorAll('.row-checkbox');
+            for (let i = 0; i < checkboxes.length; i++) {
+                checkboxes[i].checked = source.checked;
+            }
+        }
+
+        // 3. 送出批次刪除
+        function submitBatchDelete() {
+            let checkedCount = document.querySelectorAll('.row-checkbox:checked').length;
+            if (checkedCount === 0) {
+                alert("請至少選擇一筆資料！");
+                return;
+            }
+            if (confirm(`確定要刪除這 ${checkedCount} 筆資料嗎？此動作無法復原！`)) {
+                let form = document.getElementById('batchDeleteForm');
+                if(form) {
+                    form.submit();
+                } else {
+                    alert("表單載入錯誤，請重新整理頁面");
+                }
+            }
         }
     </script>
 }

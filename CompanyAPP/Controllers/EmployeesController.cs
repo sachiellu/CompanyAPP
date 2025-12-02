@@ -78,7 +78,6 @@ namespace CompanyAPP.Controllers
                 return RedirectToAction(nameof(Index));
             }
 
-
             var employeesToDelete = await _context.Employee
                 .Where(e => ids.Contains(e.Id))
                 .ToListAsync();

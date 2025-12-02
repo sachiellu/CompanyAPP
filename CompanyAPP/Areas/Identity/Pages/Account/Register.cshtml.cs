@@ -119,8 +119,8 @@ namespace CompanyAPP.Areas.Identity.Pages.Account
                         values: new { area = "Identity", userId = userId, code = code, returnUrl = returnUrl },
                         protocol: Request.Scheme);
 
-                    await _emailSender.SendEmailAsync(Input.Email, "Confirm your email",
-                        $"Please confirm your account by <a href='{HtmlEncoder.Default.Encode(callbackUrl)}'>clicking here</a>.");
+                    await _emailSender.SendEmailAsync(Input.Email, "確認您的電子郵件信箱",
+                        $"請點擊<a href='{HtmlEncoder.Default.Encode(callbackUrl)}'>此處</a>來確認您的帳號。");
 
                     if (_userManager.Options.SignIn.RequireConfirmedAccount)
                     {

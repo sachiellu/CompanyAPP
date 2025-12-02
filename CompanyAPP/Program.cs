@@ -6,94 +6,70 @@ using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Âù­y¸ô®|§PÂ_
+// é›™è»Œè·¯å¾‘åˆ¤æ–·
 var dbPath = Environment.GetEnvironmentVariable("DATABASE_PATH");
 var connectionString = "";
 
 if (!string.IsNullOrEmpty(dbPath))
 {
-    // ¶³ºİ¡G¨Ï¥ÎÀô¹ÒÅÜ¼Æ³]©wªº¸ô®| (e.g. /data/company.db)
+    // é›²ç«¯
     connectionString = $"Data Source={dbPath}";
 }
 else
 {
-    // ¥»¦a¡G¨Ï¥Î appsettings.json ªº³s½u¦r¦ê («ü¦V¥»¦aªº¸ô®|)
+    // æœ¬åœ°
     connectionString = builder.Configuration.GetConnectionString("CompanyAppContext")
                        ?? throw new InvalidOperationException("Connection string not found.");
 }
 
+// è¨»å†Šç™¼ä¿¡æœå‹™
+builder.Services.AddTransient<Microsoft.AspNetCore.Identity.UI.Services.IEmailSender, CompanyAPP.Services.EmailSender>();
+
 builder.Services.AddDbContext<CompanyAppContext>(options =>
     options.UseSqlite(connectionString));
 
-// === ·s¼W¡G«ù¤[¤Æ Data Protection Keys ===
-builder.Services.AddDataProtection()
-    .PersistKeysToFileSystem(new DirectoryInfo("/data/keys"))
-    .SetApplicationName("CompanyAPP");
+// åªæœ‰åœ¨é›²ç«¯ (æœ‰è¨­å®š DATABASE_PATH ç’°å¢ƒè®Šæ•¸) æ™‚ï¼Œæ‰è¨­å®š Key çš„å„²å­˜è·¯å¾‘
+// åœ¨æœ¬æ©Ÿé›»è…¦é–‹ç™¼æ™‚ï¼Œç›´æ¥ä½¿ç”¨é è¨­è¨­å®š (å­˜åˆ°æš«å­˜è³‡æ–™å¤¾)ï¼Œä¸ç„¶æœƒå ±éŒ¯
+if (!string.IsNullOrEmpty(Environment.GetEnvironmentVariable("DATABASE_PATH")))
+{
+    builder.Services.AddDataProtection()
+        .PersistKeysToFileSystem(new DirectoryInfo("/data/keys"))
+        .SetApplicationName("CompanyAPP");
+}
 
-// ==========================================
-// µù¥U Identity ªA°È
-// ==========================================
-// ­n§â RequireConfirmedAccount §ï¦¨ false¡A
-// ³o¼Ëµù¥U§¹´N¥i¥Hª½±µµn¤J¡A¤£¥Î·d Email ÅçÃÒ 
-
+// Identity è¨­å®š
 builder.Services.AddDefaultIdentity<IdentityUser>(options =>
  {
-     options.SignIn.RequireConfirmedAccount = false;
-
-
-     options.Password.RequireNonAlphanumeric = false; // ³]¬° false ¤£±j¨î²Å¸¹
-     options.Password.RequireUppercase = true;       // ³]¬° false ¤£±j¨î¤j¼g
+     options.SignIn.RequireConfirmedAccount = true;
+     options.Password.RequireNonAlphanumeric = false; // è¨­ç‚º false ä¸å¼·åˆ¶ç¬¦è™Ÿ
+     options.Password.RequireUppercase = true;       // è¨­ç‚º false ä¸å¼·åˆ¶å¤§å¯«
  })
     .AddRoles<IdentityRole>()
     .AddErrorDescriber<CustomIdentityErrorDescriber>()
     .AddEntityFrameworkStores<CompanyAppContext>();
 
 builder.Services.AddControllersWithViews();
-
 var app = builder.Build();
 
-// === ¾ã¦X Migration »P Seed Data (Migration ¥ı¡AµM«á Seed Data) ===
+// æ•´åˆ Migration èˆ‡ Seed Data
 using (var scope = app.Services.CreateScope())
 {
     var services = scope.ServiceProvider;
     try
     {
+        // 1. è³‡æ–™åº«é·ç§» (ç¢ºä¿ DB çµæ§‹æ˜¯æœ€æ–°çš„)
         var context = services.GetRequiredService<CompanyAppContext>();
-        // 1. ¸ê®Æ®w¾E²¾
         context.Database.Migrate();
 
-        // 2. ¨¤¦â»PºŞ²z­û Seed Data (©ñ¦b Migrate «á­±)
-        var roleManager = services.GetRequiredService<RoleManager<IdentityRole>>();
-        var userManager = services.GetRequiredService<UserManager<IdentityUser>>();
-
-        string[] roleNames = { "Admin", "User" };
-        foreach (var roleName in roleNames)
-        {
-            if (!await roleManager.RoleExistsAsync(roleName))
-            {
-                await roleManager.CreateAsync(new IdentityRole(roleName));
-            }
-        }
-
-        string adminEmail = "abccmick@gmail.com";
-        var adminUser = await userManager.FindByEmailAsync(adminEmail);
-
-        if (adminUser != null)
-        {
-            if (!await userManager.IsInRoleAsync(adminUser, "Admin"))
-            {
-                await userManager.AddToRoleAsync(adminUser, "Admin");
-            }
-        }
+        // 2. åŸ·è¡Œç¨®å­è³‡æ–™åˆå§‹åŒ– (å‘¼å« SeedData)
+        await SeedData.InitializeAsync(services);
     }
     catch (Exception ex)
     {
-        // ³B²z¿ù»~
         var logger = services.GetRequiredService<ILogger<Program>>();
-        logger.LogError(ex, "¸ê®Æ®w¾Ş§@¥¢±Ñ (¾E²¾©Î Seed Data)");
+        logger.LogError(ex, "ç³»çµ±åˆå§‹åŒ–å¤±æ•— (Migration æˆ– Seed Data éŒ¯èª¤)");
     }
 }
-
 
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
@@ -101,22 +77,15 @@ if (!app.Environment.IsDevelopment())
     app.UseExceptionHandler("/Home/Error");
 }
 app.UseStaticFiles();
-
 app.UseRouting();
 
-// ==========================================
-// ±Ò°ÊÅv­­ÅçÃÒ
-// ==========================================
+// å•Ÿå‹•æ¬Šé™é©—è­‰
 app.UseAuthorization();
-
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}");
 
-// ==========================================
-// ¥[¤J Razor Pages ¸ô¥Ñ
-// ==========================================
-
+// åŠ å…¥ Razor Pages è·¯ç”±
 app.MapRazorPages();
 
 app.Run();

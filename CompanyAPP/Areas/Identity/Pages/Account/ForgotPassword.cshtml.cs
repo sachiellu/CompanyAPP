@@ -72,8 +72,8 @@ namespace CompanyAPP.Areas.Identity.Pages.Account
 
                 await _emailSender.SendEmailAsync(
                     Input.Email,
-                    "Reset Password",
-                    $"Please reset your password by <a href='{HtmlEncoder.Default.Encode(callbackUrl)}'>clicking here</a>.");
+                    "重設密碼通知信",
+                    $"請點擊以下連結重設您的密碼： <a href='{HtmlEncoder.Default.Encode(callbackUrl)}'>點擊這裡重設密碼</a>.");
 
                 return RedirectToPage("./ForgotPasswordConfirmation");
             }

@@ -69,7 +69,7 @@ namespace CompanyAPP.Areas.Identity.Pages.Account.Manage
             /// </summary>
             [Required]
             [EmailAddress]
-            [Display(Name = "New email")]
+            [Display(Name = "新信箱")]
             public string NewEmail { get; set; }
         }
 

@@ -6,9 +6,17 @@ using Microsoft.EntityFrameworkCore;
 
 namespace CompanyAPP.Controllers
 {
+
     [Authorize(Roles = "Admin")]
+
     public class UsersController : Controller
     {
+        private readonly List<string> _superAdmins = new List<string>
+        {
+            "abccmick@gmail.com",
+            "admin@default.com"
+        };
+
         private readonly UserManager<IdentityUser> _userManager;
         private readonly RoleManager<IdentityRole> _roleManager;
 
@@ -18,7 +26,33 @@ namespace CompanyAPP.Controllers
             _roleManager = roleManager;
         }
 
-         // 使用者列表
+        // 修改舊帳戶跳過驗證
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> FixOldUsers()
+        {
+            var unverifiedUsers = await _userManager.Users
+                                        .Where(u => u.EmailConfirmed == false)
+                                        .ToListAsync();
+
+            int fixCount = 0;
+
+            foreach (var user in unverifiedUsers)
+            {
+                user.EmailConfirmed = true;
+                var result = await _userManager.UpdateAsync(user);
+                if (result.Succeeded)
+                {
+                    fixCount++;
+                }
+            }
+
+            // 把有幾個人未驗證印出來，方便除錯
+            TempData["StatusMessage"] = $"偵測到 {unverifiedUsers.Count} 個未驗證帳號，成功修復了 {fixCount} 個。";
+            return RedirectToAction(nameof(Index));
+        }
+
+        // 1. 使用者列表
         public async Task<IActionResult> Index()
         {
             var users = await _userManager.Users.ToListAsync();
@@ -29,13 +63,15 @@ namespace CompanyAPP.Controllers
                 var thisViewModel = new UserRolesViewModel();
                 thisViewModel.UserId = user.Id;
                 thisViewModel.Email = user.Email ?? "";
+
+                thisViewModel.EmailConfirmed = user.EmailConfirmed;
                 thisViewModel.Roles = await _getUserRoles(user);
                 userRolesViewModel.Add(thisViewModel);
             }
             return View(userRolesViewModel);
         }
 
-         // 管理權限頁面
+        // 2. 管理權限頁面 (GET)
         public async Task<IActionResult> ManageRoles(string userId)
         {
             var user = await _userManager.FindByIdAsync(userId);
@@ -66,6 +102,7 @@ namespace CompanyAPP.Controllers
             return View(model);
         }
 
+        // 3. 管理權限 (POST)
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> ManageRoles(string selectedRole, string userId)
@@ -73,9 +110,10 @@ namespace CompanyAPP.Controllers
             var user = await _userManager.FindByIdAsync(userId);
             if (user == null) return NotFound();
 
-            if (user.Email == "abccmick@gmail.com")
+            if (_superAdmins.Contains(user.Email))
             {
-                return Content("禁止修改最高權限管理員權限！");
+                TempData["StatusMessage"] = "錯誤：禁止修改最高權限管理員！";
+                return RedirectToAction("Index");
             }
 
             var userRoles = await _userManager.GetRolesAsync(user);
@@ -96,21 +134,26 @@ namespace CompanyAPP.Controllers
                     return RedirectToAction("Index");
                 }
             }
-
-                return RedirectToAction("Index");
-        }   
+            TempData["StatusMessage"] = "權限更新成功！";
+            return RedirectToAction("Index");
+        } 
 
         public async Task<IActionResult> Delete(string id)
         {
             var user = await _userManager.FindByIdAsync(id);
+
             if (user != null)
-            {
-                if (user.Email == "abccmick@gmail.com")
+            { 
+                if (_superAdmins.Contains(user.Email))
                 {
-                    return Content("禁止刪除最高權限管理員！");
+                    TempData["StatusMessage"] = "錯誤：禁止刪除最高權限管理員！";
+                    return RedirectToAction(nameof(Index));
                 }
+
                 await _userManager.DeleteAsync(user);
+                TempData["StatusMessage"] = "帳號刪除成功。";
             }
+
             return RedirectToAction(nameof(Index));
         }
 

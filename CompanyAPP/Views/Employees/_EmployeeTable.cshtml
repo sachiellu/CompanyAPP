@@ -1,81 +1,56 @@
 ﻿@model IEnumerable<CompanyAPP.Models.Employee>
 
-<table class="table table-hover align-middle mb-0">
-    <thead class="table-light">
-        <tr>
-            @* 全選 Checkbox *@
-            <th style="width: 50px;" class="text-center">
-
-                <input type="checkbox" id="selectAll" class="form-check-input" onclick="toggleAll(this)" />
-            </th>
-
-            <th>
-                <a asp-action="Index" asp-route-sortOrder="@ViewData["NameSortParm"]" asp-route-searchString="@ViewData["CurrentFilter"]" class="text-dark text-decoration-none">
-                    @Html.DisplayNameFor(model => model.Name) <small>⭣</small>
-                </a>
-            </th>
-            <th>
-                <a asp-action="Index" asp-route-sortOrder="@ViewData["PosSortParm"]" asp-route-searchString="@ViewData["CurrentFilter"]" class="text-dark text-decoration-none">
-                    @Html.DisplayNameFor(model => model.Position) <small>⭣</small>
-                </a>
-            </th>
-            <th>
-                <a asp-action="Index" asp-route-sortOrder="@ViewData["EmailSortParm"]" asp-route-searchString="@ViewData["CurrentFilter"]" class="text-dark text-decoration-none">
-                    @Html.DisplayNameFor(model => model.Email) <small>⭣</small>
-                </a>
-            </th>
-            <th>
-                <a asp-action="Index" asp-route-sortOrder="@ViewData["CompSortParm"]" asp-route-searchString="@ViewData["CurrentFilter"]" class="text-dark text-decoration-none">
-                    @Html.DisplayNameFor(model => model.Company) <small>⭣</small>
-                </a>
-            </th>
-            <th class="text-center">操作功能</th>
-        </tr>
-    </thead>
-    <tbody>
-        @* 如果有資料才跑迴圈 *@
-        @if (Model.Any())
-        {
+<form id="batchDeleteForm" asp-action="DeleteBatch" method="post">
+    <table class="table table-hover align-middle mb-0">
+        <thead class="table-light">
+            <tr>
+                @* 全選 Checkbox *@
+                <th style="width: 40px;">
+                    <input type="checkbox" id="selectAll" class="form-check-input" onclick="toggleSelectAll(this)">
+                </th>
+                <th>
+                    <a asp-action="Index" asp-route-sortOrder="@ViewData["NameSortParm"]">姓名 ↕</a>
+                </th>
+                <th>
+                    <a asp-action="Index" asp-route-sortOrder="@ViewData["PosSortParm"]">職位 ↕</a>
+                </th>
+                <th>
+                    <a asp-action="Index" asp-route-sortOrder="@ViewData["EmailSortParm"]">電子信箱 ↕</a>
+                </th>
+                <th>
+                    <a asp-action="Index" asp-route-sortOrder="@ViewData["CompSortParm"]">Company ↕</a>
+                </th>
+                <th>操作功能</th>
+            </tr>
+        </thead>
+        <tbody>
             @foreach (var item in Model)
             {
                 <tr>
-                    @* 每一列 Checkbox *@
-                    <td class="text-center">
-                        <input type="checkbox" name="ids" value="@item.Id" class="form-check-input item-checkbox" form="batchForm" />
+                    <td>
+                        @* 每一列的 Checkbox，name 必須是 ids *@
+                        <input type="checkbox" name="ids" value="@item.Id" class="form-check-input row-checkbox">
+                    </td>
+                    <td class="fw-bold">@Html.DisplayFor(modelItem => item.Name)</td>
+                    <td>@Html.DisplayFor(modelItem => item.Position)</td>
+                    <td>
+                        <a href="mailto:@item.Email" class="text-decoration-none">@item.Email</a>
                     </td>
                     <td>
-                        @Html.DisplayFor(modelItem => item.Name)
+                        @if (item.Company != null)
+                        {
+                            <span class="badge bg-info text-dark">@item.Company.Name</span>
+                        }
                     </td>
                     <td>
-                        @Html.DisplayFor(modelItem => item.Position)
-                    </td>
-                    <td>
-                        @Html.DisplayFor(modelItem => item.Email)
-                    </td>
-                    <td>
-                        <span class="badge bg-info text-dark">@Html.DisplayFor(modelItem => item.Company.Name)</span>
-                    </td>
-                    <td class="text-center">
                         <div class="btn-group" role="group">
                             <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-outline-success btn-sm">編輯</a>
                             <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-outline-secondary btn-sm">詳情</a>
-                            @if (User.IsInRole("Admin"))
-                            {
-                                <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-outline-danger btn-sm">刪除</a>
-                            }
+                            <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-outline-danger btn-sm">刪除</a>
                         </div>
                     </td>
                 </tr>
             }
-        }
-        else
-        {
-            @* 如果沒資料，顯示這行 *@
-            <tr>
-                <td colspan="6" class="text-center text-muted p-4">
-                    找不到符合的員工資料。
-                </td>
-            </tr>
-        }
-    </tbody>
-</table>
+        </tbody>
+    </table>
+</form>
