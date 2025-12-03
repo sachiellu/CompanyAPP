@@ -61,8 +61,8 @@
                             </td>
                             <td class="text-center">
                                 <div class="btn-group" role="group">
-                                    <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-outline-primary btn-sm">編輯</a>
-                                    <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-outline-info btn-sm">詳情</a>
+                                    <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-outline-success btn-sm">編輯</a>
+                                    <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-outline-secondary btn-sm">詳情</a>
                                     @if (User.IsInRole("Admin"))
                                     {
                                         <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-outline-danger btn-sm">刪除</a>

@@ -18,9 +18,11 @@
                         aria-expanded="false" aria-label="Toggle navigation">
                     <span class="navbar-toggler-icon"></span>
                 </button>
+
                 <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
                     <ul class="navbar-nav flex-grow-1">
 
+                        @* 首頁 (所有人都能看) *@
                         <li class="nav-item">
                             <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">首頁</a>
                         </li>
@@ -37,9 +39,13 @@
                             <a class="nav-link nav-link text-dark" asp-controller="Missions" asp-action="Index">派工管理</a>
                         </li>
 
-                        <li class="nav-item">
-                            <a class="nav-link text-danger fw-bold" asp-controller="Users" asp-action="Index">帳號管理</a>
-                        </li>
+                        @* 只有 Admin 才能看到帳號管理 *@
+                        @if (User.IsInRole("Admin"))
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link text-danger fw-bold" asp-controller="Users" asp-action="Index">帳號管理</a>
+                            </li>
+                        }
 
                     </ul>
 

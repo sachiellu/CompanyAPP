@@ -71,6 +71,7 @@ namespace CompanyAPP.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> DeleteBatch(List<int> ids)
         {
             if (ids == null || ids.Count == 0)
@@ -148,8 +149,21 @@ namespace CompanyAPP.Controllers
         {
             if (id != employee.Id) return NotFound();
 
-            // if (ModelState.IsValid)
+            // if (ModelState.IsValid) // 移除註解，讓 Model 驗證生效是最佳實踐
             {
+                // 1. 檢查目前用戶是否為 Admin
+                var isAdmin = User.IsInRole("Admin");
+
+                // 2. 如果不是 Admin，則必須保持原始 Email
+                if (!isAdmin)
+                {
+                    var originalEmployee = await _context.Employee.AsNoTracking().FirstOrDefaultAsync(m => m.Id == id);
+                    if (originalEmployee == null) return NotFound();
+
+                    // 忽略用戶從前端提交的 Email 變更，強制使用原始 Email
+                    employee.Email = originalEmployee.Email;
+                }
+
                 try
                 {
                     _context.Update(employee);

@@ -1,10 +1,13 @@
 ﻿@model CompanyAPP.Models.Company
 @inject CompanyAPP.Data.CompanyAppContext _context
+@using Microsoft.AspNetCore.Identity
+@inject SignInManager<IdentityUser> SignInManager
+@inject UserManager<IdentityUser> UserManager
 
 @{
     ViewData["Title"] = "廠商詳情";
-
     var employees = _context.Employee.Where(e => e.CompanyId == Model.Id).ToList();
+    bool isAdmin = User.IsInRole("Admin");
 }
 
 <div class="container mt-4">
@@ -79,7 +82,10 @@
 
                     <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-4">
                         <a asp-action="Index" class="btn btn-secondary me-2">返回列表</a>
-                        <a asp-action="Edit" asp-route-id="@Model?.Id" class="btn btn-primary px-4">編輯資料</a>
+                        @if (isAdmin)
+                        {
+                            <a asp-action="Edit" asp-route-id="@Model?.Id" class="btn btn-primary px-4">編輯資料</a>
+                        }
                     </div>
 
                 </div>

@@ -1,7 +1,13 @@
-﻿@model CompanyAPP.Models.Employee
+﻿@using Microsoft.AspNetCore.Identity 
+@inject SignInManager<IdentityUser> SignInManager
+@inject UserManager<IdentityUser> UserManager
+
+@model CompanyAPP.Models.Employee
 
 @{
     ViewData["Title"] = "編輯員工";
+    // 獲取角色資訊
+    bool isAdmin = User.IsInRole("Admin");
 }
 
 <div class="container mt-4">
@@ -33,7 +39,15 @@
 
                             <div class="col-md-6 mb-3">
                                 <label asp-for="Email" class="form-label"></label>
-                                <input asp-for="Email" class="form-control" />
+                                @if (isAdmin)
+                                {
+                                    <input asp-for="Email" class="form-control" />
+                                }
+                                else
+                                {
+                                    <input asp-for="Email" class="form-control" readonly="readonly" />
+                                    <small class="form-text text-danger">只有系統管理員才能修改登入信箱。</small>
+                                }
                                 <span asp-validation-for="Email" class="text-danger"></span>
                             </div>
                         </div>

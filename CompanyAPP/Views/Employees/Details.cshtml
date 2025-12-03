@@ -1,5 +1,7 @@
 ﻿@model CompanyAPP.Models.Employee
 @inject CompanyAPP.Data.CompanyAppContext _context
+@using Microsoft.AspNetCore.Identity
+@inject UserManager<IdentityUser> UserManager
 
 @{
     ViewData["Title"] = "Details";
@@ -8,6 +10,10 @@
                    .Where(m => m.EmployeeId == Model.Id)
                    .OrderByDescending(m => m.CreateDate)
                    .ToList();
+}
+
+@{
+    bool isAdminOrManager = User.IsInRole("Admin") || User.IsInRole("Manager");
 }
 
 <div class="container mt-4">
@@ -74,7 +80,10 @@
 
                     <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-4">
                         <a asp-action="Index" class="btn btn-secondary me-2">返回列表</a>
-                        <a asp-action="Edit" asp-route-id="@Model?.Id" class="btn btn-primary px-4">編輯資料</a>
+                        @if (isAdminOrManager)
+                        {
+                            <a asp-action="Edit" asp-route-id="@Model?.Id" class="btn btn-primary px-4">編輯資料</a>
+                        }   
                         <a asp-controller="Missions" asp-action="Create" asp-route-employeeId="@Model.Id" class="btn btn-success me-2">
                             + 指派任務
                         </a>

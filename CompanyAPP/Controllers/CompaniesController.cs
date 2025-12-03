@@ -48,6 +48,7 @@ namespace CompanyAPP.Controllers
         }
 
         // GET: Companies/Create
+        [Authorize(Roles = "Admin")]
         public IActionResult Create()
         {
 
@@ -62,7 +63,7 @@ namespace CompanyAPP.Controllers
         // POST: Companies/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
-
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Create(Company company)
         {
             // 為了教學方便，暫時忽略模型驗證，確保圖片能上傳
@@ -91,6 +92,7 @@ namespace CompanyAPP.Controllers
         }
 
         // GET: Companies/Edit/5
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null) return NotFound();
@@ -103,7 +105,7 @@ namespace CompanyAPP.Controllers
         // POST: Companies/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
-
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Edit(int id, Company company)
         {
             if (id != company.Id) return NotFound();
@@ -152,7 +154,6 @@ namespace CompanyAPP.Controllers
         }
 
         // POST: Companies/Delete/5
-        [Authorize(Roles = "Admin")]
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         [Authorize(Roles = "Admin")]

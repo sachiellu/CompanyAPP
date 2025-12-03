@@ -1,7 +1,15 @@
 ﻿@model IEnumerable<CompanyAPP.Models.Employee>
 
+@using Microsoft.AspNetCore.Identity
+@inject SignInManager<IdentityUser> SignInManager
+@inject UserManager<IdentityUser> UserManager
+
 @{
     ViewData["Title"] = "員工管理";
+
+    // 獲取角色資訊
+    bool isAdmin = User.IsInRole("Admin");
+    bool isAdminOrManager = User.IsInRole("Admin") || User.IsInRole("Manager");
 }
 
 <div class="container mt-4">
@@ -9,13 +17,19 @@
     <div class="d-flex justify-content-between align-items-center mb-3">
         <h1> 員工管理</h1>
         <div>
-            @* 批次刪除按鈕 (預設隱藏) *@
-            <button type="button" class="btn btn-danger me-2" onclick="submitBatchDelete()">
-                刪除選取項目
-            </button>
-            <a asp-action="Create" class="btn btn-primary me-2">
-                + 新增員工
-             </a>
+            @* 批次刪除按鈕 (預設隱藏)(限 Admin) *@
+            @if (isAdmin)
+            {
+                <button type="button" class="btn btn-danger me-2" onclick="submitBatchDelete()">
+                    刪除選取項目
+                </button>
+			}
+            @if (isAdminOrManager)
+            {
+                <a asp-action="Create" class="btn btn-primary me-2">
+                    + 新增員工
+                </a>
+            }
         </div>
     </div>
 

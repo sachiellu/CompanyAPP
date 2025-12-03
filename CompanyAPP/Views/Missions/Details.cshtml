@@ -1,60 +1,99 @@
 ﻿@model CompanyAPP.Models.Mission
+@using Microsoft.AspNetCore.Identity
+@inject SignInManager<IdentityUser> SignInManager
+@inject UserManager<IdentityUser> UserManager
 
 @{
-    ViewData["Title"] = "Details";
+    ViewData["Title"] = "任務詳情";
+    bool isAdmin = User.IsInRole("Admin");
+
+    string statusColor = "secondary";
+    string statusStr = Model.Status.ToString();
+
+    if (statusStr == "Processing" || statusStr == "處理中")
+    {
+        statusColor = "warning text-dark"; // 黃色
+    }
+    else if (statusStr == "Pending" || statusStr == "待處理")
+    {
+        statusColor = "danger"; // 紅色
+    }
+    else if (statusStr == "Completed" || statusStr == "已完成")
+    {
+        statusColor = "success"; // 綠色
+    }
 }
 
-<h1>Details</h1>
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                    <h4 class="mb-0"> 任務詳細資料</h4>
+                    <span class="badge bg-light text-primary fs-6">@Model.Status</span>
+                </div>
 
-<div>
-    <h4>Mission</h4>
-    <hr />
-    <dl class="row">
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Title)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Title)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Description)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Description)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.CreateDate)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.CreateDate)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Deadline)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Deadline)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Status)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Status)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Company)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Company.Name)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Employee)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Employee.Name)
-        </dd>
-    </dl>
-</div>
-<div>
-    <a asp-action="Edit" asp-route-id="@Model?.Id">Edit</a> |
-    <a asp-action="Index">Back to List</a>
+                <div class="card-body p-4">
+
+                    <div class="mb-4 text-center">
+                        <h2 class="fw-bold text-dark">@Model.Title</h2>
+                        <hr />
+                    </div>
+
+                    <div class="mb-4 p-3 bg-light rounded border">
+                        <label class="fw-bold text-muted mb-2">任務內容描述</label>
+                        <p class="fs-5 mb-0" style="white-space: pre-wrap;">@Model.Description</p>
+                    </div>
+
+                    <div class="row g-3">
+
+                        <div class="col-md-6">
+                            <div class="d-flex align-items-center">
+                                <div class="bg-secondary text-white rounded-circle d-flex justify-content-center align-items-center me-3" style="width: 40px; height: 40px;">
+                                    <i class="bi bi-building"></i> 
+                                </div>
+                                <div>
+                                    <div class="text-muted small">所屬廠商</div>
+                                    <div class="fw-bold fs-5">@Model.Company?.Name</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <div class="d-flex align-items-center">
+                                <div class="bg-info text-dark rounded-circle d-flex justify-content-center align-items-center me-3" style="width: 40px; height: 40px;">
+                                    <i class="bi bi-person"></i> 
+                                </div>
+                                <div>
+                                    <div class="text-muted small">指派員工</div>
+
+                                    <div class="fw-bold fs-5">@(Model.Employee?.Name ?? "尚未指派")</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6 mt-4">
+                            <label class="fw-bold text-muted"> 建立日期</label>
+                            <div class="fs-5">@Html.DisplayFor(model => model.CreateDate)</div>
+                        </div>
+
+                        <div class="col-md-6 mt-4">
+                            <label class="fw-bold text-muted"> 截止日期</label>
+                            <div class="fs-5 text-danger fw-bold">@Html.DisplayFor(model => model.Deadline)</div>
+                        </div>
+                    </div>
+
+                    <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-5 border-top pt-3">
+                        <a asp-action="Index" class="btn btn-secondary me-2">返回列表</a>
+
+                        @if (isAdmin)
+                        {
+                            <a asp-action="Edit" asp-route-id="@Model?.Id" class="btn btn-primary px-4">編輯任務</a>
+                        }
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
 </div>

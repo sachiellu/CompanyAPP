@@ -1,10 +1,11 @@
 using CompanyAPP.Data;    
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore; 
-
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.EntityFrameworkCore;
 
 namespace CompanyAPP.Controllers
 {
+    [Authorize]
     public class HomeController : Controller
     {
 

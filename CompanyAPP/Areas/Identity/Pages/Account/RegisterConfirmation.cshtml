@@ -9,14 +9,14 @@
         <div class="col-md-6">
             <div class="card shadow">
                 <div class="card-header bg-info text-white text-center">
-                    <h4 class="mb-0">📧 @ViewData["Title"]</h4>
+                    <h4 class="mb-0"> @ViewData["Title"]</h4>
                 </div>
 
                 <div class="card-body p-4">
                     @{
                         if (@Model.DisplayConfirmAccountLink)
                         {
-                            <!-- 開發模式：顯示直接驗證連結 (這就是你剛剛問的後門) -->
+                            <!-- 開發模式：顯示直接驗證連結  -->
                             <div class="alert alert-warning">
                                 <p><strong>開發模式提示：</strong></p>
                                 <p>因為尚未串接真實 Email 服務，請點擊下方連結進行驗證：</p>
