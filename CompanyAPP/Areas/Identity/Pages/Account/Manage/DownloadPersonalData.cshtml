@@ -1,12 +1,16 @@
 ﻿@page
 @model DownloadPersonalDataModel
 @{
-    ViewData["Title"] = "Download Your Data";
+    ViewData["Title"] = "下載個人數據";
     ViewData["ActivePage"] = ManageNavPages.PersonalData;
 }
 
 <h3>@ViewData["Title"]</h3>
 
-@section Scripts {
-    <partial name="_ValidationScriptsPartial" />
-}
+<div class="alert alert-info" role="alert">
+    <strong>注意：</strong> 下載的檔案為 JSON 格式，包含了您的敏感資料，請妥善保存。
+</div>
+
+<p>
+    系統將會把您的使用者資料整理成一份 JSON 檔案並開始下載。
+</p>

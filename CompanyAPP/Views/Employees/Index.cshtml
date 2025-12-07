@@ -1,5 +1,4 @@
 ﻿@model IEnumerable<CompanyAPP.Models.Employee>
-
 @using Microsoft.AspNetCore.Identity
 @inject SignInManager<IdentityUser> SignInManager
 @inject UserManager<IdentityUser> UserManager
@@ -56,18 +55,22 @@
         function searchEmployees() {
             let keyword = document.getElementById("searchInput").value;
             clearTimeout(timeout);
-            timeout = setTimeout(function () {
+            timeout = setTimeout(function () 
+            {
                 let url = `/Employees/Filter?searchString=${keyword}`;
-                $("#tableContainer").load(url, function(response, status, xhr) {
-                    if (status == "error") {
+                $("#tableContainer").load(url, function(response, status, xhr) 
+                {
+                    if (status == "error") 
+                    {
                         console.log("搜尋失敗");
                     }
-                });
+                }
+                );
             }, 300);
         }
 
             // 2. 全選 Checkbox 控制 
-        function toggleSelectAll(source) {
+        function toggleSelectAll(source) { 
             let checkboxes = document.querySelectorAll('.row-checkbox');
             for (let i = 0; i < checkboxes.length; i++) {
                 checkboxes[i].checked = source.checked;
@@ -91,4 +94,5 @@
             }
         }
     </script>
-}
+    }
+ 

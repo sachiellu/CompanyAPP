@@ -17,14 +17,14 @@ namespace CompanyAPP.Controllers
             _context = context;
         }
 
-        // GET: Missions
+        [HttpGet]
         public async Task<IActionResult> Index()
         {
             var companyAppContext = _context.Mission.Include(m => m.Company).Include(m => m.Employee);
             return View(await companyAppContext.ToListAsync());
         }
 
-        // GET: Missions/Details/5
+        [HttpGet]
         public async Task<IActionResult> Details(int? id)
         {
             if (id == null)
@@ -44,7 +44,7 @@ namespace CompanyAPP.Controllers
             return View(mission);
         }
 
-        // GET: Missions/Create
+        [HttpGet]
         public IActionResult Create(int? employeeId)
         {
             var misson = new Mission
@@ -63,7 +63,6 @@ namespace CompanyAPP.Controllers
             return View(misson);
         }
 
-        // POST: Missions/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("Id,Title,Description,CreateDate,Deadline,Status,CompanyId,EmployeeId")] Mission mission)
@@ -80,7 +79,7 @@ namespace CompanyAPP.Controllers
             return View(mission);
         }
 
-        // GET: Missions/Edit/5
+        [HttpGet]
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null)
@@ -98,7 +97,6 @@ namespace CompanyAPP.Controllers
             return View(mission);
         }
 
-        // POST: Missions/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, [Bind("Id,Title,Description,CreateDate,Deadline,Status,CompanyId,EmployeeId")] Mission mission)
@@ -133,7 +131,7 @@ namespace CompanyAPP.Controllers
             return View(mission);
         }
 
-        // GET: Missions/Delete/5
+        [HttpGet]
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Delete(int? id)
         {
@@ -154,7 +152,6 @@ namespace CompanyAPP.Controllers
             return View(mission);
         }
 
-        // POST: Missions/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         [Authorize(Roles = "Admin")]

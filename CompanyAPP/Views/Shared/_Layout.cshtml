@@ -19,10 +19,11 @@
                     <span class="navbar-toggler-icon"></span>
                 </button>
 
+                @* ==== 這是正確的折疊容器：所有連結必須在這裡面 ==== *@
                 <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
+                    @* 1. 左側主連結區塊 (佔據左側所有空間) *@
                     <ul class="navbar-nav flex-grow-1">
-
-                        @* 首頁 (所有人都能看) *@
+                     @* 首頁 (所有人都能看) *@
                         <li class="nav-item">
                             <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">首頁</a>
                         </li>
@@ -45,13 +46,18 @@
                             <li class="nav-item">
                                 <a class="nav-link text-danger fw-bold" asp-controller="Users" asp-action="Index">帳號管理</a>
                             </li>
-                        }
 
+                            <li class="nav-item">
+                                <a class="nav-link text-info fw-bold" asp-controller="AuditLogs" asp-action="Index"> 稽核紀錄</a>
+                            </li>
+                        }
                     </ul>
 
+                    @* 2. 右側登入/登出 PartialView 區塊 (Bootstrap 會自動將其推到右邊) *@
                     <ul class="navbar-nav ms-auto">
                         <partial name="_LoginPartial" />
                     </ul>
+
                 </div>
             </div>
         </nav>

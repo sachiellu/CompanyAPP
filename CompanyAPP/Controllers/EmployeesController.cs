@@ -12,13 +12,12 @@ namespace CompanyAPP.Controllers
     {
         private readonly CompanyAppContext _context;
 
-
         public EmployeesController(CompanyAppContext context)
         {
             _context = context;
         }
 
-        // GET: Companies
+        [HttpGet]
         public async Task<IActionResult> Index(string searchString, string sortOrder)
         {
             // 設定排序參數 (ViewData 用來切換 升冪/降冪)
@@ -92,7 +91,7 @@ namespace CompanyAPP.Controllers
             return RedirectToAction(nameof(Index));
         }
 
-        // GET: Employees/Details/5
+        [HttpGet]
         public async Task<IActionResult> Details(int? id)
         {
             if (id == null) return NotFound();
@@ -102,18 +101,16 @@ namespace CompanyAPP.Controllers
                 .FirstOrDefaultAsync(m => m.Id == id);
 
             if (employee == null) return NotFound();
-
             return View(employee);
         }
 
-        // GET: Employees/Create
+        [HttpGet]
         public IActionResult Create()
         {
             ViewData["CompanyId"] = new SelectList(_context.Company, "Id", "Name");
             return View();
         }
 
-        // POST: Employees/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(Employee employee)
@@ -130,7 +127,7 @@ namespace CompanyAPP.Controllers
             return View(employee);
         }
 
-        // GET: Employees/Edit/5
+        [HttpGet]
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null) return NotFound();
@@ -142,31 +139,30 @@ namespace CompanyAPP.Controllers
             return View(employee);
         }
 
-        // POST: Employees/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, Employee employee)
         {
             if (id != employee.Id) return NotFound();
 
-            // if (ModelState.IsValid) // 移除註解，讓 Model 驗證生效是最佳實踐
+                if (ModelState.IsValid)
             {
-                // 1. 檢查目前用戶是否為 Admin
-                var isAdmin = User.IsInRole("Admin");
+                //  從資料庫撈出「受追蹤(Tracked)」的實體
+                var dbEmployee = await _context.Employee.FindAsync(id);
+                if (dbEmployee == null) return NotFound();
 
-                // 2. 如果不是 Admin，則必須保持原始 Email
-                if (!isAdmin)
+                //  只更新「允許」被修改的欄位
+                dbEmployee.Name = employee.Name;
+                dbEmployee.Position = employee.Position;
+                dbEmployee.CompanyId = employee.CompanyId;
+
+                // 如果是 Admin，才允許改 Email
+                if (User.IsInRole("Admin"))
                 {
-                    var originalEmployee = await _context.Employee.AsNoTracking().FirstOrDefaultAsync(m => m.Id == id);
-                    if (originalEmployee == null) return NotFound();
-
-                    // 忽略用戶從前端提交的 Email 變更，強制使用原始 Email
-                    employee.Email = originalEmployee.Email;
+                    dbEmployee.Email = employee.Email;
                 }
-
                 try
                 {
-                    _context.Update(employee);
                     await _context.SaveChangesAsync();
                 }
                 catch (DbUpdateConcurrencyException)
@@ -180,7 +176,8 @@ namespace CompanyAPP.Controllers
             return View(employee);
         }
 
-        // GET: Employees/Delete/5
+
+        [HttpGet]
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Delete(int? id)
         {
@@ -195,7 +192,6 @@ namespace CompanyAPP.Controllers
             return View(employee);
         }
 
-        // POST: Employees/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         [Authorize(Roles = "Admin")]

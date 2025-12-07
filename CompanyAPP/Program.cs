@@ -22,9 +22,10 @@ else
                        ?? throw new InvalidOperationException("Connection string not found.");
 }
 
+builder.Services.AddHttpContextAccessor();
+
 // 註冊發信服務
 builder.Services.AddTransient<Microsoft.AspNetCore.Identity.UI.Services.IEmailSender, CompanyAPP.Services.EmailSender>();
-
 builder.Services.AddDbContext<CompanyAppContext>(options =>
     options.UseSqlite(connectionString));
 
@@ -87,5 +88,4 @@ app.MapControllerRoute(
 
 // 加入 Razor Pages 路由
 app.MapRazorPages();
-
 app.Run();

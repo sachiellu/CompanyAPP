@@ -62,7 +62,7 @@ namespace CompanyAPP.Areas.Identity.Pages.Account.Manage
             ///     directly from your code. This API may change or be removed in future releases.
             /// </summary>
             [Required(ErrorMessage = "請輸入{0}")]
-            [StringLength(100, ErrorMessage = "{0} 長度至少必須為 {2} 個字元。", MinimumLength = 6)]
+            [StringLength(100, ErrorMessage = "{0} 長度至少必須為 {2} 個字元長。", MinimumLength = 6)]
             [DataType(DataType.Password)]
             [Display(Name = "新密碼")]
             public string NewPassword { get; set; }

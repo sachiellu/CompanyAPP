@@ -18,7 +18,7 @@ namespace CompanyAPP.Controllers
             _hostEnvironment = hostEnvironment;
         }
 
-        // GET: Companies
+        [HttpGet]
         public async Task<IActionResult> Index(string searchString)
         {
             var companies = from c in _context.Company
@@ -29,29 +29,25 @@ namespace CompanyAPP.Controllers
                 companies = companies.Where(s => s.Name.Contains(searchString));
                 ViewData["CurrentFilter"] = searchString;
             }
-
             return View(await companies.ToListAsync());
         }
 
-        // GET: Companies/Details/5
+        [HttpGet]
         public async Task<IActionResult> Details(int? id)
         {
             if (id == null) return NotFound();
-
             var company = await _context.Company
                 .Include(c => c.Employees)
                 .FirstOrDefaultAsync(m => m.Id == id);
 
             if (company == null) return NotFound();
-
             return View(company);
         }
 
-        // GET: Companies/Create
+        [HttpGet]
         [Authorize(Roles = "Admin")]
         public IActionResult Create()
         {
-
             var company = new Company
             {
                 FoundedDate = DateTime.Now.AddYears(-5)
@@ -60,7 +56,6 @@ namespace CompanyAPP.Controllers
             return View(company);
         }
 
-        // POST: Companies/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
         [Authorize(Roles = "Admin")]
@@ -75,14 +70,12 @@ namespace CompanyAPP.Controllers
                     string wwwRootPath = _hostEnvironment.WebRootPath;
                     string fileName = Guid.NewGuid().ToString() + System.IO.Path.GetExtension(company.ImageFile.FileName);
                     string path = System.IO.Path.Combine(wwwRootPath + "/images/", fileName);
-
                     using (var fileStream = new System.IO.FileStream(path, System.IO.FileMode.Create))
                     {
                         await company.ImageFile.CopyToAsync(fileStream);
                     }
                     company.LogoPath = fileName;
                 }
-
 
                 _context.Add(company);
                 await _context.SaveChangesAsync();
@@ -91,18 +84,17 @@ namespace CompanyAPP.Controllers
             return View(company);
         }
 
-        // GET: Companies/Edit/5
+        [HttpGet]
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null) return NotFound();
-
             var company = await _context.Company.FindAsync(id);
+
             if (company == null) return NotFound();
             return View(company);
         }
 
-        // POST: Companies/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
         [Authorize(Roles = "Admin")]
@@ -120,14 +112,12 @@ namespace CompanyAPP.Controllers
                         string wwwRootPath = _hostEnvironment.WebRootPath;
                         string fileName = Guid.NewGuid().ToString() + System.IO.Path.GetExtension(company.ImageFile.FileName);
                         string path = System.IO.Path.Combine(wwwRootPath + "/images/", fileName);
-
                         using (var fileStream = new System.IO.FileStream(path, System.IO.FileMode.Create))
                         {
                             await company.ImageFile.CopyToAsync(fileStream);
                         }
                         company.LogoPath = fileName; 
                     }
-
                     _context.Update(company);
                     await _context.SaveChangesAsync();
                 }
@@ -141,19 +131,17 @@ namespace CompanyAPP.Controllers
             return View(company);
         }
 
-        // GET: Companies/Delete/5
+        [HttpGet]
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null) return NotFound();
-
             var company = await _context.Company.FirstOrDefaultAsync(m => m.Id == id);
+            
             if (company == null) return NotFound();
-
             return View(company);
         }
 
-        // POST: Companies/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         [Authorize(Roles = "Admin")]
