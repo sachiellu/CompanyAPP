@@ -86,6 +86,8 @@ namespace CompanyAPP.Controllers
             {
                 _context.Employee.RemoveRange(employeesToDelete);
                 await _context.SaveChangesAsync();
+
+                TempData["SuccessMessage"] = $"成功刪除 {employeesToDelete.Count} 筆員工資料！";
             }
 
             return RedirectToAction(nameof(Index));
@@ -116,10 +118,12 @@ namespace CompanyAPP.Controllers
         public async Task<IActionResult> Create(Employee employee)
         {
 
-            // if (ModelState.IsValid) 
+            if (ModelState.IsValid) 
             {
                 _context.Add(employee);
                 await _context.SaveChangesAsync();
+
+                TempData["SuccessMessage"] = "員工已新增成功！";
                 return RedirectToAction(nameof(Index));
             }
 
@@ -170,25 +174,12 @@ namespace CompanyAPP.Controllers
                     if (!EmployeeExists(employee.Id)) return NotFound();
                     else throw;
                 }
+
+                TempData["SuccessMessage"] = "員工已更新成功！";
                 return RedirectToAction(nameof(Index));
+
             }
             ViewData["CompanyId"] = new SelectList(_context.Company, "Id", "Name", employee.CompanyId);
-            return View(employee);
-        }
-
-
-        [HttpGet]
-        [Authorize(Roles = "Admin")]
-        public async Task<IActionResult> Delete(int? id)
-        {
-            if (id == null) return NotFound();
-
-            var employee = await _context.Employee
-                .Include(e => e.Company)
-                .FirstOrDefaultAsync(m => m.Id == id);
-
-            if (employee == null) return NotFound();
-
             return View(employee);
         }
 
@@ -203,14 +194,16 @@ namespace CompanyAPP.Controllers
                 _context.Employee.Remove(employee);
             }
             await _context.SaveChangesAsync();
+
+            TempData["SuccessMessage"] = "員工已成功刪除！";
             return RedirectToAction(nameof(Index));
+
         }
 
         private bool EmployeeExists(int id)
         {
             return _context.Employee.Any(e => e.Id == id);
         }
-
 
         // 專門給 AJAX 呼叫的搜尋功能
         public async Task<IActionResult> Filter(string searchString)

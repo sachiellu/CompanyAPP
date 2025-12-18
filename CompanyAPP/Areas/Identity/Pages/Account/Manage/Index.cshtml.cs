@@ -75,7 +75,7 @@ namespace CompanyAPP.Areas.Identity.Pages.Account.Manage
             var user = await _userManager.GetUserAsync(User);
             if (user == null)
             {
-                return NotFound($"Unable to load user with ID '{_userManager.GetUserId(User)}'.");
+                return NotFound($"無法載入 ID 為 '{_userManager.GetUserId(User)}' 的使用者。");
             }
 
             await LoadAsync(user);
@@ -87,7 +87,7 @@ namespace CompanyAPP.Areas.Identity.Pages.Account.Manage
             var user = await _userManager.GetUserAsync(User);
             if (user == null)
             {
-                return NotFound($"Unable to load user with ID '{_userManager.GetUserId(User)}'.");
+                return NotFound($"無法載入 ID 為 '{_userManager.GetUserId(User)}' 的使用者。");
             }
 
             if (!ModelState.IsValid)
@@ -102,13 +102,13 @@ namespace CompanyAPP.Areas.Identity.Pages.Account.Manage
                 var setPhoneResult = await _userManager.SetPhoneNumberAsync(user, Input.PhoneNumber);
                 if (!setPhoneResult.Succeeded)
                 {
-                    StatusMessage = "Unexpected error when trying to set phone number.";
+                    StatusMessage = "設定電話號碼時發生意外錯誤。";
                     return RedirectToPage();
                 }
             }
 
             await _signInManager.RefreshSignInAsync(user);
-            StatusMessage = "Your profile has been updated";
+            StatusMessage = "個人資料已更新。";
             return RedirectToPage();
         }
     }

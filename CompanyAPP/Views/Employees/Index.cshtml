@@ -40,6 +40,11 @@
                oninput="searchEmployees()">
     </div>
 
+    @* 專門給 JavaScript 抓 Token 用的隱藏區塊 *@
+    <div id="csrf-token-container" style="display:none;">
+        @Html.AntiForgeryToken()
+    </div>
+
     @* 表格容器 *@
     <div class="card shadow-sm">
         <div class="card-body p-0" id="tableContainer">
@@ -77,22 +82,73 @@
             }
         }
 
-        // 3. 送出批次刪除
+        // 3. 送出批次刪除 (進化版：解決表單巢狀衝突)
         function submitBatchDelete() {
-            let checkedCount = document.querySelectorAll('.row-checkbox:checked').length;
-            if (checkedCount === 0) {
-                alert("請至少選擇一筆資料！");
+            // 1. 抓取所有被打勾的 checkbox
+            let checkedBoxes = document.querySelectorAll('.row-checkbox:checked');
+
+            if (checkedBoxes.length === 0) {
+                if(typeof Swal !== 'undefined') {
+                    Swal.fire('提示', '請至少選擇一筆資料！', 'info');
+                } else {
+                    alert('請至少選擇一筆資料！');
+                }
                 return;
             }
-            if (confirm(`確定要刪除這 ${checkedCount} 筆資料嗎？此動作無法復原！`)) {
-                let form = document.getElementById('batchDeleteForm');
-                if(form) {
-                    form.submit();
+
+            // 定義刪除邏輯
+            let executeDelete = function() {
+                // --- 核心魔法：動態建立一個表單 ---
+                let form = document.createElement('form');
+                form.method = 'POST';
+                form.action = '/Employees/DeleteBatch';
+
+                // 精準抓取剛剛埋在 #csrf-token-container 裡的 Token
+                let tokenInput = document.querySelector('#csrf-token-container input[name="__RequestVerificationToken"]');
+
+                if (tokenInput) {
+                    form.appendChild(tokenInput.cloneNode(true));
                 } else {
-                    alert("表單載入錯誤，請重新整理頁面");
+                    alert('錯誤：找不到資安驗證權杖 (Anti-Forgery Token)，請重新整理頁面。');
+                    return; // 沒 Token 就不要送了，送了也是 400
+                }
+
+                // 把 ID 塞進去
+                checkedBoxes.forEach(box => {
+                    let input = document.createElement('input');
+                    input.type = 'hidden';
+                    input.name = 'ids'; // 這要對應 Controller 的參數名稱
+                    input.value = box.value;
+                    form.appendChild(input);
+                });
+
+                document.body.appendChild(form);
+                form.submit();
+            };
+
+            // 判斷是否使用 SweetAlert
+            if(typeof Swal !== 'undefined') {
+                Swal.fire({
+                    title: '確定要刪除嗎?',
+                    text: `即將刪除 ${checkedBoxes.length} 筆資料，此動作無法復原！`,
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#d33',
+                    confirmButtonText: '是的，全部刪除!',
+                    cancelButtonText: '取消'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        executeDelete();
+                    }
+                });
+            } else {
+                // 你的截圖顯示你目前是用原生的 confirm，也保留這個備案
+                if (confirm(`確定要刪除這 ${checkedBoxes.length} 筆資料嗎？此動作無法復原！`)) {
+                    executeDelete();
                 }
             }
         }
+
     </script>
     }
  

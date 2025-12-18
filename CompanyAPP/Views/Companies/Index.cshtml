@@ -44,6 +44,7 @@
                             <th class="text-center">操作功能</th>
                         </tr>
                     </thead>
+
                     <tbody>
                         @foreach (var item in Model)
                         {
@@ -51,7 +52,14 @@
                                 <td>
                                     @if (!string.IsNullOrEmpty(item.LogoPath))
                                     {
-                                        <img src="~/images/@item.LogoPath" width="50" height="50" style="border-radius:50%; object-fit:cover;" />
+                                        @if (item.LogoPath.StartsWith("http"))
+                                        {
+                                            <img src="@item.LogoPath" style="width:50px; height:50px; object-fit:cover; border-radius:50%;" />
+                                        }
+                                        else
+                                        {
+                                            <img src="~/images/@item.LogoPath" style="width:50px; height:50px; object-fit:cover; border-radius:50%;" />
+                                        }
                                     }
                                     else
                                     {
@@ -78,7 +86,13 @@
                                         <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-outline-secondary btn-sm">詳情</a>
                                         @if (isAdmin)
                                         {
-                                            <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-outline-danger btn-sm">刪除</a>
+                                            <button type="button" class="btn btn-outline-danger btn-sm" onclick="confirmDelete(@item.Id)">
+                                                <i class="bi bi-trash"></i> 刪除
+                                            </button>
+
+                                            <form id="delete-form-@item.Id" action="/Companies/Delete/@item.Id" method="post" style="display:none;">
+                                                @Html.AntiForgeryToken()
+                                            </form>
                                         }
                                     </div>
                                 </td>

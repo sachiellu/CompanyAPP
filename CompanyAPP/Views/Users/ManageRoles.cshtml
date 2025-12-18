@@ -2,7 +2,6 @@
 
 @{
     ViewData["Title"] = "權限分配";
-    var userId = ViewBag.UserId;
 }
 
 <div class="container mt-4">
@@ -31,7 +30,15 @@
                                         @role.RoleName
                                         @if (role.RoleName == "Admin")
                                         {
-                                            <span class="text-success">(高權限)</span>
+                                            <span class="text-danger small ms-1">(系統管理員)</span>
+                                        }
+                                        else if (role.RoleName == "Manager")
+                                        {
+                                            <span class="text-primary small ms-1">(經理)</span>
+                                        }
+                                        else if (role.RoleName == "User")
+                                        {
+                                            <span class="text-secondary small ms-1">(一般用戶)</span>
                                         }
                                     </label>
                                 </div>

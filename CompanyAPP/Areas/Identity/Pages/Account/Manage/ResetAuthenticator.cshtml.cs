@@ -39,7 +39,7 @@ namespace CompanyAPP.Areas.Identity.Pages.Account.Manage
             var user = await _userManager.GetUserAsync(User);
             if (user == null)
             {
-                return NotFound($"Unable to load user with ID '{_userManager.GetUserId(User)}'.");
+                return NotFound($"無法載入 ID 為 '{_userManager.GetUserId(User)}' 的使用者。");
             }
 
             return Page();
@@ -50,7 +50,7 @@ namespace CompanyAPP.Areas.Identity.Pages.Account.Manage
             var user = await _userManager.GetUserAsync(User);
             if (user == null)
             {
-                return NotFound($"Unable to load user with ID '{_userManager.GetUserId(User)}'.");
+                return NotFound($"無法載入 ID 為 '{_userManager.GetUserId(User)}' 的使用者。");
             }
 
             await _userManager.SetTwoFactorEnabledAsync(user, false);
@@ -59,7 +59,7 @@ namespace CompanyAPP.Areas.Identity.Pages.Account.Manage
             _logger.LogInformation("User with ID '{UserId}' has reset their authentication app key.", user.Id);
 
             await _signInManager.RefreshSignInAsync(user);
-            StatusMessage = "Your authenticator app key has been reset, you will need to configure your authenticator app using the new key.";
+            StatusMessage = "您的驗證器應用程式金鑰已重設，您需要使用新金鑰重新設定您的驗證器應用程式。";
 
             return RedirectToPage("./EnableAuthenticator");
         }

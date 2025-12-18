@@ -62,7 +62,7 @@ namespace CompanyAPP.Areas.Identity.Pages.Account.Manage
             var user = await _userManager.GetUserAsync(User);
             if (user == null)
             {
-                return NotFound($"Unable to load user with ID '{_userManager.GetUserId(User)}'.");
+                return NotFound($"無法載入 ID 為 '{_userManager.GetUserId(User)}' 的使用者。");
             }
 
             HasAuthenticator = await _userManager.GetAuthenticatorKeyAsync(user) != null;
@@ -78,11 +78,11 @@ namespace CompanyAPP.Areas.Identity.Pages.Account.Manage
             var user = await _userManager.GetUserAsync(User);
             if (user == null)
             {
-                return NotFound($"Unable to load user with ID '{_userManager.GetUserId(User)}'.");
+                return NotFound($"無法載入 ID 為 '{_userManager.GetUserId(User)}' 的使用者。");
             }
 
             await _signInManager.ForgetTwoFactorClientAsync();
-            StatusMessage = "The current browser has been forgotten. When you login again from this browser you will be prompted for your 2fa code.";
+            StatusMessage = "已移除此瀏覽器的記憶功能。下次您從此瀏覽器登入時，系統將要求輸入 2FA 驗證碼。";
             return RedirectToPage();
         }
     }

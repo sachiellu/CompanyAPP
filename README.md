@@ -1,58 +1,61 @@
 # 企業資源管理系統 (CompanyAPP)
 
-本專案為基於 ASP.NET Core 9.0 架構開發的企業資源管理平台 (ERP)，整合廠商維護、人力資源管理、任務派工與圖表統計，並實作完整的身分驗證 (RBAC) 與 Email 驗證機制。
+本專案為基於 **.NET 9.0 (ASP.NET Core MVC)** 架構開發的企業資源管理平台 (ERP)。
+系統整合廠商維護、人力資源管理、任務派工與圖表統計，更導入了 **OWASP ZAP 資安掃描**、**三層式權限控管 (RBAC)** 與 **正式/測試環境分離 (CI/CD 概念)** 的商業級開發規範。
 
 
 ## 技術架構(Tech Stack)
 
 *   **Framework**: .NET 9.0 / ASP.NET Core MVC
-
 *   **Database**: SQLite (EF Core Code First)
-
 *   **Frontend**: Bootstrap 5, jQuery, Chart.js
-
-*   **Auth**: ASP.NET Core Identity (Support Email Verification)
+*   **Auth**: ASP.NET Core Identity (Security Hardened)
+*   **Security Tools**: OWASP ZAP (DAST), SonarLint
+*   **Cloud & DevOps**: Fly.io (Docker Container), Multi-Environment Deployment
 
 
 ## 重點功能 (Features)
 
-### 1. 核心系統
+### 1. 企業級資安與架構 (Security & Architecture)
+*   **資安防護 (Hardened Security)**：
+    *   通過 **OWASP ZAP** 主動掃描，修復 High/Medium 風險漏洞。
+    *   實作 **Secure Headers** (HSTS, X-Content-Type-Options, X-Frame-Options)。
+    *   強制 **HTTPS** 與 **Secure Cookie** 政策。
+    *   修復 **登出快取漏洞 (No-Cache)**，防止瀏覽器回上一頁查看敏感資料。
+*   **三層式權限控管 (RBAC)**：
+    *   **Admin (系統管理員)**：最高權限，管理帳號與權限指派。
+    *   **Manager (經理)**：可管理員工資料、派工、廠商。
+    *   **User (一般員工)**：僅限讀取與檢視指派任務。
+*   **稽核日誌 (Audit Log)**：追蹤所有敏感操作（登入/登出/資料異動）。
+*   **環境隔離**：實作 `QA` (測試) 與 `Production` (正式) 環境分離，配置檔與敏感資料 (Secrets) 完全脫離程式碼。
 
-*   **權限控管 (RBAC)**：區分管理員 (Admin) 與一般用戶 (User)，並具備防刪除保護機制。
-
-*   **帳號驗證**：實作 SMTP 發信服務，註冊後需透過 Email 連結開通帳號。
-
-*   **安全機制**：針對系統預設的最高管理者 (Super Admin) 實作防刪除與降級保護機制。
-
-*   **[New] 稽核日誌 (Audit Log)**：追蹤和記錄所有敏感操作，如用戶登入/登出、資料新增/刪除/修改等，供管理員查詢。
-
-*   **[Update] 中文化**：核心業務模組（員工、廠商、派工）與常用帳戶功能（登入、註冊）已完成繁體中文化。
-
-### 2. 業務模組
-
-*   **廠商管理 (Vendors)**：支援圖文維護、即時預覽，並可直接檢視旗下員工。
-
-*   **員工管理 (Employees)**：支援 AJAX 即時搜尋、批次刪除與外鍵關聯。
-
-*   **任務派工 (Missions)**：具備時效警示、狀態追蹤與智慧表單功能。
-
-*   **數據儀表板 (Dashboard)**：首頁整合 Chart.js 統計圖表。
-
----
-
-###  開發輔助工具 (Dev Tools)
-
-> **注意：本區塊功能僅供測試使用，正式上線前將移除。**
-
-*   **帳號一鍵驗證 (Batch Verification)**
-    *   **用途**：解決測試環境中存在大量假信箱、無法實際收信驗證的問題。
-    *   **功能**：可一鍵將資料庫中所有「未驗證」帳號強制轉為「已驗證」，加速功能測試。
+### 2. 核心業務模組
+*   **廠商管理 (Vendors)**：支援雲端圖床 (Cloudinary) 上傳、預覽與維護。
+*   **員工管理 (Employees)**：支援 AJAX 即時搜尋、分頁排序、批次刪除。
+*   **任務派工 (Missions)**：具備時效警示、狀態追蹤。
+*   **數據儀表板 (Dashboard)**：首頁整合 Chart.js 視覺化統計。
 
 ---
 
 ## 版本更新紀錄 (Changelog)
 
-### [v2.2] - 維運穩定性、資安稽核與介面優化 (最新)
+### [v2.3] - 商業級資安加固與三層權限架構 (Release)
+
+**本次更新將系統標準提升至商業交付等級，重點修復資安漏洞並完善權限模型。**
+
+*   **資安與滲透測試 (Security & Penetration Testing)**
+    *   **OWASP ZAP 驗證**：完成 QA 環境的主動掃描，確認 SQL Injection、XSS、CSRF 等高風險漏洞均已修復。
+    *   **敏感資料保護**：移除 `appsettings.json` 中所有敏感金鑰，全面改用 **User Secrets (Local)** 與 **Platform Secrets (Cloud)** 管理。
+    *   **登出機制重構**：強制清除瀏覽器快取 (Cache-Control: no-store)，並防止 CSRF 登出攻擊。
+    *   **身分驗證強化**：關閉開發模式的「略過驗證連結」，強制執行 SMTP 寄信驗證流程；啟用「登入失敗鎖定 (Lockout)」機制防止暴力破解。
+
+*   **權限與帳號管理 (RBAC Refinement)**
+    *   **三層權限實作**：正式區分 **Admin / Manager / User** 三種角色，並實作對應的 Controller 與 View 權限過濾。
+    *   **權限管理介面**：Admin 可在後台快速升級/降級用戶角色。
+    *   **手動開通機制**：針對 Email 系統異常狀況，增加 Admin 後台「手動開通 (Manual Verify)」功能，保留管理彈性。
+
+
+### [v2.2] - 維運穩定性、資安稽核與介面優化
 
 *   **核心資安與稽核 (CRITICAL)**
     *   **新增稽核日誌 (Audit Log) 功能**：開始追蹤記錄所有敏感系統操作與用戶活動。
@@ -61,7 +64,7 @@
 
 *   **介面與使用者體驗 (UI/RWD)**
     *   **列表表格 (RWD):** 對廠商、員工列表實作 `table-responsive`、`d-none` 隱藏次要欄位等響應式優化。
-    *   **2FA 介面中文化:** 完成**雙重認證 (2FA)** 相關頁面的中文化工作。
+    *   **2FA 介面中文化:** 完成**雙重認證 (2FA)** 相關頁面的中文化工作。(尚未實裝功能)。
 
 ### [v2.1] - 緊急安全補丁與 RABC 強化
 
@@ -86,27 +89,40 @@
 
 ---
 
-##  快速開始
+##  快速開始 (Quick Start)
 
-**1. 環境準備**(確保已安裝 .NET 9.0 SDK)
+### 1. 本地開發 (Local)
+1.  複製專案：
+    ```bash
+    git clone https://github.com/sachiellu/CompanyAPP.git
+    ```
+2.  設定 User Secrets (請勿將密碼寫入 appsettings.json)：
+    ```bash
+    dotnet user-secrets set "EmailSettings:AppPassword" "你的密碼"
+    dotnet user-secrets set "Cloudinary:ApiSecret" "你的密碼"
+    ```
+3.  更新資料庫：
+    ```bash
+    dotnet ef database update
+    ```
+4.  啟動：
+    ```bash
+    dotnet run
+    ```
+
+### 2. 雲端部署 (Fly.io Production)
+
+本專案採用環境變數注入設定，部署前請確保 Secrets 已設定：
+
 ```bash
-git clone [Repository URL]
+# 設定正式環境變數 (App 名稱: companyapp-luyu)
+fly secrets set EmailSettings__AppPassword="..." Cloudinary__ApiSecret="..." -a companyapp-luyu
+
+# 部署到正式環境
+fly deploy -a companyapp-luyu
 ```
 
-
-**2. 資料庫設定**(於專案根目錄執行)
-```bash
-dotnet ef database update
-```
-
-
-**3. 啟動專案**
-```bash
-dotnet run
-```
-
-
-## 系統初始化設定
+## 系統初始化設定 (Seed Data)
 
 系統首次啟動時，將透過 Seed Data 自動建立預設管理員帳號：
 
@@ -115,7 +131,7 @@ dotnet run
 *   **預設密碼**: Admin123!
 
 
-> **注意**：線上環境 (Production) 請透過環境變數 (Environment Variables) 覆寫上述預設帳密，以確保資安
+> **注意**：正式環境中，所有新註冊用戶預設為 **User**權限，必須由上述 Admin 登入後手動升級權限。
 
 
 

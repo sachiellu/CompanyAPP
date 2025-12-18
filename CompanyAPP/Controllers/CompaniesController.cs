@@ -2,45 +2,36 @@
 using Microsoft.EntityFrameworkCore;
 using CompanyAPP.Data;
 using CompanyAPP.Models;
-using Microsoft.AspNetCore.Authorization; 
+using Microsoft.AspNetCore.Authorization;
+using CompanyAPP.Services;
 
 namespace CompanyAPP.Controllers
 {
     [Authorize]
     public class CompaniesController : Controller
     {
-        private readonly CompanyAppContext _context;
-        private readonly IWebHostEnvironment _hostEnvironment;
+        private readonly ICompanyService _companyService;
 
-        public CompaniesController(CompanyAppContext context, IWebHostEnvironment hostEnvironment)
+        public CompaniesController(ICompanyService companyService)
         {
-            _context = context;
-            _hostEnvironment = hostEnvironment;
+            _companyService = companyService;
         }
 
         [HttpGet]
         public async Task<IActionResult> Index(string searchString)
         {
-            var companies = from c in _context.Company
-                            select c;
-
-            if (!string.IsNullOrEmpty(searchString))
-            {
-                companies = companies.Where(s => s.Name.Contains(searchString));
-                ViewData["CurrentFilter"] = searchString;
-            }
-            return View(await companies.ToListAsync());
+            var companies = await _companyService.GetAllAsync(searchString);
+            
+            ViewData["CurrentFilter"] = searchString;
+            return View(companies);
         }
 
         [HttpGet]
         public async Task<IActionResult> Details(int? id)
         {
-            if (id == null) return NotFound();
-            var company = await _context.Company
-                .Include(c => c.Employees)
-                .FirstOrDefaultAsync(m => m.Id == id);
+            var company = await _companyService.GetByIdAsync(id);
 
-            if (company == null) return NotFound();
+            if (id == null) return NotFound();
             return View(company);
         }
 
@@ -52,7 +43,6 @@ namespace CompanyAPP.Controllers
             {
                 FoundedDate = DateTime.Now.AddYears(-5)
             };
-
             return View(company);
         }
 
@@ -61,26 +51,13 @@ namespace CompanyAPP.Controllers
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Create(Company company)
         {
-            // 為了教學方便，暫時忽略模型驗證，確保圖片能上傳
-            // if (ModelState.IsValid) 
-            {
-                 // 圖片上傳邏輯
-                if (company.ImageFile != null)
-                {
-                    string wwwRootPath = _hostEnvironment.WebRootPath;
-                    string fileName = Guid.NewGuid().ToString() + System.IO.Path.GetExtension(company.ImageFile.FileName);
-                    string path = System.IO.Path.Combine(wwwRootPath + "/images/", fileName);
-                    using (var fileStream = new System.IO.FileStream(path, System.IO.FileMode.Create))
-                    {
-                        await company.ImageFile.CopyToAsync(fileStream);
-                    }
-                    company.LogoPath = fileName;
-                }
+             if (ModelState.IsValid) 
+             {
+                await _companyService.AddAsync(company);
 
-                _context.Add(company);
-                await _context.SaveChangesAsync();
+                TempData["SuccessMessage"] = "廠商已新增成功！";
                 return RedirectToAction(nameof(Index));
-            }
+             }
             return View(company);
         }
 
@@ -88,9 +65,7 @@ namespace CompanyAPP.Controllers
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Edit(int? id)
         {
-            if (id == null) return NotFound();
-            var company = await _context.Company.FindAsync(id);
-
+            var company = await _companyService.GetByIdAsync(id);
             if (company == null) return NotFound();
             return View(company);
         }
@@ -101,45 +76,19 @@ namespace CompanyAPP.Controllers
         public async Task<IActionResult> Edit(int id, Company company)
         {
             if (id != company.Id) return NotFound();
-
-            // if (ModelState.IsValid)
+            try
             {
-                try
-                {
-                    // 圖片更新邏輯
-                    if (company.ImageFile != null)
-                    {
-                        string wwwRootPath = _hostEnvironment.WebRootPath;
-                        string fileName = Guid.NewGuid().ToString() + System.IO.Path.GetExtension(company.ImageFile.FileName);
-                        string path = System.IO.Path.Combine(wwwRootPath + "/images/", fileName);
-                        using (var fileStream = new System.IO.FileStream(path, System.IO.FileMode.Create))
-                        {
-                            await company.ImageFile.CopyToAsync(fileStream);
-                        }
-                        company.LogoPath = fileName; 
-                    }
-                    _context.Update(company);
-                    await _context.SaveChangesAsync();
-                }
-                catch (DbUpdateConcurrencyException)
-                {
-                    if (!CompanyExists(company.Id)) return NotFound();
-                    else throw;
-                }
-                return RedirectToAction(nameof(Index));
+                // 呼叫 Service 更新
+                await _companyService.UpdateAsync(company);
             }
-            return View(company);
-        }
+            catch (Exception) // 簡化錯誤捕捉
+            {
+                if (!_companyService.CompanyExists(company.Id)) return NotFound();
+                else throw;
+            }
 
-        [HttpGet]
-        [Authorize(Roles = "Admin")]
-        public async Task<IActionResult> Delete(int? id)
-        {
-            if (id == null) return NotFound();
-            var company = await _context.Company.FirstOrDefaultAsync(m => m.Id == id);
-            
-            if (company == null) return NotFound();
-            return View(company);
+            TempData["SuccessMessage"] = "廠商已修改成功！";
+            return RedirectToAction(nameof(Index));
         }
 
         [HttpPost, ActionName("Delete")]
@@ -147,18 +96,10 @@ namespace CompanyAPP.Controllers
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            var company = await _context.Company.FindAsync(id);
-            if (company != null)
-            {
-                _context.Company.Remove(company);
-            }
-            await _context.SaveChangesAsync();
-            return RedirectToAction(nameof(Index));
-        }
+            await _companyService.DeleteAsync(id);
 
-        private bool CompanyExists(int id)
-        {
-            return _context.Company.Any(e => e.Id == id);
+            TempData["SuccessMessage"] = "廠商已成功刪除！";
+            return RedirectToAction(nameof(Index));
         }
     }
 }

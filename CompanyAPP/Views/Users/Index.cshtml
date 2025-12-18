@@ -5,24 +5,14 @@
 }
 
 @{
-    // 最高權限名單(白名單)
-    var superAdmins = new List<string>
-    {
-        "abccmick@gmail.com",
-        "admin@default.com",
-    };
+    var superAdmins = new List<string> { "admin@default.com" };
 }
+
 
 <div class="container mt-4">
     <h2> 系統帳號與權限管理</h2>
-
-    @*一次性開啟跳過舊帳號驗證按鈕 *@
-    <form asp-action="FixOldUsers" method="post" onsubmit="return confirm('確定要執行「跳過驗證」嗎？這將會讓目前所有未驗證的帳號變成已驗證。');">
-        <button type="submit" class="btn btn-warning shadow-sm">
-            ⚡ 開通所有舊帳號 (Fix Data)
-        </button>
-    </form>
 </div>
+
 
 @* 顯示執行結果 *@
 @if (TempData["StatusMessage"] != null)
@@ -50,7 +40,7 @@
                         <tr>
                             <td>@user.Email</td>
 
-                        @*  綠色=已驗證 / 紅色=未驗證 *@
+                        @* 驗證狀態 *@
                         <td>
                             @if (user.EmailConfirmed)
                             {
@@ -60,48 +50,55 @@
                             {
                                 <span class="badge bg-danger">未驗證</span>
                             }
+
+                            @* 單一開通按鈕 *@
+                            <form asp-action="VerifyUser" method="post" style="display:inline;">
+                                <input type="hidden" name="userId" value="@user.UserId" />
+                                <button type="submit" class="btn btn-sm btn-outline-success py-0 px-2"
+                                        title="手動協助開通"
+                                        onclick="return confirm('確定要將 @user.Email 設為已驗證嗎？');">
+                                    <small>開通</small>
+                                </button>
+                            </form>         
                         </td>
 
+                        @* 目前身分*@
                         <td>
-                            @if (user.Roles.Contains("Admin"))
+                            @foreach (var role in user.Roles)
                             {
-                                <span class="badge bg-danger">管理員</span>
-                            }
-                            else
-                            {
-                                <span class="badge bg-secondary">一般用戶</span>
+                                <span class="badge bg-secondary">@role</span>
                             }
                         </td>
 
+                        @* 操作功能 *@
                         <td class="text-center">
-                                <div class="btn-group">
-
-                                @* 檢查是否為超最高權限管理員 *@
+                            <div class="btn-group">
                                 @if (superAdmins.Contains(user.Email))
-                                    {
+                                {
                                     <span class="badge bg-secondary fst-italic">由系統保護</span>
-                                    }
+                                }
+                                else
+                                {
+                                    @* 跳轉到 ManageRoles 的按鈕 *@
+                                    <a asp-action="ManageRoles" asp-route-userId="@user.UserId"
+                                       class="btn btn-outline-primary btn-sm">
+                                        分配權限
+                                    </a>
 
-                                    else
+
+                                    @* 刪除按鈕 *@
+                                    @if (User.Identity.Name != user.Email)
                                     {
-                                        <a asp-action="ManageRoles" asp-route-userId="@user.UserId" class="btn btn-outline-primary btn-sm">
-                                            🔑 分配權限
-                                        </a>
-
-                                        @* 保護機制,用戶不能刪除自己 *@
-                                        @if (User.Identity.Name != user.Email)
-                                        {
-                                            <a asp-action="Delete" asp-route-id="@user.UserId"
-                                            class="btn btn-outline-danger btn-sm"
-                                            onclick="return confirm('確定要刪除此帳號？');">刪除</a>
-                                        }
+                                        <a asp-action="Delete" asp-route-id="@user.UserId"
+                                           class="btn btn-outline-danger btn-sm ms-1"
+                                           onclick="return confirm('確定要刪除此帳號？');">刪除</a>
                                     }
-                                </div>
-                            </td>
-                        </tr>
-                    }
-                </tbody>
-            </table>
-        </div>
+                                }
+                            </div>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
     </div>
 </div>

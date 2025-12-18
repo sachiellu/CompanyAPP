@@ -14,16 +14,16 @@
 
                 <div class="card-body p-4">
                     @{
-                        if (@Model.DisplayConfirmAccountLink)
-                        {
-                            <!-- 開發模式：顯示直接驗證連結  -->
-                            <div class="alert alert-warning">
-                                <p><strong>開發模式提示：</strong></p>
-                                <p>因為尚未串接真實 Email 服務，請點擊下方連結進行驗證：</p>
-                                <a id="confirm-link" href="@Model.EmailConfirmationUrl" class="btn btn-success w-100">點擊驗證帳號</a>
-                            </div>
-                        }
-                        else
+                        // if (@Model.DisplayConfirmAccountLink)
+                        // {
+                        //     <!-- 開發模式：顯示直接驗證連結  -->
+                        //     <div class="alert alert-warning">
+                        //         <p><strong>開發模式提示：</strong></p>
+                        //         <p>因為尚未串接真實 Email 服務，請點擊下方連結進行驗證：</p>
+                        //         <a id="confirm-link" href="@Model.EmailConfirmationUrl" class="btn btn-success w-100">點擊驗證帳號</a>
+                        //     </div>
+                        // }
+                        // else
                         {
                             <!-- 正式模式/已設定EmailSender：顯示去收信 -->
                             <div class="text-center">

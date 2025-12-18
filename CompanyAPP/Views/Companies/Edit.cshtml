@@ -52,10 +52,29 @@
                         <div class="mb-3 card p-3 bg-light">
                             <label class="fw-bold mb-2">Logo 預覽</label>
 
-                            <div class="mb-2 text-center">
-                                <img id="imgPreview"
-                                     src="@(string.IsNullOrEmpty(Model.LogoPath) ? "https://via.placeholder.com/150?text=No+Image" : Url.Content("~/images/" + Model.LogoPath))"
-                                     style="max-width: 200px; max-height: 200px; border-radius: 10px; border: 1px solid #ddd; object-fit: cover;" />
+                            <div class="border p-2 text-center" style="background-color: #f8f9fa; border-radius: 5px;">
+                                @if (!string.IsNullOrEmpty(Model.LogoPath))
+                                {
+                                    if (Model.LogoPath.StartsWith("http"))
+                                    {
+                                        // 雲端圖片
+                                        <img id="imgPreview" src="@Model.LogoPath" style="max-height: 200px; max-width: 100%; object-fit: contain;" />
+                                    }
+                                    else
+                                    {
+                                        // 本地舊圖片
+                                        <img id="imgPreview" src="~/images/@Model.LogoPath" style="max-height: 200px; max-width: 100%; object-fit: contain;" />
+                                    }
+                                }
+                                else
+                                {
+                                    // 目前沒有圖片的情況
+                                    // 1. 顯示文字提示
+                                    <span id="noImageText" class="text-muted">目前沒有圖片</span>
+
+                                    // 2.預先埋一個隱藏的 img 標籤，等使用者選檔案時顯示出來
+                                    <img id="imgPreview" src="#" style="max-height: 200px; max-width: 100%; object-fit: contain; display:none;" />
+                                }
                             </div>
 
                             <label asp-for="ImageFile" class="form-label mt-2">更換圖片</label>
@@ -85,15 +104,24 @@
             if (input.files && input.files[0]) {
                 var reader = new FileReader();
 
-                // 當檔案讀取完成後，執行這個動作
                 reader.onload = function (e) {
-                    // 把圖片的 src 換成剛剛讀到的檔案內容
-                    document.getElementById('imgPreview').src = e.target.result;
-                }
+                    var img = document.getElementById('imgPreview');
+                    var text = document.getElementById('noImageText');
 
-                // 開始讀取檔案
+                    // 1. 設定圖片路徑
+                    img.src = e.target.result;
+
+                    // 2. 確保圖片是顯示的 (去除 display:none)
+                    img.style.display = 'inline-block';
+
+                    // 3. 如果原本有「目前沒有圖片」的文字，把它藏起來
+                    if (text) {
+                        text.style.display = 'none';
+                    }
+                }   
+
                 reader.readAsDataURL(input.files[0]);
             }
         }
-    </script>
+     </script>
 }

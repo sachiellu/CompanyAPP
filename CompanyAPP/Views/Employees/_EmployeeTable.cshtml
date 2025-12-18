@@ -10,67 +10,71 @@
 }
 
 <div class="table-responsive">
-    <form id="batchDeleteForm" asp-action="DeleteBatch" method="post">
-        <table class="table table-hover align-middle mb-0">
-            <thead class="table-light">
+    <table class="table table-hover align-middle mb-0">
+        <thead class="table-light">
+            <tr>
+                @* 全選 Checkbox *@
+                <th style="width: 40px;">
+                    <input type="checkbox" id="selectAll" class="form-check-input" onclick="toggleSelectAll(this)">
+                </th>
+                <th class="text-nowrap">
+                    <a asp-action="Index" asp-route-sortOrder="@ViewData["NameSortParm"]">姓名 ↕</a>
+                </th>
+                <th class="d-none d-md-table-cell text-nowrap">
+                    <a asp-action="Index" asp-route-sortOrder="@ViewData["PosSortParm"]">職位 ↕</a>
+                </th>
+                <th class="d-none d-md-table-cell text-nowrap">
+                    <a asp-action="Index" asp-route-sortOrder="@ViewData["EmailSortParm"]">電子信箱 ↕</a>
+                </th>
+                <th class="d-none d-lg-table-cell text-nowrap">
+                    <a asp-action="Index" asp-route-sortOrder="@ViewData["CompSortParm"]">Company ↕</a>
+                </th>
+
+                <th>操作功能</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model)
+            {
                 <tr>
-                    @* 全選 Checkbox *@
-                    <th style="width: 40px;">
-                        <input type="checkbox" id="selectAll" class="form-check-input" onclick="toggleSelectAll(this)">
-                    </th>
-                    <th class="text-nowrap">
-                        <a asp-action="Index" asp-route-sortOrder="@ViewData["NameSortParm"]">姓名 ↕</a>
-                    </th>
-                    <th class="d-none d-md-table-cell text-nowrap">
-                        <a asp-action="Index" asp-route-sortOrder="@ViewData["PosSortParm"]">職位 ↕</a>
-                    </th>
-                    <th class="d-none d-md-table-cell text-nowrap">
-                        <a asp-action="Index" asp-route-sortOrder="@ViewData["EmailSortParm"]">電子信箱 ↕</a>
-                    </th>
-                    <th class="d-none d-lg-table-cell text-nowrap">
-                        <a asp-action="Index" asp-route-sortOrder="@ViewData["CompSortParm"]">Company ↕</a>
-                    </th>
+                    <td>
+                        @*Checkbox，name 必須是 ids*@
+                        <input type="checkbox" name="ids" value="@item.Id" class="form-check-input row-checkbox">
+                    </td>
+                    <td class="fw-bold text-nowrap">@Html.DisplayFor(modelItem => item.Name)</td>
+                    <td class="d-none d-md-table-cell text-nowrap">@Html.DisplayFor(modelItem => item.Position)</td>
+                    <td class="d-none d-md-table-cell text-nowrap">
+                        <a href="mailto:@item.Email" class="text-decoration-none">@item.Email</a>
+                    </td>
+                    <td class="d-none d-lg-table-cell text-nowrap">
+                        @if (item.Company != null)
+                        {
+                            <span class="badge bg-info text-dark">@item.Company.Name</span>
+                        }
+                    </td>
 
-                    <th>操作功能</th>
+                    @* 操作功能 *@
+                    <td class="text-nowrap">
+                        @if (isAdminOrManager)
+                        {
+                            <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-outline-success btn-sm">編輯</a>
+                        }
+
+                        <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-outline-secondary btn-sm">詳情</a>                   
+
+                        @if (isAdmin)
+                        {
+                            <button type="button" class="btn btn-outline-danger btn-sm" onclick="confirmDelete(@item.Id)">
+                                <i class="bi bi-trash"></i> 刪除
+                            </button>
+
+                            <form id="delete-form-@item.Id" action="/Employees/Delete/@item.Id" method="post" style="display:none;">
+                                @Html.AntiForgeryToken()
+                            </form>
+                        }
+                    </td>
                 </tr>
-            </thead>
-            <tbody>
-                @foreach (var item in Model)
-                {
-                    <tr>
-                        <td>
-                            @*Checkbox，name 必須是 ids*@
-                            <input type="checkbox" name="ids" value="@item.Id" class="form-check-input row-checkbox">
-                        </td>
-                        <td class="fw-bold text-nowrap">@Html.DisplayFor(modelItem => item.Name)</td>
-                        <td class="d-none d-md-table-cell text-nowrap">@Html.DisplayFor(modelItem => item.Position)</td>
-                        <td class="d-none d-md-table-cell text-nowrap">
-                            <a href="mailto:@item.Email" class="text-decoration-none">@item.Email</a>
-                        </td>
-                        <td class="d-none d-lg-table-cell text-nowrap">
-                            @if (item.Company != null)
-                            {
-                                <span class="badge bg-info text-dark">@item.Company.Name</span>
-                            }
-                        </td>
-
-                        @* 操作功能 *@
-                        <td class="text-nowrap">
-                            @if (isAdminOrManager)
-                            {
-                                <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-outline-success btn-sm">編輯</a>
-                            }
-
-                            <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-outline-secondary btn-sm">詳情</a>                   
-
-                            @if (isAdmin)
-                            {
-                                <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-outline-danger btn-sm">刪除</a>
-                            }
-                        </td>
-                    </tr>
-                }
-            </tbody>
-        </table>
-    </form>
+            }
+        </tbody>
+    </table>
 </div>

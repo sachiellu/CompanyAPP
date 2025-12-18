@@ -1,10 +1,33 @@
 ﻿@page
 @model LockoutModel
 @{
-    ViewData["Title"] = "Locked out";
+    ViewData["Title"] = "帳號已鎖定";
 }
 
-<header>
-    <h1 class="text-danger">@ViewData["Title"]</h1>
-    <p class="text-danger">This account has been locked out, please try again later.</p>
-</header>
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6 text-center">
+            <div class="card shadow-sm border-danger">
+                <div class="card-header bg-danger text-white">
+                    <h4 class="mb-0"> 安全警示</h4>
+                </div>
+                <div class="card-body p-5">
+                    <h2 class="text-danger mb-4">@ViewData["Title"]</h2>
+
+                    <p class="lead text-muted">
+                        由於多次登入失敗，為了保護您的帳號安全，<br>
+                        系統已暫時鎖定。
+                    </p>
+
+                    <div class="alert alert-warning mt-4" role="alert">
+                        請稍候幾分鐘後再嘗試登入。
+                    </div>
+
+                    <div class="mt-4">
+                        <a href="/" class="btn btn-outline-secondary">返回首頁</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

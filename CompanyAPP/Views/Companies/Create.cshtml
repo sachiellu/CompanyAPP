@@ -12,16 +12,10 @@
                     <h4 class="mb-0">新增廠商資料</h4>
                 </div>
                 <div class="card-body">
-                    <form asp-action="Create">  enctype="multipart/form-data">
+                    <form asp-action="Create" enctype="multipart/form-data">
 
                         <div asp-validation-summary="ModelOnly" class="text-danger"></div>
                         
-                        <div class="mb-3">
-                            <label asp-for="ImageFile" class="form-label"></label>
-                            <input asp-for="ImageFile" class="form-control" type="file" accept="image/*" />
-                            <span asp-validation-for="ImageFile" class="text-danger"></span>
-                        </div>
-
                         <div class="mb-3">
                             <label asp-for="Name" class="form-label fw-bold"></label>
                             <input asp-for="Name" class="form-control" placeholder="請輸入廠商名稱" />
@@ -53,10 +47,26 @@
                             <span asp-validation-for="Address" class="text-danger"></span>
                         </div>
 
+                        <div class="mb-3 card p-3 bg-light">
+                            <label class="fw-bold mb-2">Logo 預覽</label>
+
+                            <div class="border p-2 text-center" style="background-color: #f8f9fa; border-radius: 5px;">
+                                @* 預設隱藏圖片，等選了檔案再用 JS 顯示出來 *@
+                                <img id="imgPreview" src="#" style="max-height: 200px; max-width: 100%; object-fit: contain; display:none;" />
+                                <span id="noImageText" class="text-muted">尚未選擇圖片</span>
+                            </div>
+
+                            <label asp-for="ImageFile" class="form-label mt-2">上傳圖片</label>
+                            @* 加上 onchange 事件 *@
+                            <input asp-for="ImageFile" class="form-control" type="file" accept="image/*" onchange="previewImage(this)" />
+                            <span asp-validation-for="ImageFile" class="text-danger"></span>
+                        </div>
+
                         <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-4">
                             <a asp-action="Index" class="btn btn-secondary me-2">取消返回</a>
                             <input type="submit" value="確認新增" class="btn btn-primary px-4" />
                         </div>
+
                     </form>
                 </div>
             </div>
@@ -68,4 +78,21 @@
     @{
         await Html.RenderPartialAsync("_ValidationScriptsPartial");
     }
+
+<script>
+    function previewImage(input) {
+        if (input.files && input.files[0]) {
+            var reader = new FileReader();
+            reader.onload = function (e) {
+                var img = document.getElementById('imgPreview');
+                var text = document.getElementById('noImageText');
+
+                img.src = e.target.result;
+                img.style.display = 'inline-block'; // 顯示圖片
+                if (text) text.style.display = 'none'; // 隱藏文字
+            }
+            reader.readAsDataURL(input.files[0]);
+        }
+    }
+</script>
 }

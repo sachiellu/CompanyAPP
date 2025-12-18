@@ -73,9 +73,37 @@
             &copy; 2025 - 嗨!你好😊企業資源管理系統 版本 1.0 - <a asp-area="" asp-controller="Home" asp-action="Privacy">隱私</a>
         </div>
     </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <script>
+        // 檢查後端有沒有傳來成功訊息
+        var successMsg = '@Html.Raw(TempData["SuccessMessage"])';
+
+        if (successMsg) {
+            Swal.fire({
+                text: successMsg,           // 改用 text，字體較小
+                target: 'body',
+                toast: true,
+                position: 'bottom-right',   // 改到右下角 (比較不擋視線)
+                showConfirmButton: false,
+                timer: 2000,                // 縮短時間 (1.5秒)
+                background: '#333',         // 黑底
+                color: '#fff',              // 白字
+                customClass: {
+                    popup: 'colored-toast'  // 可以自訂 CSS 去掉陰影
+                },
+                showClass: { popup: '' },   // 去掉跳出來的動畫，直接浮現
+                hideClass: { popup: '' }
+            });
+        }
+    </script>
+
+
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
+
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>

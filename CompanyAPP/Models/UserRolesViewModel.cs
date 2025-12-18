@@ -1,4 +1,5 @@
 ﻿namespace CompanyAPP.Models
+
 {
     public class UserRolesViewModel
     {
@@ -6,10 +7,9 @@
         public string Email { get; set; } = string.Empty;
         public bool EmailConfirmed { get; set; }
         public List<string> Roles { get; set; } = new List<string>();
-
     }
 
-    // 用來在畫面顯示 Checkbox 的輔助類別z
+    // 用來在畫面顯示 Checkbox 的輔助類別
     public class ManageUserRolesViewModel
     {
         public string RoleId { get; set; } = string.Empty;

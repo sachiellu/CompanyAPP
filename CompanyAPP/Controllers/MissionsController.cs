@@ -11,7 +11,6 @@ namespace CompanyAPP.Controllers
     public class MissionsController : Controller
     {
         private readonly CompanyAppContext _context;
-
         public MissionsController(CompanyAppContext context)
         {
             _context = context;
@@ -67,10 +66,12 @@ namespace CompanyAPP.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("Id,Title,Description,CreateDate,Deadline,Status,CompanyId,EmployeeId")] Mission mission)
         {
-           // if (ModelState.IsValid)
+            if (ModelState.IsValid)
             {
                 _context.Add(mission);
                 await _context.SaveChangesAsync();
+
+                TempData["SuccessMessage"] = "任務指派成功！";
                 return RedirectToAction(nameof(Index));
             }
             ViewData["CompanyId"] = new SelectList(_context.Company, "Id", "Name", mission.CompanyId);
@@ -124,31 +125,12 @@ namespace CompanyAPP.Controllers
                         throw;
                     }
                 }
+
+                TempData["SuccessMessage"] = "任務狀態更新成功！";
                 return RedirectToAction(nameof(Index));
             }
             ViewData["CompanyId"] = new SelectList(_context.Company, "Id", "Name", mission.CompanyId);
             ViewData["EmployeeId"] = new SelectList(_context.Employee, "Id", "Name", mission.EmployeeId);
-            return View(mission);
-        }
-
-        [HttpGet]
-        [Authorize(Roles = "Admin")]
-        public async Task<IActionResult> Delete(int? id)
-        {
-            if (id == null)
-            {
-                return NotFound();
-            }
-
-            var mission = await _context.Mission
-                .Include(m => m.Company)
-                .Include(m => m.Employee)
-                .FirstOrDefaultAsync(m => m.Id == id);
-            if (mission == null)
-            {
-                return NotFound();
-            }
-
             return View(mission);
         }
 
@@ -164,6 +146,8 @@ namespace CompanyAPP.Controllers
             }
 
             await _context.SaveChangesAsync();
+
+            TempData["SuccessMessage"] = "任務已刪除！";
             return RedirectToAction(nameof(Index));
         }
 

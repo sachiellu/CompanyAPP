@@ -1,21 +1,49 @@
 ﻿@page
 @model LogoutModel
 @{
-    ViewData["Title"] = "Log out";
+    ViewData["Title"] = "登出系統";
 }
 
-<header>
-    <h1>@ViewData["Title"]</h1>
-    @{
-        if (User.Identity?.IsAuthenticated ?? false)
-        {
-            <form class="form-inline" asp-area="Identity" asp-page="/Account/Logout" asp-route-returnUrl="@Url.Page("/", new { area = "" })" method="post">
-                <button type="submit" class="nav-link btn btn-link text-dark">Click here to Logout</button>
-            </form>
-        }
-        else
-        {
-            <p>You have successfully logged out of the application.</p>
-        }
-    }
-</header>
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6 text-center">
+            <div class="card shadow-sm">
+
+                @if (User.Identity?.IsAuthenticated ?? false)
+                {
+                    <div class="card-header bg-warning text-dark">
+                        <h4 class="mb-0">確認登出</h4>
+                    </div>
+                    <div class="card-body p-5">
+                        <p class="lead text-muted mb-4">
+                            您目前仍處於登入狀態，確定要登出嗎？
+                        </p>
+                        <form class="form-inline" asp-area="Identity" asp-page="/Account/Logout" asp-route-returnUrl="@Url.Page("/", new { area = "" })" method="post">
+                            <button type="submit" class="btn btn-danger btn-lg px-4">確認登出</button>
+                        </form>
+                    </div>
+                }
+                else
+                {
+                    <div class="card-header bg-success text-white">
+                        <h4 class="mb-0">已登出</h4>
+                    </div>
+                    <div class="card-body p-5">
+                        <div class="mb-4 text-success">
+                            <i class="bi bi-check-circle-fill" style="font-size: 3rem;"></i>
+                        </div>
+                        <h3 class="mb-3">您已安全登出系統</h3>
+                        <p class="text-muted">
+                            感謝您。
+                        </p>
+
+                        <div class="mt-4 d-grid gap-2 d-sm-flex justify-content-sm-center">
+                            <a href="/" class="btn btn-outline-secondary">返回首頁</a>
+                            <a asp-page="./Login" class="btn btn-primary">重新登入</a>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>

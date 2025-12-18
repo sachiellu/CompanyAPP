@@ -1,12 +1,10 @@
 ﻿@model CompanyAPP.Models.Company
-@inject CompanyAPP.Data.CompanyAppContext _context
 @using Microsoft.AspNetCore.Identity
 @inject SignInManager<IdentityUser> SignInManager
 @inject UserManager<IdentityUser> UserManager
 
 @{
     ViewData["Title"] = "廠商詳情";
-    var employees = _context.Employee.Where(e => e.CompanyId == Model.Id).ToList();
     bool isAdmin = User.IsInRole("Admin");
 }
 
@@ -22,8 +20,27 @@
                     <div class="row mb-4">
                         @* 左邊放圖片 *@
                         <div class="col-md-4 text-center mb-3">
-                            <img src="@(string.IsNullOrEmpty(Model.LogoPath) ? "https://via.placeholder.com/150?text=No+Logo" : Url.Content("~/images/" + Model.LogoPath))"
-                                 class="img-fluid rounded border p-1" style="max-height: 150px;" />
+                            @if (!string.IsNullOrEmpty(Model.LogoPath))
+                            {
+                                // 判斷是否為雲端網址 (Cloudinary)
+                                if (Model.LogoPath.StartsWith("http"))
+                                {
+                                    <img src="@Model.LogoPath"
+                                         class="img-fluid rounded border p-1" style="max-height: 150px; object-fit: cover;" />
+                                }
+                                else
+                                {
+                                    // 本地舊圖片
+                                    <img src="~/images/@Model.LogoPath"
+                                         class="img-fluid rounded border p-1" style="max-height: 150px; object-fit: cover;" />
+                                }
+                            }
+                            else
+                            {
+                                // 沒有圖片時顯示預設圖
+                                <img src="https://via.placeholder.com/150?text=No+Logo"
+                                     class="img-fluid rounded border p-1" style="max-height: 150px;" />
+                            }
                         </div>
 
                         @* 右邊放主要資訊 *@
@@ -52,7 +69,7 @@
                      @* 員工列表區塊 *@
                     <div class="mt-4">
                         <h5 class="border-bottom pb-2">員工列表</h5>
-                        @if (employees.Any())
+                        @if (Model.Employees != null && Model.Employees.Any())
                         {
                             <table class="table table-sm table-hover mt-2">
                                 <thead class="table-light">
@@ -63,7 +80,7 @@
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    @foreach (var emp in employees)
+                                    @foreach (var emp in Model.Employees)
                                     {
                                         <tr>
                                             <td>@emp.Name</td>

@@ -13,7 +13,7 @@ namespace CompanyAPP.Data
             var configuration = serviceProvider.GetRequiredService<IConfiguration>();
 
             // 1. 確保角色存在
-            string[] roleNames = { "Admin", "User" };
+            string[] roleNames = { "Admin", "Manager", "User" };
             foreach (var roleName in roleNames)
             {
                 if (!await roleManager.RoleExistsAsync(roleName))

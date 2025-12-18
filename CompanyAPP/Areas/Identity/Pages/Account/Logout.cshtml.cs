@@ -26,6 +26,11 @@ namespace CompanyAPP.Areas.Identity.Pages.Account
         public async Task<IActionResult> OnPost(string returnUrl = null)
         {
             await _signInManager.SignOutAsync();
+
+            HttpContext.Response.Headers["Cache-Control"] = "no-cache, no-store, must-revalidate";
+            HttpContext.Response.Headers["Pragma"] = "no-cache";
+            HttpContext.Response.Headers["Expires"] = "0";
+
             _logger.LogInformation("User logged out.");
             if (returnUrl != null)
             {
@@ -35,7 +40,7 @@ namespace CompanyAPP.Areas.Identity.Pages.Account
             {
                 // This needs to be a redirect so that the browser performs a new
                 // request and the identity for the user gets updated.
-                return RedirectToPage();
+                return Redirect("~/");
             }
         }
     }

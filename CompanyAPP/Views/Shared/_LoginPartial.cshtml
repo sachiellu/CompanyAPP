@@ -6,12 +6,10 @@
     @if (SignInManager.IsSignedIn(User))
     {
         <li class="nav-item">
-            <!-- Hello ... 改成 您好 -->
             <a class="nav-link text-dark" asp-area="Identity" asp-page="/Account/Manage/Index" title="Manage">您好，@User.Identity?.Name!</a>
         </li>
         <li class="nav-item">
-            <form class="form-inline" asp-area="Identity" asp-page="/Account/Logout" asp-route-returnUrl="@Url.Action("Index", "Home", new { area = "" })">
-                <!-- Logout 改成 登出 -->
+            <form class="form-inline" asp-area="Identity" asp-page="/Account/Logout" asp-route-returnUrl="@Url.Action("Index", "Home", new { area = "", t = DateTime.Now.Ticks })" method="post">
                 <button type="submit" class="nav-link btn btn-link text-dark">登出</button>
             </form>
         </li>
@@ -19,11 +17,9 @@
     else
     {
         <li class="nav-item">
-            <!-- Register 改成 註冊 -->
             <a class="nav-link text-dark" asp-area="Identity" asp-page="/Account/Register">註冊</a>
         </li>
         <li class="nav-item">
-            <!-- Login 改成 登入 -->
             <a class="nav-link text-dark" asp-area="Identity" asp-page="/Account/Login">登入</a>
         </li>
     }

@@ -65,7 +65,12 @@
                                     <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-outline-secondary btn-sm">詳情</a>
                                     @if (User.IsInRole("Admin"))
                                     {
-                                        <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-outline-danger btn-sm">刪除</a>
+                                        <button type="button" class="btn btn-outline-danger btn-sm" onclick="confirmDelete(@item.Id)">
+                                            <i class="bi bi-trash"></i> 刪除
+                                        </button>
+                                        <form id="delete-form-@item.Id" action="/Missions/Delete/@item.Id" method="post" style="display:none;">
+                                            @Html.AntiForgeryToken()
+                                        </form>
                                     }
                                 </div>
                             </td>

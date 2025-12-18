@@ -1,10 +1,27 @@
 ﻿@page
 @model AccessDeniedModel
 @{
-    ViewData["Title"] = "Access denied";
+    ViewData["Title"] = "拒絕訪問";
 }
 
-<header>
-    <h1 class="text-danger">@ViewData["Title"]</h1>
-    <p class="text-danger">You do not have access to this resource.</p>
-</header>
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6 text-center">
+            <div class="card shadow-sm border-danger">
+                <div class="card-body p-5">
+                    <h1 class="text-danger display-1 fw-bold">403</h1>
+                    <h2 class="text-danger mb-4">@ViewData["Title"]</h2>
+
+                    <p class="lead text-muted mb-4">
+                        您的帳號權限不足，無法存取此頁面。<br />
+                        如果您認為這是錯誤，請聯繫系統管理員。
+                    </p>
+
+                    <a href="/" class="btn btn-primary px-4">
+                        返回首頁
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
