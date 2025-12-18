@@ -15,6 +15,39 @@
                     <form asp-action="Edit" enctype="multipart/form-data">
                         <div asp-validation-summary="ModelOnly" class="text-danger"></div>
 
+                        <div class="mb-3 card p-3 bg-light">
+                            <label class="fw-bold mb-2">Logo 預覽</label>
+
+                            <div class="border p-2 text-center" style="background-color: #f8f9fa; border-radius: 5px;">
+                                @if (!string.IsNullOrEmpty(Model.LogoPath))
+                                {
+                                    if (Model.LogoPath.StartsWith("http"))
+                                    {
+                                        // 雲端圖片
+                                        <img id="imgPreview" src="@Model.LogoPath" style="max-height: 200px; max-width: 100%; object-fit: contain;" />
+                                    }
+                                    else
+                                    {
+                                        // 本地舊圖片
+                                        <img id="imgPreview" src="~/images/@Model.LogoPath" style="max-height: 200px; max-width: 100%; object-fit: contain;" />
+                                    }
+                                }
+                                else
+                                {
+                                    // 目前沒有圖片的情況
+                                    // 1. 顯示文字提示
+                                    <span id="noImageText" class="text-muted">目前沒有圖片</span>
+
+                                    // 2.預先埋一個隱藏的 img 標籤，等使用者選檔案時顯示出來
+                                    <img id="imgPreview" src="#" style="max-height: 200px; max-width: 100%; object-fit: contain; display:none;" />
+                                }
+                            </div>
+
+                            <label asp-for="ImageFile" class="form-label mt-2">更換圖片</label>
+                            <input asp-for="ImageFile" class="form-control" type="file" accept="image/*" onchange="previewImage(this)" />
+                            <span asp-validation-for="ImageFile" class="text-danger"></span>
+                        </div>
+
                         <input type="hidden" asp-for="Id" />
                         <input type="hidden" asp-for="LogoPath" />
 
@@ -47,39 +80,6 @@
                             <label asp-for="Address" class="form-label"></label>
                             <input asp-for="Address" class="form-control" />
                             <span asp-validation-for="Address" class="text-danger"></span>
-                        </div>
-
-                        <div class="mb-3 card p-3 bg-light">
-                            <label class="fw-bold mb-2">Logo 預覽</label>
-
-                            <div class="border p-2 text-center" style="background-color: #f8f9fa; border-radius: 5px;">
-                                @if (!string.IsNullOrEmpty(Model.LogoPath))
-                                {
-                                    if (Model.LogoPath.StartsWith("http"))
-                                    {
-                                        // 雲端圖片
-                                        <img id="imgPreview" src="@Model.LogoPath" style="max-height: 200px; max-width: 100%; object-fit: contain;" />
-                                    }
-                                    else
-                                    {
-                                        // 本地舊圖片
-                                        <img id="imgPreview" src="~/images/@Model.LogoPath" style="max-height: 200px; max-width: 100%; object-fit: contain;" />
-                                    }
-                                }
-                                else
-                                {
-                                    // 目前沒有圖片的情況
-                                    // 1. 顯示文字提示
-                                    <span id="noImageText" class="text-muted">目前沒有圖片</span>
-
-                                    // 2.預先埋一個隱藏的 img 標籤，等使用者選檔案時顯示出來
-                                    <img id="imgPreview" src="#" style="max-height: 200px; max-width: 100%; object-fit: contain; display:none;" />
-                                }
-                            </div>
-
-                            <label asp-for="ImageFile" class="form-label mt-2">更換圖片</label>
-                            <input asp-for="ImageFile" class="form-control" type="file" accept="image/*" onchange="previewImage(this)" />
-                            <span asp-validation-for="ImageFile" class="text-danger"></span>
                         </div>
 
                         <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-4">
