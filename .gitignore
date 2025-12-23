@@ -11,6 +11,9 @@ obj/
 Debug/
 Release/
 
+## 忽略單元測試產生的報告
+TestResults/
+
 ## 忽略 SQLite 資料庫
 *.db
 *.db-shm

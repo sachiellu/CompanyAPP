@@ -5,8 +5,7 @@
 
 @{
     ViewData["Title"] = "員工管理";
-
-    // 獲取角色資訊
+    // 獲取權限狀態
     bool isAdmin = User.IsInRole("Admin");
     bool isAdminOrManager = User.IsInRole("Admin") || User.IsInRole("Manager");
 }
@@ -15,28 +14,57 @@
     @* 標題與功能列 *@
     <div class="d-flex justify-content-between align-items-center mb-3">
         <h1> 員工管理</h1>
-        <div>
-            @* 批次刪除按鈕 (預設隱藏)(限 Admin) *@
-            @if (isAdmin)
-            {
-                <button type="button" class="btn btn-danger me-2" onclick="submitBatchDelete()">
-                    刪除選取項目
-                </button>
-			}
-            @if (isAdminOrManager)
-            {
-                <a asp-action="Create" class="btn btn-primary me-2">
-                    + 新增員工
-                </a>
-            }
+
+    <div class="d-flex gap-2">
+        @* 1. 更多功能 (Excel 匯入/匯出) - 收納進下拉選單 *@
+        <div class="dropdown">
+            <button class="btn btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                <i class="bi bi-gear-fill"></i> 更多功能
+            </button>
+            <ul class="dropdown-menu">
+                @* 匯出 (所有人可見) *@
+                <li>
+                    <a class="dropdown-item" asp-action="ExportToExcel">
+                        <i class="bi bi-file-earmark-excel text-success"></i> 匯出 Excel 報表
+                    </a>
+                </li>
+
+                @* 匯入 (限管理員) *@
+                @if (isAdminOrManager)
+                {
+                    <li><hr class="dropdown-divider"></li>
+                    <li>
+                        <a class="dropdown-item" asp-action="Import">
+                            <i class="bi bi-upload text-primary"></i> 批次匯入資料
+                        </a>
+                    </li>
+                }
+            </ul>
         </div>
+
+        @* 2. 刪除按鈕 (危險操作，獨立顯示) *@
+        @if (isAdmin)
+        {
+            <button type="button" class="btn btn-outline-danger" onclick="submitBatchDelete()">
+                <i class="bi bi-trash"></i> 刪除選取
+            </button>
+        }
+
+        @* 3. 新增按鈕 (主要操作，最顯眼) *@
+        @if (isAdminOrManager)
+        {
+            <a asp-action="Create" class="btn btn-primary">
+                <i class="bi bi-plus-lg"></i> 新增員工
+            </a>
+        }
     </div>
+</div>
 
     @* 搜尋框 *@
     <div class="input-group mb-4 shadow-sm">
         <span class="input-group-text bg-white border-end-0">🔍</span>
         <input type="text" id="searchInput" class="form-control border-start-0"
-               placeholder="請輸入姓名、職位或 Email (即時搜尋)..."
+               placeholder="請輸入姓名、職位或 Email (即時搜尋)..."  
                oninput="searchEmployees()">
     </div>
 

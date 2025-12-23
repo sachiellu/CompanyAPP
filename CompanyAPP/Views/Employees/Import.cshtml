@@ -1,0 +1,55 @@
+﻿@{
+    ViewData["Title"] = "批次匯入員工";
+}
+
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card shadow">
+                <div class="card-header bg-success text-white">
+                    <h4 class="mb-0"><i class="bi bi-file-earmark-excel"></i> 批次匯入員工資料</h4>
+                </div>
+                <div class="card-body p-4">
+
+                    @* 顯示錯誤訊息 *@
+                    <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+                    <div class="text-dark">
+                        <p class="mb-xl-3">請上傳 Excel 檔案 (.xlsx)。</p>
+
+                        <div class="mb-2">
+                            <p class="mb-1 fw-bold">注意：</p>
+                            <p class="ms-2">
+                                Excel 資料匯入第一列必須為「標題列」（程式會自動跳過），請從第二列開始填寫資料。
+                            </p>
+                        </div>
+
+                        <div class="mb-2">
+                            <p class="mb-1 fw-bold">欄位順序：</p>
+                            <div class="alert alert-light border mb-0">
+                                姓名 | 職位 | Email | 所屬公司名稱
+                            </div>
+                        </div>
+                    </div>
+
+                    @*  重點：enctype="multipart/form-data" 才能傳檔案 *@
+                    <form asp-action="Import" enctype="multipart/form-data" method="post">
+
+                        <div class="mb-4">
+                            <label class="form-label fw-bold">選擇檔案</label>
+                            @* name="excelFile" 要對應 Controller 的參數名稱 *@
+                            <input type="file" name="excelFile" class="form-control" accept=".xlsx" required />
+                        </div>
+
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-success">
+                                <i class="bi bi-upload"></i> 開始匯入
+                            </button>
+                            <a asp-action="Index" class="btn btn-secondary">取消返回</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
