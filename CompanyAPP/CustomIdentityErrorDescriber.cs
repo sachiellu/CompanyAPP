@@ -47,19 +47,19 @@ namespace CompanyAPP // 記得確認你的 namespace
         }
 
         // 8. 帳號錯誤：使用者名稱已存在
-        public override IdentityError DuplicateUserName(string userName)
+        public override IdentityError DuplicateUserName(string ? userName)
         {
             return new IdentityError { Code = nameof(DuplicateUserName), Description = $"使用者名稱 '{userName}' 已經被使用了。" };
         }
 
         // 9. 帳號錯誤：Email 已存在
-        public override IdentityError DuplicateEmail(string email)
+        public override IdentityError DuplicateEmail(string ? email)
         {
             return new IdentityError { Code = nameof(DuplicateEmail), Description = $"電子信箱 '{email}' 已經被使用了。" };
         }
 
         // 10. 帳號錯誤：使用者名稱含有無效字元
-        public override IdentityError InvalidUserName(string userName)
+        public override IdentityError InvalidUserName(string ? userName)
         {
             return new IdentityError { Code = nameof(InvalidUserName), Description = $"使用者名稱 '{userName}' 含有無效的字元，只能使用字母或數字。" };
         }

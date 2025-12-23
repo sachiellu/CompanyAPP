@@ -17,26 +17,26 @@ namespace CompanyAPP.Areas.Identity.Pages.Account
         }
 
         [BindProperty]
-        public InputModel Input { get; set; }
+        public InputModel Input { get; set; } = default!;
 
         public class InputModel
         {
             [Required(ErrorMessage = "請輸入{0}")]
             [EmailAddress(ErrorMessage = "格式錯誤")]
-            public string Email { get; set; }
+            public string Email { get; set; } = string.Empty;
 
             [Required(ErrorMessage = "請輸入{0}")]
             [DataType(DataType.Password)]
             [Display(Name = "新密碼")]
-            public string Password { get; set; }
+            public string Password { get; set; } = string.Empty;
 
             [DataType(DataType.Password)]
             [Display(Name = "確認新密碼")]
             [Compare("Password", ErrorMessage = "兩次輸入的密碼不一致。")]
-            public string ConfirmPassword { get; set; }
+            public string ConfirmPassword { get; set; } = string.Empty;
 
             [Required]
-            public string Code { get; set; }
+            public string Code { get; set; } = string.Empty;
         }
 
         public IActionResult OnGet(string code = null, string email = null)

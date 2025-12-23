@@ -25,8 +25,8 @@ namespace CompanyAPP.Services
                 // 使用 ?. 運算子防止 null 崩潰，並提供預設值
                 string host = _configuration["EmailSettings:Host"] ?? "smtp.gmail.com";
                 int port = int.Parse(_configuration["EmailSettings:Port"] ?? "587");
-                string myEmail = _configuration["EmailSettings:SenderEmail"];
-                string myPassword = _configuration["EmailSettings:AppPassword"];
+                string myEmail = _configuration["EmailSettings:SenderEmail"] ?? string.Empty;
+                string myPassword = _configuration["EmailSettings:AppPassword"] ?? string.Empty;
 
                 // 2. 檢查關鍵資料是否為空
                 if (string.IsNullOrEmpty(myEmail) || string.IsNullOrEmpty(myPassword))
