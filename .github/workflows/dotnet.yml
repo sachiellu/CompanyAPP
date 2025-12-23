@@ -1,0 +1,31 @@
+name: .NET 9 CI (Build & Test)
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  build:
+    # 建議維持 ubuntu-latest (Linux)，因為你的 Fly.io 也是 Linux 環境
+    # 這能幫你提早發現「路徑寫法」或「大小寫」不相容的問題
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4 # 升級到 v4
+
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4 # 升級到 v4
+      with:
+        dotnet-version: 9.0.x
+
+    - name: Restore dependencies
+      run: dotnet restore
+
+    - name: Build
+      run: dotnet build --no-restore
+
+    # 這裡會自動跑我們剛剛寫的 Tests
+    - name: Test
+      run: dotnet test --no-build --verbosity normal
