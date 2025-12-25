@@ -29,7 +29,7 @@ public class AuditServiceTests
         var service = new AuditService(context, mockAccessor.Object);
 
         // 2. Act (執行)
-        // 呼叫你的非同步方法
+        // 呼叫非同步方法
         await service.LogAsync("Employee", "Delete", "ID: 99", "Test Change");
 
         // 3. Assert (驗證)

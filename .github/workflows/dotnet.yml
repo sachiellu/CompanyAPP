@@ -1,4 +1,4 @@
-name: .NET 9 CI (Build & Test)
+name: .NET 9 CI/CD Pipeline
 
 on:
   push:
@@ -7,16 +7,14 @@ on:
     branches: [ "main" ]
 
 jobs:
-  build:
-    # 建議維持 ubuntu-latest (Linux)，因為你的 Fly.io 也是 Linux 環境
-    # 這能幫你提早發現「路徑寫法」或「大小寫」不相容的問題
+  # 第一階段：編譯與測試 (CI)
+  build-and-test:
     runs-on: ubuntu-latest
-
     steps:
-    - uses: actions/checkout@v4 # 升級到 v4
-
+    - uses: actions/checkout@v4
+    
     - name: Setup .NET
-      uses: actions/setup-dotnet@v4 # 升級到 v4
+      uses: actions/setup-dotnet@v4
       with:
         dotnet-version: 9.0.x
 
@@ -24,8 +22,26 @@ jobs:
       run: dotnet restore
 
     - name: Build
-      run: dotnet build --no-restore
+      run: dotnet build --no-restore --configuration Release
 
-    # 這裡會自動跑我們剛剛寫的 Tests
     - name: Test
-      run: dotnet test --no-build --verbosity normal
+      # 這裡如果測試紅燈，流程就會直接中斷，不會往下跑部署
+      run: dotnet test --no-build --configuration Release --verbosity normal
+
+
+  # 第二階段：自動部署到 QA (CD)
+  deploy-qa:
+    needs: build-and-test  # 關鍵：一定要測試通過才部署
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push' # 只在 push 到 main 時執行
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      # 安裝 flyctl
+      - uses: superfly/flyctl-actions/setup-flyctl@master
+      
+      # 執行部署指令 (指定部署到 QA)
+      - name: Deploy to Fly.io (QA)
+        run: flyctl deploy --remote-only -a companyapp-qa
+        env:
+          FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}

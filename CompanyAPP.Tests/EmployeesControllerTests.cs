@@ -46,12 +46,11 @@ namespace CompanyAPP.Tests
 
             var controller = new EmployeesController(context);
 
-            // ★★★ 關鍵修正：手動初始化 TempData ★★★
+            // 關鍵修正：手動初始化 TempData
             // 因為在單元測試中，Controller 不會自動獲得 TempData，必須我們自己裝上去
             var httpContext = new DefaultHttpContext();
             var tempData = new TempDataDictionary(httpContext, Mock.Of<ITempDataProvider>());
             controller.TempData = tempData;
-            // ★★★★★★★★★★★★★★★★★★★★★★★★★
 
             // 建立 Excel 內容
             byte[] fileContents;
