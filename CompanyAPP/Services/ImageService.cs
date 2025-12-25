@@ -21,7 +21,7 @@ namespace CompanyAPP.Services
 
         public async Task<string> UploadImageAsync(IFormFile file)
         {
-            if (file == null || file.Length == 0) return null;
+            if (file == null || file.Length == 0) return string.Empty;
 
             using var stream = file.OpenReadStream();
             var uploadParams = new ImageUploadParams
