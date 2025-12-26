@@ -9,22 +9,22 @@
                 <div class="card-header bg-success text-white">
                     <h4 class="mb-0"><i class="bi bi-file-earmark-excel"></i> 批次匯入員工資料</h4>
                 </div>
-                <div class="card-body p-4">
 
+                <div class="card-body p-4">
                     @* 顯示錯誤訊息 *@
                     <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
 
                     <div class="text-dark">
                         <p class="mb-xl-3">請上傳 Excel 檔案 (.xlsx)。</p>
 
-                        <div class="mb-2">
+                        <div class="mb-4">
                             <p class="mb-1 fw-bold">注意：</p>
                             <p class="ms-2">
                                 Excel 資料匯入第一列必須為「標題列」（程式會自動跳過），請從第二列開始填寫資料。
                             </p>
                         </div>
 
-                        <div class="mb-2">
+                        <div class="mb-4">
                             <p class="mb-1 fw-bold">欄位順序：</p>
                             <div class="alert alert-light border mb-0">
                                 姓名 | 職位 | Email | 所屬公司名稱
