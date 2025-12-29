@@ -7,26 +7,48 @@ on:
     branches: [ "main" ]
 
 jobs:
-  # 第一階段：編譯與測試 (CI)
   build-and-test:
+    name: Build, Test and Analyze
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v4
-    
-    - name: Setup .NET
-      uses: actions/setup-dotnet@v4
-      with:
-        dotnet-version: 9.0.x
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # 為了讓 SonarCloud 分析完整歷史，這裡要設為 0
 
-    - name: Restore dependencies
-      run: dotnet restore
+      # 1. 安裝 Java (SonarScanner 需要)
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: 17
+          distribution: 'zulu'
 
-    - name: Build
-      run: dotnet build --no-restore --configuration Release
+      # 2. 安裝 .NET
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 9.0.x
 
-    - name: Test
-      # 這裡如果測試紅燈，流程就會直接中斷，不會往下跑部署
-      run: dotnet test --no-build --configuration Release --verbosity normal
+      # 3. 安裝 SonarScanner 工具
+      - name: Install SonarCloud scanner
+        run: dotnet tool install --global dotnet-sonarscanner
+
+      # 4. 開始分析 (Begin) + 編譯 + 測試 + 結束分析 (End)
+      - name: Build and Analyze
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # GitHub 內建的，不用設
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}    # 你剛剛設的 Secret
+        run: |
+          dotnet sonarscanner begin /k:"sachiellu_CompanyAPP" /o:"sachiellu
+" /d:sonar.token="${{ secrets.SONAR_TOKEN }}" /d:sonar.host.url="https://sonarcloud.io"
+
+          dotnet restore
+          dotnet build --no-restore --configuration Release
+          
+          # 執行測試
+          dotnet test --no-build --configuration Release --verbosity normal
+          
+          # 結束分析 (這時候會把報告上傳到 SonarCloud)
+          dotnet sonarscanner end /d:sonar.token="${{ secrets.SONAR_TOKEN }}"
 
 
   # 第二階段：自動部署到 QA (CD)
