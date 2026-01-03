@@ -1,4 +1,4 @@
-# 企業資源管理系統 (CompanyAPP)
+                                                                                                                                                                                                                                               # 企業資源管理系統 (CompanyAPP)
 
 本專案為基於 **.NET 9.0 (ASP.NET Core MVC)** 架構開發的企業資源管理平台 (ERP)。
 系統整合廠商維護、人力資源管理、任務派工與圖表統計，更導入了 **OWASP ZAP 資安掃描**、**三層式權限控管 (RBAC)** 與 **正式/測試環境分離 (CI/CD 概念)** 的商業級開發規範。
@@ -10,6 +10,7 @@
 *   **Database**: SQLite (EF Core Code First)
 *   **Frontend**: Bootstrap 5, jQuery, Chart.js
 *   **Auth**: ASP.NET Core Identity (Security Hardened)
+*   **API Doc**: Swagger (OpenAPI)
 *   **Security Tools**: OWASP ZAP (DAST), SonarLint
 *   **Cloud & DevOps**: Fly.io (Docker Container), Multi-Environment Deployment
 
@@ -34,6 +35,16 @@
 *   **員工管理 (Employees)**：支援 AJAX 即時搜尋、分頁排序、批次刪除。
 *   **任務派工 (Missions)**：具備時效警示、狀態追蹤。
 *   **數據儀表板 (Dashboard)**：首頁整合 Chart.js 視覺化統計。
+
+### 3. API 與擴充性 (API & Scalability)
+
+*   **RESTful API 架構**：
+    *   實作 **Hybrid (混合式) 架構**，在 MVC 基礎上擴充 Web API (`api/CompaniesApi`)。
+    *   將核心商業邏輯 (`Service Layer`) 進行解耦，使 API 與 MVC Controller 共用同一套邏輯，確保資料一致性。
+
+*   **API 文件化 (Swagger/OpenAPI)**：
+    *   整合 **Swashbuckle**，自動生成 API 規格文件。
+    *   提供可互動的 **Swagger UI**，方便前端/App 開發者進行接口測試與除錯。
 
 ---
 

@@ -75,6 +75,11 @@ builder.Services.ConfigureApplicationCookie(options =>
 });
 
 builder.Services.AddControllersWithViews();
+
+// 註冊 Swagger 產生器
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen();
+
 var app = builder.Build();
 
 // Fly.io 代理設定 (解決 HTTPS 誤判)
@@ -119,13 +124,16 @@ app.Use(async (context, next) =>
     await next();
 });
 
-// 錯誤處理與 HSTS
+// 錯誤處理與 HSTS (強制安全傳輸)
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Home/Error");
     // HSTS (解決 Strict-Transport-Security Header Not Set)
     app.UseHsts();
 }
+
+app.UseSwagger();
+app.UseSwaggerUI();
 
 app.UseStaticFiles(); // 靜態檔案現在會受到上面的 Header 保護
 
