@@ -1,0 +1,14 @@
+# Visual Studio
+.vs
+[Bb]in
+[Oo]bj
+
+# Node  React
+node_modules
+dist
+.env
+
+# Database
+.db
+.db-shm
+.db-wal

@@ -1,0 +1,124 @@
+﻿@model CompanyAPP.Models.Mission
+
+@{
+    ViewData["Title"] = "新增任務";
+}
+
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0">新增派工任務</h4>
+                </div>
+                <div class="card-body">
+                    <form asp-action="Create">
+                        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">任務名稱</label>
+
+                            <select id="taskSelector" class="form-control mb-2" onchange="syncTaskName(this)">
+                                <option value="">-- 快速選擇常見項目 --</option>
+                                <option value="設備維修">設備維修</option>
+                                <option value="系統安裝">系統安裝</option>
+                                <option value="教育訓練">教育訓練</option>
+                                <option value="定期保養">定期保養</option>
+                                <option value="Other">➕ 自定義輸入...</option>
+                            </select>
+
+                            <input asp-for="Title" id="taskInput" class="form-control" placeholder="請先選擇項目..." readonly />
+                            <span asp-validation-for="Title" class="text-danger"></span>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label asp-for="CompanyId" class="form-label fw-bold"></label>
+                                <select asp-for="CompanyId" class="form-control" asp-items="ViewBag.CompanyId">
+                                    <option value="">-- 請選擇客戶 --</option>
+                                </select>
+                                <span asp-validation-for="CompanyId" class="text-danger"></span>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label asp-for="EmployeeId" class="form-label fw-bold"></label>
+                                <select asp-for="EmployeeId" class="form-control" asp-items="ViewBag.EmployeeId">
+                                    <option value="">-- 請選擇員工 --</option>
+                                </select>
+                                <span asp-validation-for="EmployeeId" class="text-danger"></span>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label asp-for="CreateDate" class="form-label"></label>
+                                <input asp-for="CreateDate" class="form-control" />
+                                <span asp-validation-for="CreateDate" class="text-danger"></span>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label asp-for="Deadline" class="form-label"></label>
+                                <input asp-for="Deadline" class="form-control" />
+                                <span asp-validation-for="Deadline" class="text-danger"></span>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="Description" class="form-label"></label>
+                            <textarea asp-for="Description" class="form-control" rows="3"></textarea>
+                            <span asp-validation-for="Description" class="text-danger"></span>
+                        </div>
+
+                        <input type="hidden" asp-for="Status" value="0" />
+
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-4">
+                            <a asp-action="Index" class="btn btn-secondary me-2">取消</a>
+                            <input type="submit" value="確認派工" class="btn btn-primary px-4" />
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+
+    <script>
+
+        window.onload = function() {
+            var input = document.getElementById("taskInput");
+
+            input.style.backgroundColor = "#e9ecef";
+        };
+
+        function syncTaskName(select) {
+            var input = document.getElementById("taskInput");
+            var selectedValue = select.value;
+
+
+            if (selectedValue === "Other") {
+                input.value = "";           
+                input.readOnly = false;    
+                input.style.backgroundColor = "#ffffff"; 
+                input.style.cursor = "text"; 
+                input.placeholder = "請輸入自定義名稱";
+                input.focus();           
+            }
+            // 如果選常見項目
+            else {
+                if (selectedValue === "") {
+                    input.value = ""; 
+                } else {
+
+                    input.value = select.options[select.selectedIndex].text;
+                }
+
+                input.readOnly = true;      
+                input.style.backgroundColor = "#e9ecef";
+                input.style.cursor = "not-allowed"; 
+            }
+        }
+    </script>
+}
