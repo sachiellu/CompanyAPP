@@ -5,23 +5,20 @@ stages:
   - test
   - automation
 
-# 1. 格式檢查
 lint_format:
   stage: build
   script:
-    - dotnet format CompanyAPP/CompanyAPP.sln --verify-no-changes
+    - 'dotnet format CompanyAPP/CompanyAPP.sln --verify-no-changes'
 
-# 2. 執行單元測試
 unit_tests:
   stage: test
   script:
-    - dotnet test CompanyAPP/CompanyAPP.sln
+    - 'dotnet test CompanyAPP/CompanyAPP.sln'
 
-# 3. 自動建立 Merge Request
 create_mr:
   stage: automation
-  image: curlimages/curl:7.85.000
+  image: curlimages/curl:7.85.0
   rules:
     - if: '$CI_COMMIT_BRANCH == "task/sdet-devops-flow"'
   script:
-    - curl --request POST --header "PRIVATE-TOKEN: ${GITLAB_PRIVATE_TOKEN}" "https://gitlab.com/api/v4/projects/${CI_PROJECT_ID}/merge_requests?source_branch=${CI_COMMIT_BRANCH}&target_branch=main&title=SDET_Task_MR"
+    - 'curl --request POST --header "PRIVATE-TOKEN: ${GITLAB_PRIVATE_TOKEN}" "https://gitlab.com/api/v4/projects/${CI_PROJECT_ID}/merge_requests?source_branch=${CI_COMMIT_BRANCH}&target_branch=main&title=SDET_Task_MR"'
