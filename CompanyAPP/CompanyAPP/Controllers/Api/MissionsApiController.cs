@@ -21,7 +21,8 @@ namespace CompanyAPP.Controllers.Api
         {
             var missions = await _context.Mission
                 .Include(m => m.Company).Include(m => m.Employee)
-                .Select(m => new {
+                .Select(m => new
+                {
                     m.Id,
                     m.Title,
                     m.Deadline,

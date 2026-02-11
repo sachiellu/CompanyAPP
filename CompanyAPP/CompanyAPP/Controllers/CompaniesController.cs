@@ -21,7 +21,7 @@ namespace CompanyAPP.Controllers
         public async Task<IActionResult> Index(string searchString)
         {
             var companies = await _companyService.GetAllAsync(searchString);
-            
+
             ViewData["CurrentFilter"] = searchString;
             return View(companies);
         }
@@ -51,13 +51,13 @@ namespace CompanyAPP.Controllers
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Create(Company company)
         {
-             if (ModelState.IsValid) 
-             {
+            if (ModelState.IsValid)
+            {
                 await _companyService.AddAsync(company);
 
                 TempData["SuccessMessage"] = "廠商已新增成功！";
                 return RedirectToAction(nameof(Index));
-             }
+            }
             return View(company);
         }
 

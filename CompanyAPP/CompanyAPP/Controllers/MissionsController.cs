@@ -58,7 +58,7 @@ namespace CompanyAPP.Controllers
             }
             ViewData["CompanyId"] = new SelectList(_context.Company, "Id", "Name");
             ViewData["EmployeeId"] = new SelectList(_context.Employee, "Id", "Name", employeeId);
-            
+
             return View(misson);
         }
 

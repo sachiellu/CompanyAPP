@@ -63,7 +63,7 @@ namespace CompanyAPP.Areas.Identity.Pages.Account
             [Display(Name = "電子信箱")]
             public string Email { get; set; }
         }
-        
+
         public IActionResult OnGet() => RedirectToPage("./Login");
 
         public IActionResult OnPost(string provider, string returnUrl = null)

@@ -9,7 +9,7 @@ namespace CompanyAPP.Services
     public class EmailSender : IEmailSender
     {
         private readonly IConfiguration _configuration;
-        private readonly ILogger<EmailSender> _logger; 
+        private readonly ILogger<EmailSender> _logger;
 
         public EmailSender(IConfiguration configuration, ILogger<EmailSender> logger)
         {

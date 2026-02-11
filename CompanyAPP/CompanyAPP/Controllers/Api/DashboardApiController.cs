@@ -22,7 +22,8 @@ namespace CompanyAPP.Controllers.Api
             var missionCount = await _context.Mission.CountAsync(m => m.Status == MissionStatus.Pending);
 
             var chartData = await _context.Company
-                .Select(c => new {
+                .Select(c => new
+                {
                     name = c.Name,
                     count = c.Employees.Count()
                 }).ToListAsync();

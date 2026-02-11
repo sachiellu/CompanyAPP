@@ -50,7 +50,7 @@ namespace CompanyAPP.Areas.Identity.Pages.Account
                 Input = new InputModel
                 {
                     Code = Encoding.UTF8.GetString(WebEncoders.Base64UrlDecode(code)),
-                                Email = email
+                    Email = email
                 };
                 return Page();
             }

@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using Microsoft.AspNetCore.Http; 
+using Microsoft.AspNetCore.Http;
 
 namespace CompanyAPP.Models
 {
@@ -39,7 +39,7 @@ namespace CompanyAPP.Models
 
         // 巢狀聯絡人清單
         public virtual ICollection<Contact> Contacts { get; set; } = new List<Contact>();
-            
+
         // 員工清單（只保留這一個，建議使用 ICollection 比較標準）
         public virtual ICollection<Employee>? Employees { get; set; } = new List<Employee>();
 

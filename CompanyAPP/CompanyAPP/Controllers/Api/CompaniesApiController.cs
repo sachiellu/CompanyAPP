@@ -39,7 +39,8 @@ namespace CompanyAPP.Controllers.Api
         public async Task<IActionResult> GetCompanies(string? searchString)
         {
             var companies = await _companyService.GetAllAsync(searchString ?? "");
-            return Ok(companies.Select(c => new {
+            return Ok(companies.Select(c => new
+            {
                 c.Id,
                 c.Name,
                 c.Industry,
@@ -64,14 +65,16 @@ namespace CompanyAPP.Controllers.Api
                 company.TaxId,
                 company.FoundedDate,
                 company.LogoPath,
-                Employees = company.Employees?.Select(e => new {
+                Employees = company.Employees?.Select(e => new
+                {
                     e.Id,
                     e.StaffId,
                     e.Name,
                     e.Position,
                     e.Status
                 }) ?? Enumerable.Empty<object>(),
-                Contacts = company.Contacts?.Select(c => new {
+                Contacts = company.Contacts?.Select(c => new
+                {
                     c.Id,
                     c.Name,
                     c.Phone,

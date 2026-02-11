@@ -35,7 +35,8 @@ namespace CompanyAPP.Controllers.Api
         public async Task<IActionResult> GetEmployees(string? searchString)
         {
             var emps = await _employeeService.GetAllAsync(searchString);
-            return Ok(emps.Select(e => new {
+            return Ok(emps.Select(e => new
+            {
                 e.Id,
                 e.StaffId,
                 e.Name,

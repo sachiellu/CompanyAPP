@@ -74,9 +74,9 @@ namespace CompanyAPP.Services
                     if (existingContact != null)
                     {
                         // 更新舊有聯絡人
-                        existingContact.Name = dto.Name; 
+                        existingContact.Name = dto.Name;
                         existingContact.Phone = dto.Phone;
-                        existingContact.Email = dto.Email; 
+                        existingContact.Email = dto.Email;
                         existingContact.Remark = dto.Remark;
                     }
                     else

@@ -37,7 +37,7 @@ namespace CompanyAPP.Data
                 {
                     UserName = adminEmail,
                     Email = adminEmail,
-                    EmailConfirmed = true 
+                    EmailConfirmed = true
                 };
 
                 var createResult = await userManager.CreateAsync(newAdmin, adminPwd);
