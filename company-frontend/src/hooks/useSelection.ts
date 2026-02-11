@@ -4,20 +4,39 @@ export function useSelection<T extends { id: number }>(items: T[]) {
     const [selectedIds, setSelectedIds] = useState<number[]>([]);
     const [previewIds, setPreviewIds] = useState<number[]>([]);
     const [rowDragStartId, setRowDragStartId] = useState<number | null>(null);
+    const [lastCheckedId, setLastCheckedId] = useState<number | null>(null);
 
-    // 判斷某一行是否顯示為選取
     const isRowSelected = (id: number) => {
         const isSelected = selectedIds.includes(id);
         const isPreviewing = previewIds.includes(id);
         return isPreviewing ? !isSelected : isSelected;
     };
 
-    // 一般單選/連選
-    const handleCheck = (id: number) => {
-        if (selectedIds.includes(id)) {
-            setSelectedIds(prev => prev.filter(i => i !== id));
+    const handleCheck = (id: number, e?: React.MouseEvent | React.ChangeEvent) => {
+        const mouseEvent = e as React.MouseEvent;
+        const nativeEvent = mouseEvent?.nativeEvent;
+
+        if (nativeEvent && nativeEvent.shiftKey && lastCheckedId !== null) {
+            const start = items.findIndex(i => i.id === lastCheckedId);
+            const end = items.findIndex(i => i.id === id);
+
+            const sliced = items.slice(Math.min(start, end), Math.max(start, end) + 1);
+            const rangeIds = sliced.map(i => i.id);
+
+            const isAllSelected = rangeIds.every(rid => selectedIds.includes(rid));
+            if (isAllSelected) {
+                setSelectedIds(prev => prev.filter(pid => !rangeIds.includes(pid)));
+            } else {
+                const newSet = new Set([...selectedIds, ...rangeIds]);
+                setSelectedIds(Array.from(newSet));
+            }
         } else {
-            setSelectedIds(prev => [...prev, id]);
+            if (selectedIds.includes(id)) {
+                setSelectedIds(prev => prev.filter(i => i !== id));
+            } else {
+                setSelectedIds(prev => [...prev, id]);
+            }
+            setLastCheckedId(id);
         }
     };
 
@@ -26,7 +45,6 @@ export function useSelection<T extends { id: number }>(items: T[]) {
         else setSelectedIds([]);
     };
 
-    // Shift 行拖曳邏輯
     const handleRowMouseDown = (id: number, e: React.MouseEvent) => {
         if (e.shiftKey && e.button === 0) {
             e.preventDefault();
