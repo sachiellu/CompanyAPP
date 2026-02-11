@@ -79,7 +79,7 @@ namespace CompanyAPP.Controllers
             try
             {
                 // 呼叫 Service 更新
-                await _companyService.UpdateAsync(company);
+                await _companyService.UpdateAsync(company, new List<ContactDto>());
             }
             catch (Exception) // 簡化錯誤捕捉
             {

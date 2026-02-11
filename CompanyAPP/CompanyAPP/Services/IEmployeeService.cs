@@ -1,4 +1,5 @@
 ﻿using CompanyAPP.Models;
+using CompanyAPP.Services;
 
 namespace CompanyAPP.Services
 {
@@ -15,5 +16,6 @@ namespace CompanyAPP.Services
 		Task<int> DeleteBatchAsync(List<int> ids);
 		Task<byte[]> ExportToExcelAsync(List<int>? ids = null);
         Task<ImportResult> ImportFromExcelAsync(Stream fileStream);
+
     }
 }
