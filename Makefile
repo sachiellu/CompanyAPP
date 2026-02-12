@@ -19,3 +19,11 @@ lint:
 # 5. 啟動後端 API
 run:
 	dotnet run --project CompanyAPP/CompanyAPP/CompanyAPP.csproj
+
+# 6. 執行 API 測試
+api-test:
+	dotnet test CompanyAPP/CompanyAPP.sln --filter FullyQualifiedName~Controller
+
+# 7. 執行 SAST 安全掃描
+security:
+	dotnet list CompanyAPP/CompanyAPP.sln package --vulnerable
