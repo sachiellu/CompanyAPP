@@ -26,7 +26,7 @@ api_tests:
     - echo "正在執行 API 整合測試 (驗證 Controllers 端點)..."
     - 'dotnet test CompanyAPP/CompanyAPP.sln --filter FullyQualifiedName~Controller'
 
-# 4. SAST 靜態安全掃描 (KSAST)
+# 4. SAST 靜態安全掃描 (SAST)
 sast_scan:
   stage: security
   script:

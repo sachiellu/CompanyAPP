@@ -163,6 +163,6 @@ fly deploy -a companyapp-luyu
 
 > **注意**：正式環境中，所有新註冊用戶預設為 **User**權限，必須由上述 Admin 登入後手動升級權限。
 
-
+# Last update: 2026/02/23
 
 

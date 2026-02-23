@@ -46,7 +46,7 @@ jobs:
           # 執行測試
           dotnet test --no-build --configuration Release --verbosity normal --collect:"XPlat Code Coverage" -- DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.Format=opencover
           
-          # 結束分析 (這時候會把報告上傳到 SonarCloud)
+          # 結束分析 (這會把報告上傳到 SonarCloud)
           dotnet sonarscanner end /d:sonar.token="${{ secrets.SONAR_TOKEN }}"
 
 

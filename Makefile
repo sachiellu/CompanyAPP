@@ -8,7 +8,7 @@ setup:
 build:
 	dotnet build CompanyAPP/CompanyAPP.sln
 
-# 3. 跑單元測試 (執行你既有的測試專案)
+# 3. 跑單元測試 (執行既有的測試專案)
 test:
 	dotnet test CompanyAPP/CompanyAPP.sln
 
