@@ -7,12 +7,16 @@ stages:
   - security
   - automation
 
+<<<<<<< HEAD
 # 1. 格式檢查 (Formatter)
+=======
+>>>>>>> 8b8ad2ba45da66e9d57f4af2a074689bceb151ee
 lint_format:
   stage: build
   script:
     - 'dotnet format CompanyAPP/CompanyAPP.sln --verify-no-changes'
 
+<<<<<<< HEAD
 # 2. 單元測試 (Unit Test)
 unit_tests:
   stage: test
@@ -34,7 +38,7 @@ sast_scan:
     - 'dotnet list CompanyAPP/CompanyAPP.sln package --vulnerable'
     - 'grep -rE "password|secret|key|Token" CompanyAPP/ || exit 0'
 
-# 5. 自動建立 MR
+# 5. 自動建立 Merge Request
 create_mr:
   stage: automation
   image: curlimages/curl:7.85.0
