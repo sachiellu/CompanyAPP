@@ -7,28 +7,29 @@ stages:
   - security
   - automation
 
-# 1. 格式檢查 (Kelly 項: Formatter)
+# 1. 格式檢查 (Formatter)
 lint_format:
   stage: build
   script:
     - 'dotnet format CompanyAPP/CompanyAPP.sln --verify-no-changes'
 
-# 2. 單元測試 (Kelly 項: Unit Test)
+# 2. 單元測試 (Unit Test)
 unit_tests:
   stage: test
   script:
     - 'dotnet test CompanyAPP/CompanyAPP.sln --filter Category!=Integration'
 
-# 3. API 測試 (Kelly 項: API Test)
+# 3. API 測試 (API Test)
 api_tests:
   stage: api_test
   script:
     - 'dotnet test CompanyAPP/CompanyAPP.sln --filter FullyQualifiedName~Controller'
 
-# 4. SAST 靜態安全掃描 (Kelly 項: SAST)
+# 4. SAST 靜態安全掃描 (SAST)
 sast_scan:
   stage: security
   script:
+    - 'dotnet restore CompanyAPP/CompanyAPP.sln'
     - 'dotnet list CompanyAPP/CompanyAPP.sln package --vulnerable'
     - 'grep -rE "password|secret|key|Token" CompanyAPP/ || exit 0'
 

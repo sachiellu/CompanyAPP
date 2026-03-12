@@ -1,7 +1,8 @@
 ﻿import { Outlet } from "react-router-dom";
-import Sidebar from "./Sidebar";
+import Sidebar from "../components/Sidebar";
 
 export default function MainLayout() {
+
     return (
         <div className="d-flex w-100" style={{ minHeight: "100vh", backgroundColor: '#f4f6f9' }}>
             <Sidebar />

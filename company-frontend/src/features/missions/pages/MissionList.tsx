@@ -1,4 +1,4 @@
-﻿    import { useEffect, useState, useCallback } from 'react';
+﻿import { useEffect, useState, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { api } from '../../../services/api';
 import type { Mission } from '../types';
@@ -30,11 +30,10 @@ export default function MissionList() {
         <div className="page-container position-relative px-4 pt-3">
             <div className="page-header-wrapper d-flex justify-content-between align-items-center mb-4">
                 <h2 className="text-dark fw-bold mb-0" style={{ fontSize: '1.25rem' }}>
-                    任務派工管理 {loading && <span className="spinner-border spinner-border-sm ms-2 text-primary"></span>}
+                    任務派工 {loading && <span className="spinner-border spinner-border-sm ms-2 text-primary"></span>}
                 </h2>
-                {/* 新增按鈕對齊：px-3 */}
-                <Link to="/missions/create" className="btn btn-sm btn-primary px-3 shadow-sm text-nowrap">
-                    <i className="bi bi-plus-circle me-1"></i>發布新任務
+                <Link to="/missions/create" className="btn btn-sm btn-primary text-nowrap px-3 shadow-sm">
+                    <i className="bi bi-plus-lg me-1"></i>發布新任務
                 </Link>
             </div>
 

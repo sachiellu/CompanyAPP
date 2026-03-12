@@ -1,5 +1,6 @@
 ﻿// src/features/employees/components/EmployeeFormFields.tsx
 import type { Company } from '../../companies/types';
+import { EmployeeStatus } from '../types';
 
 interface EmployeeData {
     staffId: string;
@@ -7,7 +8,7 @@ interface EmployeeData {
     position: string;
     email: string;
     companyId: string;
-    status?: string; // 用來判斷是否鎖死 Email
+    status?: string | EmployeeStatus;
 }
 
 interface Props {
@@ -15,14 +16,30 @@ interface Props {
     companies: Company[];
     onChange: (key: string, value: string) => void;
     isEdit?: boolean; // 是否為編輯模式
+    canEditStaffId?: boolean;
 }
 
-export function EmployeeFormFields({ data, companies, onChange, isEdit }: Props) {
+export function EmployeeFormFields({ data, companies, onChange, isEdit, canEditStaffId }: Props) {
+
+    const isStaffIdLocked = isEdit && !canEditStaffId;
+
     return (
         <div className="row g-3 text-start">
             <div className="col-md-4">
-                <label className="form-label fw-bold text-secondary small text-uppercase">員工編號</label>
-                <input className="form-control form-control-sm" value={data.staffId} onChange={e => onChange('staffId', e.target.value)} placeholder="如：EMP001" />
+                <div className="col-md-6">
+                    <label className="form-label fw-bold text-secondary small text-uppercase">員工編號</label>
+                    <input
+                        className={`form-control form-control-sm ${isEdit ? 'bg-light' : ''}`} // 編輯時變灰
+                        value={data.staffId}
+                        onChange={e => onChange('staffId', e.target.value)}
+                        placeholder="例如: EMP-001"
+
+                        // 如果是編輯模式 (isEdit=true)，就鎖死不讓改
+                        readOnly={isStaffIdLocked}
+                    />
+                    {/* 加上提示字 */}
+                    {isStaffIdLocked && <small className="text-muted">如需修改請洽管理員</small>}
+                </div>
             </div>
             <div className="col-md-8">
                 <label className="form-label fw-bold text-secondary small text-uppercase">姓名</label>

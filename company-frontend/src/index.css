@@ -125,3 +125,15 @@ main {
         background-color: #f9f9f9;
     }
 }
+
+/* Dashboard hover card */
+
+.dashboard-card {
+    transition: all 0.2s ease;
+}
+
+    .dashboard-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 10px 20px rgba(0,0,0,0.12);
+        background-color: #f8f9fa;  
+    }

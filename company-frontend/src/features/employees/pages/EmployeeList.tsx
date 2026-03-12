@@ -9,6 +9,18 @@ import { StatusBadge } from '../components/StatusBadge';
 
 export default function EmployeeList() {
     const navigate = useNavigate();
+
+    // 權限邏輯
+    const userRole = localStorage.getItem('userRole') || 'User';
+    const isAdmin = userRole === 'Admin';
+    const isManager = userRole === 'Manager';
+
+    // 權限操作能力
+    const canEdit = isAdmin || isManager; // 編輯給 Manager 和 Admin
+    const canDelete = isAdmin;            // 刪除給 Admin
+    const canExport = isAdmin;            // 匯出給 Admin
+    const canImport = isAdmin;            // 匯入給 Admin
+
     const [employees, setEmployees] = useState<Employee[]>([]);
     const [loading, setLoading] = useState(false);
     const [searchTerm, setSearchTerm] = useState("");
@@ -126,11 +138,11 @@ export default function EmployeeList() {
             onMouseDown={handleContainerMouseDown}
             onMouseMove={handleContainerMouseMove}
             onContextMenu={(e) => handleContextMenu(e, null)}
-            onDragOver={(e) => { e.preventDefault(); e.stopPropagation(); setIsDraggingFile(true); }}
-            onDragLeave={(e) => { e.preventDefault(); e.stopPropagation(); setIsDraggingFile(false); }}
-            onDrop={handleDrop}
+            onDragOver={(e) => { if (canImport) { e.preventDefault(); e.stopPropagation(); setIsDraggingFile(true); } }}
+            onDragLeave={(e) => { if (canImport) { e.preventDefault(); e.stopPropagation(); setIsDraggingFile(false); } }}
+            onDrop={(e) => { if (canImport) handleDrop(e); }}
         >
-            <input type="file" ref={fileInputRef} style={{ display: 'none' }} accept=".xlsx, .xls" onChange={(e) => e.target.files?.[0] && uploadFile(e.target.files[0])} />
+            {canImport && <input type="file" ref={fileInputRef} style={{ display: 'none' }} accept=".xlsx, .xls" onChange={(e) => e.target.files?.[0] && uploadFile(e.target.files[0])} />}
 
             {selectionBox && <div style={{ position: 'absolute', left: selectionBox.x, top: selectionBox.y, width: selectionBox.w, height: selectionBox.h, border: '2px solid #0d6efd', backgroundColor: 'rgba(13,110,253,0.2)', pointerEvents: 'none', zIndex: 9999 }} />}
 
@@ -153,16 +165,28 @@ export default function EmployeeList() {
                         <button type="button" className={`btn btn-sm btn-outline-secondary dropdown-toggle ${showDropdown ? 'show' : ''}`}>功能</button>
                         <ul className={`dropdown-menu shadow ${showDropdown ? 'show' : ''}`} style={{ marginTop: 0, fontSize: '13px' }}>
                             <li><button className="dropdown-item" onClick={() => handleCheckAll({ target: { checked: selectedIds.length !== employees.length } } as React.ChangeEvent<HTMLInputElement>)}>全選 / 取消全選</button></li>
-                            <li><button className="dropdown-item" onClick={() => handleExport(selectedIds)}>匯出所選</button></li>
-                            <li><button className="dropdown-item" onClick={() => fileInputRef.current?.click()}>匯入資料</button></li>
+
+                            {/* 匯出 */}
+                            {canExport && <li><button className="dropdown-item" onClick={() => handleExport(selectedIds)}>匯出所選</button></li>}
+
+                            {/* 匯入 */}
+                            {canImport && <li><button className="dropdown-item" onClick={() => fileInputRef.current?.click()}>匯入資料</button></li>}
+
                             <li><hr className="dropdown-divider" /></li>
                             <li><button className="dropdown-item" onClick={() => fetchData(searchTerm)}>重新整理</button></li>
                         </ul>
                     </div>
-                    <Link to="/employees/create" className="btn btn-sm btn-primary text-nowrap px-3 shadow-sm"><i className="bi bi-plus-lg me-1"></i>新增員工</Link>
+
+                    {/* 新增員工 */}
+                    {canEdit && (
+                        <Link to="/employees/create" className="btn btn-sm btn-primary text-nowrap px-3 shadow-sm">
+                            <i className="bi bi-plus-lg me-1"></i>新增員工
+                        </Link>
+                    )}
                 </div>
             </div>
 
+            {/* 錯誤報告區塊省略，保持原樣 */}
             {importReports.length > 0 && (
                 <div className="alert alert-light border-danger shadow-sm mb-4 p-3">
                     <div className="d-flex justify-content-between align-items-center mb-2">
@@ -214,16 +238,12 @@ export default function EmployeeList() {
                                     onContextMenu={(e) => { e.stopPropagation(); handleContextMenu(e, emp.id); }}
                                     onMouseDown={(e) => handleRowMouseDown(emp.id, e)}
                                     onMouseEnter={() => handleRowMouseEnter(emp.id)}
-
-                                    // 這裡是新增的雙擊跳轉功能
                                     onDoubleClick={() => navigate(`/employees/${emp.id}`)}
-
                                     onClick={(e) => {
                                         const target = e.target as HTMLElement;
                                         if (target.tagName === 'BUTTON' || target.closest('a') || target.tagName === 'INPUT') return;
                                         handleCheck(emp.id, e as unknown as React.MouseEvent);
                                     }}
-                                    // 加上 userSelect: 'none' 防止雙擊選取文字
                                     style={{ cursor: 'pointer', userSelect: 'none' }}
                                 >
                                     <td className="text-center">
@@ -243,8 +263,14 @@ export default function EmployeeList() {
                                     <td><StatusBadge status={emp.status} /></td>
                                     <td className="text-end px-4 text-nowrap">
                                         <Link to={`/employees/${emp.id}`} className="btn btn-xs btn-outline-primary me-1 shadow-sm" style={{ fontSize: '12px', padding: '2px 8px' }} onClick={e => e.stopPropagation()}>詳情</Link>
-                                        <Link to={`/employees/edit/${emp.id}`} className="btn btn-xs btn-outline-success me-1 shadow-sm" style={{ fontSize: '12px', padding: '2px 8px' }} onClick={e => e.stopPropagation()}>編輯</Link>
-                                        <button className="btn btn-xs btn-outline-danger shadow-sm" style={{ fontSize: '12px', padding: '2px 8px' }} onClick={(e) => { e.stopPropagation(); handleDelete(emp.id); }}>刪除</button>
+
+                                        {canEdit && (
+                                            <Link to={`/employees/edit/${emp.id}`} className="btn btn-xs btn-outline-success me-1 shadow-sm" style={{ fontSize: '12px', padding: '2px 8px' }} onClick={e => e.stopPropagation()}>編輯</Link>
+                                        )}
+
+                                        {canDelete && (
+                                            <button className="btn btn-xs btn-outline-danger shadow-sm" style={{ fontSize: '12px', padding: '2px 8px' }} onClick={(e) => { e.stopPropagation(); handleDelete(emp.id); }}>刪除</button>
+                                        )}
                                     </td>
                                 </tr>
                             );
@@ -253,20 +279,36 @@ export default function EmployeeList() {
                 </table>
             </div>
 
+            {/* 右鍵選單修復區塊 */}
             {contextMenu.visible && (
                 <div style={{ position: 'fixed', top: contextMenu.y, left: contextMenu.x, zIndex: 10000, minWidth: '160px', borderRadius: '4px', fontSize: '13.5px' }} className="dropdown-menu show shadow-lg border-light">
                     {contextMenu.id ? (
                         <>
                             <Link to={`/employees/${contextMenu.id}`} className="dropdown-item py-1.5">查看詳情</Link>
-                            <Link to={`/employees/edit/${contextMenu.id}`} className="dropdown-item py-1.5">編輯資料</Link>
+
+                            {canEdit && (
+                                <Link to={`/employees/edit/${contextMenu.id}`} className="dropdown-item py-1.5">編輯資料</Link>
+                            )}
+
                             <div className="dropdown-divider"></div>
-                            <button className="dropdown-item py-1.5" onClick={() => handleExport(selectedIds.includes(contextMenu.id!) ? selectedIds : [contextMenu.id!])}>匯出所選資料</button>
-                            <div className="dropdown-divider"></div>
-                            <button className="dropdown-item text-danger py-1.5" onClick={() => handleDelete(contextMenu.id!)}>刪除員工</button>
+
+                            {canExport && (
+                                <button className="dropdown-item py-1.5" onClick={() => handleExport(selectedIds.includes(contextMenu.id!) ? selectedIds : [contextMenu.id!])}>匯出所選資料</button>
+                            )}
+
+                            {canDelete && (
+                                <>
+                                    <div className="dropdown-divider"></div>
+                                    <button className="dropdown-item text-danger py-1.5" onClick={() => handleDelete(contextMenu.id!)}>刪除員工</button>
+                                </>
+                            )}
                         </>
                     ) : (
                         <>
-                            <Link to="/employees/create" className="dropdown-item py-1.5">新增員工</Link>
+                            {canEdit && (
+                                <Link to="/employees/create" className="dropdown-item py-1.5">新增員工</Link>
+                            )}
+
                             <button className="dropdown-item py-1.5" onClick={() => fetchData(searchTerm)}>重新整理</button>
                             <div className="dropdown-divider"></div>
                             <button className="dropdown-item py-1.5" onClick={() => handleCheckAll({ target: { checked: true } } as React.ChangeEvent<HTMLInputElement>)}>全選所有</button>

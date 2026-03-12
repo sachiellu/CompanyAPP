@@ -1,5 +1,4 @@
-﻿// hooks/useDragSelect.ts
-import { useState, useRef, useEffect } from 'react';
+﻿import { useState, useRef, useEffect } from 'react';
 
 interface UseDragSelectProps {
     containerRef: React.RefObject<HTMLDivElement | null>;
@@ -21,9 +20,15 @@ export function useDragSelect({
 
     const handleContainerMouseDown = (e: React.MouseEvent) => {
         const target = e.target as HTMLElement;
+        // 排除掉按鈕、連結、輸入框
         if (target.tagName === 'INPUT' || target.tagName === 'BUTTON' || target.closest('a') || target.closest('button')) return;
 
+        // 🔥 修正 1：移除按鍵限制，只要是左鍵 (button === 0) 就可以啟動框選
         if (e.button === 0 && containerRef.current) {
+
+            // 如果點在卡片上，不啟動框選，交給卡片自己的 MouseDown 處理
+            if (target.closest('.card')) return;
+
             isBoxSelecting.current = true;
             hasDragged.current = false;
             setPreviewIds([]);
@@ -51,7 +56,6 @@ export function useDragSelect({
             const h = Math.abs(currentY - startPos.current.y);
             setSelectionBox({ x, y, w, h });
 
-            // 碰撞檢測：使用 Viewport 座標比較最準確
             const rows = containerRef.current.querySelectorAll('[data-id]');
             const newPreviewIds: number[] = [];
             const boxViewportRect = {
@@ -74,27 +78,37 @@ export function useDragSelect({
     };
 
     useEffect(() => {
-        const handleGlobalMouseUp = () => {
-            // 只有在真的有在進行框選或拖選動作時才處理
+        const handleGlobalMouseUp = (e: MouseEvent) => {
+
+            // 如果只是單純點擊（沒拖曳），且不是在框選模式，直接退出
             if (!isBoxSelecting.current && rowDragStartId === null) return;
 
-            const newSet = new Set(selectedIds);
+            // 如果是點擊空白處（沒拖曳），清空選取
+            if (isBoxSelecting.current && !hasDragged.current) {
+                setSelectedIds([]); // 清空
+                // 重置狀態
+                isBoxSelecting.current = false;
+                setSelectionBox(null);
+                setPreviewIds([]);
+                setRowDragStartId(null);
+                return;
+            }
 
-            // 1. 處理框選或 Shift 滑選的預覽 ID
-            if (previewIds.length > 0) {
+            // 判斷按鍵
+            const isModifier = e.ctrlKey || e.metaKey || e.shiftKey;
+            let newSet: Set<number>;
+
+            // 🔥 修正 2：邏輯分流
+            if (!isModifier && previewIds.length > 0) {
+                // 情境 A：沒按功能鍵 -> "取代" (只選框框裡的，舊的丟掉)
+                newSet = new Set(previewIds);
+            } else {
+                // 情境 B：有按功能鍵 -> "疊加/反選" (保留舊的 + 框框裡的運算)
+                newSet = new Set(selectedIds);
                 previewIds.forEach((id) => {
                     if (newSet.has(id)) newSet.delete(id);
                     else newSet.add(id);
                 });
-            }
-            // 2. 處理單純點擊（沒有拖拽動作）
-            else if (rowDragStartId !== null && !hasDragged.current) {
-                if (newSet.has(rowDragStartId)) newSet.delete(rowDragStartId);
-                else newSet.add(rowDragStartId);
-            }
-            // 3. 點擊空白處（沒拖拽且沒選到東西）
-            else if (isBoxSelecting.current && !hasDragged.current) {
-                newSet.clear();
             }
 
             setSelectedIds(Array.from(newSet));

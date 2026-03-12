@@ -25,7 +25,7 @@ export default function Sidebar() {
     const menuItems: MenuItem[] = [
         { path: '/', label: '系統概覽', icon: DashboardSvg, roles: ['Admin', 'Manager', 'User'] },
         { path: '/companies', label: '廠商總覽', icon: CompanySvg, roles: ['Admin', 'Manager', 'User'] },
-        { path: '/employees', label: '員工管理', icon: EmployeeSvg, roles: ['Admin', 'Manager'] },
+        { path: '/employees', label: '員工管理', icon: EmployeeSvg, roles: ['Admin', 'Manager', 'User'] },
         { path: '/missions', label: '任務派工', icon: MissionsSvg, roles: ['Admin', 'Manager', 'User'] },
         { path: '/users', label: '帳號權限', icon: AuthoritySvg, roles: ['Admin'] },
     ];
@@ -40,7 +40,7 @@ export default function Sidebar() {
     return (
         <div className="bg-dark text-white vh-100 d-flex flex-column border-end border-secondary shadow flex-shrink-0" style={{ width: '230px' }}>
             <div className="p-3 border-bottom border-secondary mb-2 d-flex align-items-center">
-                <img src={EsLogo} alt="Logo" style={{ width: '26px', height: '26px' }} />
+                <img src={EsLogo} alt="Logo" style={{ width: '28px', height: '28px' }} />
                 <div className="ms-2">
                     <h6 className="fw-bold m-0 text-primary" style={{ fontSize: '14px' }}>企業管理系統</h6>
                     <small className="opacity-50" style={{ fontSize: '8px' }}>Portal v1.0</small>

@@ -1,83 +1,75 @@
-﻿// src/hooks/useZoomPan.ts
-import { useState, useEffect, useCallback, useRef } from 'react';
+﻿import { useState, useEffect, useCallback, useRef } from 'react';
 
 export function useZoomPan() {
+    // view 控制縮放與主要位移
     const [view, setView] = useState({ x: 0, y: 0, scale: 1 });
-    const [elastic, setElastic] = useState({ x: 0, y: 0 });
-    const [isDragging, setIsDragging] = useState(false);
+    // parallax 控制視差偏移 (跟隨滑鼠輕微移動)
+    const [parallax, setParallax] = useState({ x: 0, y: 0 });
 
     const containerRef = useRef<HTMLDivElement>(null);
-    const dragStart = useRef({ x: 0, y: 0 });
 
+    // 1. 跟隨滑鼠縮放 (Zoom to Point)
     const handleWheel = useCallback((e: WheelEvent) => {
         e.preventDefault();
-        const zoomSpeed = 0.1;
-        const delta = e.deltaY > 0 ? (1 - zoomSpeed) : (1 + zoomSpeed);
-        const newScale = Math.min(Math.max(0.5, view.scale * delta), 3);
+
+        // 設定縮放係數
+        const intensity = 0.1;
+        const delta = e.deltaY > 0 ? (1 - intensity) : (1 + intensity);
+
+        // 限制縮放範圍 (0.8x ~ 3x)
+        const newScale = Math.min(Math.max(0.8, view.scale * delta), 3);
 
         if (newScale !== view.scale) {
             const rect = containerRef.current?.getBoundingClientRect();
             if (!rect) return;
+
+            // 取得滑鼠在容器內的座標
             const mouseX = e.clientX - rect.left;
             const mouseY = e.clientY - rect.top;
 
-            // 智慧縮放公式
-            const xs = (mouseX - view.x) / view.scale;
-            const ys = (mouseY - view.y) / view.scale;
+            // 數學魔法：計算新的 X, Y，讓滑鼠指的地方保持不動
+            // 公式：NewX = MouseX - (MouseX - OldX) * (NewScale / OldScale)
+            const newX = mouseX - (mouseX - view.x) * (newScale / view.scale);
+            const newY = mouseY - (mouseY - view.y) * (newScale / view.scale);
 
             setView({
-                x: mouseX - xs * newScale,
-                y: mouseY - ys * newScale,
+                x: newX,
+                y: newY,
                 scale: newScale
             });
         }
     }, [view]);
 
-    const handleMouseDown = useCallback((e: MouseEvent) => {
-        if (e.button !== 0) return;
-        const target = e.target as HTMLElement;
-        if (target.tagName === 'INPUT' || target.tagName === 'BUTTON') return;
-
-        setIsDragging(true);
-        dragStart.current = { x: e.clientX - elastic.x, y: e.clientY - elastic.y };
-        document.body.style.userSelect = 'none';
-        document.body.style.cursor = 'grabbing';
-    }, [elastic]);
-
+    // 2. 視差效果 (Parallax) - 計算滑鼠距離中心的偏移
     const handleMouseMove = useCallback((e: MouseEvent) => {
-        if (!isDragging) return;
-        setElastic({
-            x: Math.max(Math.min(e.clientX - dragStart.current.x, 200), -200),
-            y: Math.max(Math.min(e.clientY - dragStart.current.y, 200), -200)
-        });
-    }, [isDragging]);
+        const centerX = window.innerWidth / 2;
+        const centerY = window.innerHeight / 2;
 
-    const handleMouseUp = useCallback(() => {
-        setIsDragging(false);
-        setElastic({ x: 0, y: 0 });
-        document.body.style.userSelect = 'auto';
-        document.body.style.cursor = 'default';
+        // 計算偏移量，數值越小，移動越輕微 (這裡設為 / 25)
+        const moveX = (e.clientX - centerX) / 25;
+        const moveY = (e.clientY - centerY) / 25;
+
+        setParallax({ x: moveX, y: moveY });
     }, []);
 
+    // 3. 雙擊還原
     const resetAll = () => {
         setView({ x: 0, y: 0, scale: 1 });
-        setElastic({ x: 0, y: 0 });
     };
 
     useEffect(() => {
         const el = containerRef.current;
         if (!el) return;
+
+        // 綁定事件
         el.addEventListener('wheel', handleWheel, { passive: false });
-        window.addEventListener('mousedown', handleMouseDown);
         window.addEventListener('mousemove', handleMouseMove);
-        window.addEventListener('mouseup', handleMouseUp);
+
         return () => {
             el.removeEventListener('wheel', handleWheel);
-            window.removeEventListener('mousedown', handleMouseDown);
             window.removeEventListener('mousemove', handleMouseMove);
-            window.removeEventListener('mouseup', handleMouseUp);
         };
-    }, [handleWheel, handleMouseMove, handleMouseUp, handleMouseDown]);
+    }, [handleWheel, handleMouseMove]);
 
-    return { view, elastic, containerRef, isDragging, resetAll };
+    return { view, parallax, containerRef, resetAll };
 }

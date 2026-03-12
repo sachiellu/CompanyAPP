@@ -10,6 +10,9 @@ export default function CompanyDetail() {
     useEscBack('/companies');
     const { id } = useParams<{ id: string }>();
 
+    const userRole = localStorage.getItem('userRole');
+    const isAdmin = userRole === 'Admin';   
+
     // 修正 1：指定型別為 <Company | null>
     const [company, setCompany] = useState<Company | null>(null);
     const [loading, setLoading] = useState(false);
@@ -46,8 +49,16 @@ export default function CompanyDetail() {
                     廠商詳情 {loading && <span className="spinner-border spinner-border-sm ms-2"></span>}
                 </h2>
                 <div className="d-flex align-items-center gap-2">
-                    <button className="btn btn-sm btn-outline-success px-3 shadow-sm" onClick={handleExport}>匯出資料</button>
-                    <Link to={`/companies/edit/${id}`} className="btn btn-sm btn-primary px-3 shadow-sm">編輯資料</Link>
+
+
+                    {isAdmin && (
+                        <button className="btn btn-sm btn-outline-success px-3 shadow-sm" onClick={handleExport}>匯出資料</button>
+                    )}
+
+                    {isAdmin && (
+                        <Link to={`/companies/edit/${id}`} className="btn btn-sm btn-primary px-3 shadow-sm">編輯資料</Link>
+                    )}
+
                     <Link to="/companies" className="btn btn-sm btn-outline-secondary px-3 shadow-sm">返回列表</Link>
                 </div>
             </div>
@@ -77,7 +88,7 @@ export default function CompanyDetail() {
 
                     {/* 系統派工員工清單 - 修正 2: 指定 emp 型別為 Employee */}
                     <div className="card shadow-sm border-0 mb-4 text-start">
-                        <div className="card-header bg-light py-2 px-4 border-bottom"><span className="text-secondary fw-bold small text-uppercase">內部指派員工</span></div>
+                        <div className="card-header bg-light py-2 px-4 border-bottom"><span className="text-secondary fw-bold small text-uppercase">內部員工</span></div>
                         <div className="card-body p-0">
                             <table className="table table-hover mb-0 align-middle" style={{ fontSize: '13px' }}>
                                 <thead className="table-light">
@@ -102,7 +113,7 @@ export default function CompanyDetail() {
 
                     {/* 行政聯絡人清單 - 修正 3: 指定 c 型別為 Contact */}
                     <div className="card shadow-sm border-0 text-start">
-                        <div className="card-header bg-light py-2 px-4 border-bottom"><span className="text-secondary fw-bold small text-uppercase">外部聯絡窗口</span></div>
+                        <div className="card-header bg-light py-2 px-4 border-bottom"><span className="text-secondary fw-bold small text-uppercase">外部窗口</span></div>
                         <div className="card-body p-0">
                             <table className="table table-sm table-borderless mb-0 align-middle" style={{ fontSize: '13px' }}>
                                 <thead className="table-light">

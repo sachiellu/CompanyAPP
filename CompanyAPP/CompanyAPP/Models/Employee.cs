@@ -8,9 +8,14 @@ namespace CompanyAPP.Models
         // --- 1. 定義型別與列舉 (放在最上面，像說明書一樣) ---
         public enum EmployeeStatus
         {
-            Unregistered = 0, // 待註冊
-            Active = 1,       // 已啟動
-            Disabled = 2      // 已停用
+            [Display(Name = "待註冊")] // 建議加上 Display Name 方便之後 UI 顯示
+            Unregistered = 0,
+
+            [Display(Name = "在職")]
+            Active = 1,
+
+            [Display(Name = "已停用")]
+            Disabled = 2
         }
 
         // --- 2. 主鍵 ID ---
@@ -29,9 +34,10 @@ namespace CompanyAPP.Models
         public string? Position { get; set; }
 
         // --- 4. 帳號與通訊資訊 ---
+        [Required]
         [Display(Name = "電子信箱")]
         [EmailAddress(ErrorMessage = "格式不正確")]
-        public string? Email { get; set; }
+        public string Email { get; set; } = string.Empty; // 這裡改 string 並給預設值，避免 Null   
 
         [Display(Name = "帳號狀態")]
         public EmployeeStatus Status { get; set; } = EmployeeStatus.Unregistered;
