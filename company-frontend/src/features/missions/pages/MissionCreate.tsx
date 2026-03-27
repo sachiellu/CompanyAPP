@@ -32,8 +32,8 @@ export default function MissionCreate() {
             api.get<Company[]>('/companies'),
             api.get<Employee[]>('/employees')
         ]).then(([resComp, resEmp]) => {
-            if (resComp.ok) setCompanies(resComp.data || []);
-            if (resEmp.ok) setAllEmployees(resEmp.data || []);
+            if (resComp.data) setCompanies(resComp.data || []);
+            if (resEmp.data) setAllEmployees(resEmp.data || []);
         });
     }, []);
 
@@ -57,7 +57,7 @@ export default function MissionCreate() {
         setLoading(true);
         try {
             const res = await api.post('/missions', formData);
-            if (res.ok) navigate('/missions');
+            if (res.data) navigate('/missions');
         } finally { setLoading(false); }
     };
 
