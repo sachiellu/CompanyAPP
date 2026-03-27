@@ -4,19 +4,28 @@ import { companyApi } from '../api/companyApi';
 import type { Company, Contact } from '../types'; // 引入型別
 import type { Employee } from '../../employees/types'; // 引入員工型別
 import { useEscBack } from '../../../hooks/useEscBack';
-import { StatusBadge } from '../../employees/components/StatusBadge';
+import { StatusBadge } from '../../employees/components/EmployeeStatusBadge';
+
 
 export default function CompanyDetail() {
     useEscBack('/companies');
     const { id } = useParams<{ id: string }>();
 
-    const userRole = localStorage.getItem('userRole');
+    const userRole = localStorage.getItem('userRole') || 'User';
     const isAdmin = userRole === 'Admin';   
+    const isManager = userRole === 'Manager';
+
+    // 根據你的規格：只有 Admin || isManager可以管理(編輯)廠商
+    const canEdit = isAdmin || isManager;  
+    const canExport = isAdmin;
 
     // 修正 1：指定型別為 <Company | null>
     const [company, setCompany] = useState<Company | null>(null);
     const [loading, setLoading] = useState(false);
-    const backendUrl = 'http://localhost:5203';
+
+    // 從環境變數拿 API 網址 (例如 http://localhost:5000/api)
+    const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5203/api';
+    const backendUrl = apiUrl.replace(/\/api\/?$/, ''); 
 
     const fetchDetail = useCallback(async (compId: string) => {
         setLoading(true);
@@ -34,10 +43,19 @@ export default function CompanyDetail() {
         if (!company) return;
         try {
             const res = await companyApi.exportExcel([company.id]);
-            const b = await res.blob();
+
+            const b = await res.data;
             const u = window.URL.createObjectURL(b);
             const a = document.createElement('a'); a.href = u; a.download = `${company.name}.xlsx`; a.click();
-        } catch (err) { console.error(err); }
+            a.href = u; 
+            a.download = `${company.name}.xlsx`;
+            document.body.appendChild(a); 
+            a.click();
+            document.body.removeChild(a);
+            window.URL.revokeObjectURL(u); // 記得釋放記憶體
+        } catch (err) {
+                console.error("導出失敗：", err);
+        }
     };
 
     if (loading && !company) return <div className="page-container p-5 text-center text-muted">載入中...</div>;
@@ -51,11 +69,11 @@ export default function CompanyDetail() {
                 <div className="d-flex align-items-center gap-2">
 
 
-                    {isAdmin && (
+                    {canExport && (
                         <button className="btn btn-sm btn-outline-success px-3 shadow-sm" onClick={handleExport}>匯出資料</button>
                     )}
 
-                    {isAdmin && (
+                    {canEdit && (
                         <Link to={`/companies/edit/${id}`} className="btn btn-sm btn-primary px-3 shadow-sm">編輯資料</Link>
                     )}
 

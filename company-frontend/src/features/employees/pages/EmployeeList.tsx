@@ -4,8 +4,10 @@ import { useSelection } from '../../../hooks/useSelection';
 import { useDragSelect } from '../../../hooks/useDragSelect';
 import { useContextMenu } from '../../../hooks/useContextMenu';
 import { employeeApi } from '../api/employeeApi';
-import type { Employee, ImportResult, RowReport } from '../types';
-import { StatusBadge } from '../components/StatusBadge';
+import { type Employee, type ImportResult, type RowReport } from '../types';
+import { StatusBadge } from '../components/EmployeeStatusBadge';
+import { extractErrorMessage } from '../../../utils/errorHandler';
+
 
 export default function EmployeeList() {
     const navigate = useNavigate();
@@ -23,14 +25,16 @@ export default function EmployeeList() {
 
     const [employees, setEmployees] = useState<Employee[]>([]);
     const [loading, setLoading] = useState(false);
+    const [isInviting, setIsInviting] = useState<number | null>(null); // 新增：追蹤哪一筆正在發送邀請
     const [searchTerm, setSearchTerm] = useState("");
     const [isShiftPressed, setIsShiftPressed] = useState(false);
     const [isDraggingFile, setIsDraggingFile] = useState(false);
     const [sortConfig, setSortConfig] = useState<{ key: keyof Employee; direction: 'asc' | 'desc' } | null>(null);
     const [showDropdown, setShowDropdown] = useState(false);
+    const [importReports, setImportReports] = useState<RowReport[]>([]);
+
     const fileInputRef = useRef<HTMLInputElement>(null);
     const containerRef = useRef<HTMLDivElement>(null);
-    const [importReports, setImportReports] = useState<RowReport[]>([]);
 
     const fetchData = useCallback(async (s = "") => {
         setLoading(true);
@@ -50,12 +54,6 @@ export default function EmployeeList() {
         return () => clearTimeout(timer);
     }, [searchTerm, fetchData]);
 
-    const requestSort = (key: keyof Employee) => {
-        let dir: 'asc' | 'desc' = 'asc';
-        if (sortConfig?.key === key && sortConfig.direction === 'asc') dir = 'desc';
-        setSortConfig({ key, direction: dir });
-    };
-
     const sortedEmployees = useMemo(() => {
         if (!sortConfig) return employees;
         return [...employees].sort((a: Employee, b: Employee) => {
@@ -68,25 +66,74 @@ export default function EmployeeList() {
 
     const { selectedIds, setSelectedIds, previewIds, setPreviewIds, rowDragStartId, setRowDragStartId, handleCheck, handleCheckAll, handleRowMouseDown, handleRowMouseEnter } = useSelection(sortedEmployees);
     const { selectionBox, handleContainerMouseDown, handleContainerMouseMove } = useDragSelect({ containerRef, selectedIds, setSelectedIds, previewIds, setPreviewIds, rowDragStartId, setRowDragStartId });
-    const { contextMenu, handleContextMenu } = useContextMenu();
+    const { contextMenu, handleContextMenu } = useContextMenu();    
+
+
+// 1. 軟刪除 (停用) -> 改狀態為 2 (Disabled)
+    const handleDelete = async (id: number) => {
+        if (!confirm("確定要停用此員工嗎？")) return;
+        try {
+            await employeeApi.deleteEmployee(id);
+            //  不要用 filter 移除，用 map 更新狀態！
+            setEmployees(prev => prev.map(e => 
+                e.id === id ? { ...e, status: 2 } : e
+            ));
+        } catch (err) { console.error("停用出錯", err); }
+    };
+
+    // 2. 恢復員工 -> 改狀態為 1 (Active) 或 0 (Unregistered)
+    // 這裡我們簡單點，先恢復成待註冊(0)，如果他原本有綁定，後端 restore API 會處理好
+    const handleRestore = async (id: number) => {
+        if (!confirm("確定要恢復此員工的資料與權限嗎？")) return;
+        try {
+            await employeeApi.restoreEmployee(id);
+            // 重新去跟後端要一次最新資料，確保狀態完全正確
+            fetchData(searchTerm); 
+        } catch (err) { console.error("恢復出錯", err); }
+    };
+
+    // 3. 永久刪除 (物理毀滅) -> 這才是真的要從畫面上移除
+    const handleHardDelete = async (id: number) => {
+        if (!confirm("⚠️ 警告：這將徹底從資料庫抹除該員工與帳號，無法復原！確定嗎？")) return;
+        try {
+            await employeeApi.hardDeleteEmployee(id);
+            // 只有真的毀滅了，才用 filter 把他從畫面上趕走
+            setEmployees(prev => prev.filter(e => e.id !== id));
+        } catch (err) { console.error("永久刪除出錯", err); }
+    };
+
+
+// --- 新增：發送邀請 ---
+    const handleSendInvite = async (id: number, email: string) => {
+        if (!window.confirm(`確定要發送註冊邀請信給 ${email} 嗎？`)) return;
+        setIsInviting(id);
+        
+        try {
+                console.log("目前的 employeeApi 裡面有什麼：", employeeApi);
+                await employeeApi.sendInvite(id);
+                alert("邀請信已成功發送！");
+                fetchData(searchTerm);
+            } catch (err: unknown) { 
+                // 這裡改用 unknown，避開 eslint 的 any 檢查
+                console.error(err);
+                const msg = extractErrorMessage(err); // 一行搞定所有解析！
+                alert(msg);
+            } finally {
+                // 結束後重設
+                setIsInviting(null);
+            }
+    };
 
     const handleExport = async (ids: number[]) => {
         const exportList = ids.length > 0 ? ids : employees.map(e => e.id);
-        if (!confirm(`確定匯出 ${exportList.length} 筆員工資料？`)) return;
+        if (!window.confirm(`確定匯出 ${exportList.length} 筆員工資料？`)) return;
         try {
             const res = await employeeApi.exportExcel(exportList);
-            const blobData = await res.blob();
+            const blobData = res.data;
+            
             const url = window.URL.createObjectURL(blobData);
             const a = document.createElement('a'); a.href = url; a.download = 'Employees.xlsx'; a.click();
         } catch (err) { console.error("匯出失敗", err); }
-    };
-
-    const handleDelete = async (id: number) => {
-        if (!confirm("確定刪除?")) return;
-        try {
-            await employeeApi.deleteEmployee(id);
-            setEmployees(prev => prev.filter(e => e.id !== id));
-        } catch (err) { console.error("刪除出錯", err); }
     };
 
     const uploadFile = async (file: File) => {
@@ -124,12 +171,20 @@ export default function EmployeeList() {
         }
     };
 
+    const requestSort = (key: keyof Employee) => {
+        let dir: 'asc' | 'desc' = 'asc';
+        if (sortConfig?.key === key && sortConfig.direction === 'asc') dir = 'desc';
+        setSortConfig({ key, direction: dir });
+    };
+
+
     useEffect(() => {
         const h = (e: KeyboardEvent) => setIsShiftPressed(e.shiftKey);
         window.addEventListener('keydown', h); window.addEventListener('keyup', h);
         return () => { window.removeEventListener('keydown', h); window.removeEventListener('keyup', h); };
     }, []);
 
+    // 渲染 (Return JSX)
     return (
         <div
             ref={containerRef}
@@ -155,6 +210,7 @@ export default function EmployeeList() {
                 </div>
             )}
 
+            {/* Header */}
             <div className="page-header-wrapper d-flex justify-content-between align-items-center mb-4">
                 <h2 className="text-dark fw-bold mb-0" style={{ fontSize: '1.25rem' }}>
                     員工管理 {loading && <span className="spinner-border spinner-border-sm ms-2 text-primary"></span>}
@@ -186,7 +242,7 @@ export default function EmployeeList() {
                 </div>
             </div>
 
-            {/* 錯誤報告區塊省略，保持原樣 */}
+            {/* Import Reports */}
             {importReports.length > 0 && (
                 <div className="alert alert-light border-danger shadow-sm mb-4 p-3">
                     <div className="d-flex justify-content-between align-items-center mb-2">
@@ -211,6 +267,7 @@ export default function EmployeeList() {
                 </div>
             )}
 
+            {/* Table Area */}
             <div className="page-content bg-white shadow-sm rounded overflow-hidden">
                 <table className="table table-hover align-middle mb-0 text-start" style={{ fontSize: '13.5px' }}>
                     <thead className="table-light">
@@ -261,15 +318,54 @@ export default function EmployeeList() {
                                     <td className="text-muted small">{emp.email}</td>
                                     <td><span className="badge bg-light text-dark border fw-normal" style={{ fontSize: '12px' }}>{emp.companyName || '未歸類'}</span></td>
                                     <td><StatusBadge status={emp.status} /></td>
-                                    <td className="text-end px-4 text-nowrap">
-                                        <Link to={`/employees/${emp.id}`} className="btn btn-xs btn-outline-primary me-1 shadow-sm" style={{ fontSize: '12px', padding: '2px 8px' }} onClick={e => e.stopPropagation()}>詳情</Link>
 
-                                        {canEdit && (
-                                            <Link to={`/employees/edit/${emp.id}`} className="btn btn-xs btn-outline-success me-1 shadow-sm" style={{ fontSize: '12px', padding: '2px 8px' }} onClick={e => e.stopPropagation()}>編輯</Link>
+                                    <td className="text-end px-4 text-nowrap d-flex justify-content-end gap-2">
+                                        
+                                        {/* 1. 邀請：只有「待註冊 (Status === 0)」才有 */}
+                                        {canEdit && emp.status === 0 && (
+                                            <button
+                                                type="button"
+                                                disabled={isInviting === emp.id}
+                                                className="btn btn-xs btn-outline-warning shadow-sm"
+                                                style={{ fontSize: '12px', padding: '2px 8px' }}
+                                                onClick={(e) => { e.stopPropagation(); if (emp.email) handleSendInvite(emp.id, emp.email); }}
+                                            >
+                                                {isInviting === emp.id ? <span className="spinner-border spinner-border-sm"></span> : "邀請"}
+                                            </button>
                                         )}
 
-                                        {canDelete && (
-                                            <button className="btn btn-xs btn-outline-danger shadow-sm" style={{ fontSize: '12px', padding: '2px 8px' }} onClick={(e) => { e.stopPropagation(); handleDelete(emp.id); }}>刪除</button>
+                                        {/* 2. 詳情：不管什麼狀態「永遠都有」 */}
+                                        <Link to={`/employees/${emp.id}`} className="btn btn-xs btn-outline-primary shadow-sm" style={{ fontSize: '12px', padding: '2px 8px' }} onClick={e => e.stopPropagation()}>
+                                            詳情
+                                        </Link>
+
+                                        {/* 3. 編輯：只有「非停用 (Status !== 2)」才有 */}
+                                        {canEdit && emp.status !== 2 && (
+                                            <Link to={`/employees/edit/${emp.id}`} className="btn btn-xs btn-outline-success shadow-sm" style={{ fontSize: '12px', padding: '2px 8px' }} onClick={e => e.stopPropagation()}>
+                                                編輯
+                                            </Link>
+                                        )}
+
+                                        {/* 4. 刪除 (軟刪除)：只有「非停用 (Status !== 2)」才有 */}
+                                        {canDelete && emp.status !== 2 && (
+                                            <button className="btn btn-xs btn-outline-danger shadow-sm" style={{ fontSize: '12px', padding: '2px 8px' }} onClick={(e) => { e.stopPropagation(); handleDelete(emp.id); }}>
+                                                刪除
+                                            </button>
+                                        )}
+
+                                        {/* ========================================= */}
+                                        {/* 5. 已停用 (Status === 2) 的專屬按鈕 (取代編輯和軟刪除) */}
+                                        
+                                        {canDelete && emp.status === 2 && (
+                                            <>
+                                                <button className="btn btn-xs btn-outline-info shadow-sm" style={{ fontSize: '12px', padding: '2px 8px' }} onClick={(e) => { e.stopPropagation(); handleRestore(emp.id); }}>
+                                                    恢復
+                                                </button>
+                                                {/* 為了保持排版一致，這裡的按鈕名稱依然叫「刪除」，但按下去是實作「永久刪除」 */}
+                                                <button className="btn btn-xs btn-danger shadow-sm" style={{ fontSize: '12px', padding: '2px 8px' }} onClick={(e) => { e.stopPropagation(); handleHardDelete(emp.id); }}>
+                                                    刪除
+                                                </button>
+                                            </>
                                         )}
                                     </td>
                                 </tr>
@@ -279,7 +375,7 @@ export default function EmployeeList() {
                 </table>
             </div>
 
-            {/* 右鍵選單修復區塊 */}
+            {/* Context Menu (右鍵選單) */}
             {contextMenu.visible && (
                 <div style={{ position: 'fixed', top: contextMenu.y, left: contextMenu.x, zIndex: 10000, minWidth: '160px', borderRadius: '4px', fontSize: '13.5px' }} className="dropdown-menu show shadow-lg border-light">
                     {contextMenu.id ? (

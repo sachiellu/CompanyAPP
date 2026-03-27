@@ -85,6 +85,7 @@ namespace CompanyAPP.Controllers.Api
         }
 
         [HttpPost]
+        [Authorize(Roles = "Admin,Manager")]
         public async Task<IActionResult> CreateCompany([FromForm] CompanyCreateDto dto)
         {
             var company = new Company
@@ -102,6 +103,7 @@ namespace CompanyAPP.Controllers.Api
         }
 
         [HttpPut("{id}")]
+        [Authorize(Roles = "Admin,Manager")]
         public async Task<IActionResult> UpdateCompany(int id, [FromForm] CompanyCreateDto dto)
         {
             var existing = await _context.Company.FindAsync(id);
@@ -119,6 +121,7 @@ namespace CompanyAPP.Controllers.Api
         }
 
         [HttpDelete("{id}")]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> DeleteCompany(int id)
         {
             await _companyService.DeleteAsync(id);
@@ -126,6 +129,7 @@ namespace CompanyAPP.Controllers.Api
         }
 
         [HttpPost("export")]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Export([FromBody] List<int>? ids)
         {
             var file = await _companyService.ExportToExcelAsync(ids);

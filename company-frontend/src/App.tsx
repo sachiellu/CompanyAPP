@@ -7,8 +7,9 @@ import MainLayout from "./layouts/MainLayout";
 import AuthLayout from "./layouts/AuthLayout";
 import RequireAuth from "./layouts/RequireAuth";
 
-import Login from './features/auth/pages/Login_Glass'; // 確保login用對版本
-import Dashboard from './features/dashboard/pages/Dashboard';   
+import Login from './features/auth/pages/Login_Glass(dark)'; // 確保login用對版本
+import Dashboard from './features/dashboard/pages/Dashboard';
+import Register from './features/auth/pages/Register';   
 
 import { companyRoutes } from "./features/companies/routes";
 import { employeeRoutes } from "./features/employees/routes";
@@ -21,6 +22,7 @@ export default function App() {
 
             <Route element={<AuthLayout />}>
                 <Route path="/login" element={<Login />} />
+                <Route path="/register" element={<Register />} />
             </Route>
 
             <Route element={<RequireAuth />}>

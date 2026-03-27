@@ -2,6 +2,7 @@
 
 using CompanyAPP.Data;
 using CompanyAPP.Models;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -10,7 +11,7 @@ namespace CompanyAPP.Controllers.Api
 {
     [Route("api/missions")]
     [ApiController]
-    [Authorize]
+    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     public class MissionsApiController : ControllerBase
     {
         private readonly CompanyAppContext _context;
@@ -55,6 +56,55 @@ namespace CompanyAPP.Controllers.Api
                 CompanyName = m.Company?.Name ?? "未指定",
                 EmployeeName = m.Employee?.Name ?? "未指派"
             });
+        }
+
+        [HttpPost]
+        [Authorize(Roles = "Admin,Manager")] // 鎖：只有 Admin 和 Manager 能派工
+        public async Task<IActionResult> CreateMission([FromBody] Mission mission)
+        {
+            if (!ModelState.IsValid) return BadRequest(ModelState);
+
+            mission.CreateDate = DateTime.Now;
+            _context.Mission.Add(mission);
+            await _context.SaveChangesAsync();
+
+            return Ok(new { message = "任務指派成功！" });
+        }
+
+        // 補上修改任務
+        [HttpPut("{id}")]
+        [Authorize(Roles = "Admin,Manager")] // 鎖：只有 Admin 和 Manager 能改任務
+        public async Task<IActionResult> UpdateMission(int id, [FromBody] Mission mission)
+        {
+            if (id != mission.Id) return BadRequest("ID 不符");
+
+            _context.Entry(mission).State = EntityState.Modified;
+
+            try
+            {
+                await _context.SaveChangesAsync();
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                if (!_context.Mission.Any(e => e.Id == id)) return NotFound();
+                else throw;
+            }
+
+            return Ok(new { message = "任務更新成功！" });
+        }
+
+        // 補上刪除任務
+        [HttpDelete("{id}")]
+        [Authorize(Roles = "Admin")] // 鎖：只有 Admin 可以刪除任務
+        public async Task<IActionResult> DeleteMission(int id)
+        {
+            var mission = await _context.Mission.FindAsync(id);
+            if (mission == null) return NotFound();
+
+            _context.Mission.Remove(mission);
+            await _context.SaveChangesAsync();
+
+            return Ok(new { message = "任務已刪除！" });
         }
     }
 }

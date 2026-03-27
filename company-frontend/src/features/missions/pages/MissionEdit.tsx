@@ -6,6 +6,7 @@ import { useEscBack } from '../../../hooks/useEscBack';
 import type { Mission, MissionFormData } from '../types';
 import type { Company } from '../../companies/types';
 import type { Employee } from '../../employees/types';
+import { extractErrorMessage } from '../../../utils/errorHandler';
 
 export default function MissionEdit() {
     useEscBack('/missions');
@@ -37,21 +38,20 @@ export default function MissionEdit() {
                 api.get<Mission>(`/missions/${id}`)
             ]);
 
-            if (resComp.ok) setCompanies(resComp.data || []);
-            if (resEmp.ok) setAllEmployees(resEmp.data || []);
+            setCompanies(resComp.data || []);
+            setAllEmployees(resEmp.data || []);
 
-            if (resMission.ok && resMission.data) {
-                const m = resMission.data;
-                setFormData({
-                    title: m.title,
-                    description: m.description || "",
-                    createDate: m.createDate.split('T')[0],
-                    deadline: m.deadline.split('T')[0],
-                    status: m.status,
-                    companyId: m.companyId.toString(),
-                    employeeId: m.employeeId.toString()
-                });
-            }
+            const m = resMission.data;
+            setFormData({
+                title: m.title,
+                description: m.description || "",
+                createDate: m.createDate.split('T')[0],
+                deadline: m.deadline.split('T')[0],
+                status: m.status,
+                companyId: m.companyId.toString(),
+                employeeId: m.employeeId.toString()
+            });
+  
         } finally { setLoading(false); }
     }, [id]);
 
@@ -75,10 +75,18 @@ export default function MissionEdit() {
         e.preventDefault();
         setLoading(true);
         try {
-            const res = await api.put(`/missions/${id}`, formData);
-            if (res.ok) navigate('/missions');
-            else alert("修改失敗");
-        } finally { setLoading(false); }
+            await api.put(`/missions/${id}`, formData);
+            navigate('/missions');
+
+        } catch (err: unknown) {
+            console.error("修改失敗:", err);
+            
+            const errorMsg = extractErrorMessage(err);
+            alert(errorMsg); 
+            
+        } finally { 
+            setLoading(false); 
+        }
     };
 
     return (

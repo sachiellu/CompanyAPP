@@ -4,6 +4,14 @@ import { api } from '../../../services/api';
 import { useEscBack } from '../../../hooks/useEscBack';
 import type { Mission } from '../types';
 
+// 權限邏輯
+    const userRole = localStorage.getItem('userRole') || 'User';
+    const isAdmin = userRole === 'Admin';
+    const isManager = userRole === 'Manager';
+
+    // 任務的權限操作能力
+    const canEdit = isAdmin || isManager; // 新增、編輯任務 (Manager 可以派工)
+
 export default function MissionDetail() {
     useEscBack('/missions');
     const { id } = useParams<{ id: string }>();
@@ -14,7 +22,8 @@ export default function MissionDetail() {
         setLoading(true);
         try {
             const res = await api.get<Mission>(`/missions/${mid}`);
-            if (res.ok) setMission(res.data);
+            if (res.status === 200)     
+                setMission(res.data);
         } finally {
             setLoading(false);
         }
@@ -34,7 +43,9 @@ export default function MissionDetail() {
                     任務詳細資料 {loading && "..."}
                 </h2>
                 <div className="d-flex gap-2">
-                    <Link to={`/missions/edit/${id}`} className="btn btn-sm btn-primary px-3 shadow-sm">編輯任務</Link>
+                    {canEdit && (
+                        <Link to={`/missions/edit/${id}`} className="btn btn-sm btn-primary px-3 shadow-sm">編輯任務</Link>
+                    )}
                     <Link to="/missions" className="btn btn-sm btn-outline-secondary px-3 shadow-sm">返回列表</Link>
                 </div>
             </div>

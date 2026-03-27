@@ -34,7 +34,7 @@
 
         useEffect(() => {
             api.get<DashboardStats>('/dashboard/stats').then(res => {
-                if (res.ok) setStats(res.data);
+                if (res.data) setStats(res.data);
             });
         }, []);
 

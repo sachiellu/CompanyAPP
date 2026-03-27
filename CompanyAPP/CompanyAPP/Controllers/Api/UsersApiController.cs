@@ -1,5 +1,6 @@
 ﻿using CompanyAPP.Data;
 using CompanyAPP.Models;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -10,7 +11,7 @@ namespace CompanyAPP.Controllers.Api
     [Route("api/users")]
     [ApiController]
     // 只有 Admin 才能看帳號列表和改權限
-    [Authorize(Roles = "Admin")]
+    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "Admin")]
     public class UsersApiController : ControllerBase
     {
         private readonly UserManager<IdentityUser> _userManager;

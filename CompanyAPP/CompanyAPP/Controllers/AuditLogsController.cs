@@ -22,7 +22,7 @@ namespace CompanyAPP.Controllers
                                      .OrderByDescending(x => x.Timestamp)
                                      .Take(50)
                                      .ToListAsync();
-            return View(logs);
+            return Ok(logs);
         }
     }
 }

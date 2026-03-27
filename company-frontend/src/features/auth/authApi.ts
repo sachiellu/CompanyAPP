@@ -1,19 +1,13 @@
 ﻿// src/features/auth/authApi.ts
-const BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5203/api';
+import { api } from '../../services/api'; 
+
 
 export const authApi = {
     login: async (email: string, password: string) => {
-        const res = await fetch(`${BASE_URL}/auth/login`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ email, password })
-        });
-
-        if (!res.ok) {
-            const errorText = await res.text();
-            throw new Error(errorText || "帳號或密碼錯誤");
-        }
-
-        return res.json(); // 回傳 { token, role, email ... }
+        // 使用 api.post，它會自動帶上 withCredentials: true
+        const res = await api.post('/auth/login', { email, password });
+        
+        // Axios 的資料是在 .data 裡面
+        return res.data; 
     }
 };

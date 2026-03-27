@@ -1,10 +1,12 @@
 ﻿import type { Company } from '../companies/types';
 
-export enum EmployeeStatus {
-    Unregistered = 0,
-    Active = 1,
-    Disabled = 2
-}
+export const EmployeeStatus = {
+    Unregistered: 0,
+    Active: 1,
+    Disabled: 2
+} as const;
+
+export type EmployeeStatus = typeof EmployeeStatus[keyof typeof EmployeeStatus];
 
 export interface Employee {
     id: number;
@@ -12,13 +14,12 @@ export interface Employee {
     name: string;
     position?: string;
     email?: string;
-    status: EmployeeStatus;  // 狀態 (當下狀態)
+    status: EmployeeStatus; // 這裡會自動對應到 0 | 1 | 2
     userId?: string;
     companyId: number;
     company?: Company;
-
-    companyName?: string;    // 所屬廠商名稱 (問號代表選填)
-    processStatus?: string;  // 後續處理狀態 (例如：待交接)
+    companyName?: string;
+    processStatus?: string;
 }
 
 export interface RowReport {

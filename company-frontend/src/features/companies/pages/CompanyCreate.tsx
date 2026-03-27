@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { api } from '../../../services/api';
 import { CompanyFormFields } from '../components/CompanyFormFields';
 import { useEscBack } from '../../../hooks/useEscBack';
+import { extractErrorMessage } from '../../../utils/errorHandler';
 
 export default function CompanyCreate() {
     useEscBack('/companies');
@@ -52,13 +53,19 @@ export default function CompanyCreate() {
         if (selectedFile) formData.append("ImageFile", selectedFile);
 
         try {
-            const res = await api.post('/companies', formData);
-            if (res.ok) navigate('/');
-            else alert("新增失敗");
+            await api.post('/companies', formData);
+            alert("建立成功！"); 
+            navigate('/companies');
+            
         } catch (err) {
-            console.error(err);
-        } finally { setLoading(false); }
-    };
+            console.error("建立失敗:", err);
+
+            const errorMsg = extractErrorMessage(err);
+            alert(errorMsg); 
+        } finally {
+            setLoading(false);
+        }
+    };   
 
     return (
         <div className="page-container position-relative px-4 pt-3">

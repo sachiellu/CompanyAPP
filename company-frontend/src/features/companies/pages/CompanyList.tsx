@@ -17,7 +17,6 @@ export default function CompanyList() {
     const canEdit = isAdmin || isManager; // 新增、編輯
     const canDelete = isAdmin;            // 刪除
     const canExport = isAdmin;            // 匯出
-    const canImport = isAdmin;            // 匯入
 
     const [companies, setCompanies] = useState<Company[]>([]);
     const [loading, setLoading] = useState(false);
@@ -109,7 +108,8 @@ export default function CompanyList() {
         if (!confirm(`確定匯出 ${exportList.length} 筆資料？`)) return;
         try {
             const res = await companyApi.exportExcel(exportList);
-            const blobData = await res.blob();
+            const blobData = res.data;
+            
             const url = window.URL.createObjectURL(blobData);
             const a = document.createElement('a'); a.href = url; a.download = "Companies.xlsx"; a.click();
         } catch (err) { console.error(err); }
@@ -288,13 +288,14 @@ export default function CompanyList() {
                                         <button className="dropdown-item text-danger" onClick={() => handleDelete(contextMenu.id!)}>刪除廠商</button>
                                     )}
                                 </>
-                            )}
                         </>
                     ) : (
                         <>
-                            <Link to="/companies/create" className="btn btn-sm btn-primary text-nowrap px-3 shadow-sm">
-                                    {canEdit && <Link to="/companies/create" className="dropdown-item">新增廠商</Link>}
-                            </Link>
+                            {canEdit && (
+                                <Link to="/companies/create" className="dropdown-item py-1.5">
+                                    新增廠商
+                                </Link>
+                            )}
                             <button className="dropdown-item" onClick={() => fetchData(searchTerm)}>重新整理</button>
                             <div className="dropdown-divider"></div>
                             <button className="dropdown-item" onClick={() => handleCheckAll({ target: { checked: true } } as React.ChangeEvent<HTMLInputElement>)}>全選所有項目</button>

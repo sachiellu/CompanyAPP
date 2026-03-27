@@ -1,8 +1,9 @@
 ﻿import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { authApi } from '../../../features/auth/authApi';
 import loginBg from '../../../assets/images/login-bg.webp';
 import EsLogo from '../../../assets/icons/Logo.svg';
+
 
 export default function Login() {
     const [email, setEmail] = useState("");
@@ -56,7 +57,7 @@ export default function Login() {
                 className="position-absolute top-0 start-0 w-100 h-100 d-flex align-items-center"
                 style={{
                     zIndex: 1,
-                    paddingLeft: '10%' // 保持你喜歡的「靠左」排版
+                    paddingLeft: '10%' // 保持「靠左」排版
                 }}
             >
                 {/* 卡片本體 */}
@@ -66,8 +67,10 @@ export default function Login() {
                         width: '380px',
                         borderRadius: '20px',
                         padding: '40px',
-                        background: 'rgba(255, 255, 255, 0.85)', // 毛玻璃基底
-                        backdropFilter: 'blur(20px)',
+                     //   background: 'rgba(255, 255, 255, 0.85)', // 毛玻璃基底
+                     //   backdropFilter: 'blur(20px)',
+                        backgroundColor: 'rgba(0, 0, 0, 0.6)', 
+                        backdropFilter: 'blur(4px)',
                         border: '1px solid rgba(255, 255, 255, 0.5)',
                         boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)'
                     }}
@@ -97,6 +100,7 @@ export default function Login() {
                                 onChange={e => setPassword(e.target.value)}
                                 required
                             />
+                            
                         </div>
                         <button
                             className="btn btn-primary w-100 py-2 fw-bold rounded-pill shadow-sm mb-4"
@@ -105,6 +109,23 @@ export default function Login() {
                         >
                             {loading ? "連線中..." : "立即進入系統"}
                         </button>
+
+                        {/* --- 左右按鈕排版區塊 --- */}
+                        <div className="d-flex justify-content-between align-items-center mb-4">
+                            <Link 
+                                to="/register" 
+                                className="btn btn-link text-primary p-0 text-decoration-none small fw-bold"
+                            >
+                                <i className="bi bi-plus-fill me-1"></i>註冊新帳號
+                            </Link>
+                    
+                            <Link 
+                                to="/forgot-password" 
+                                className="btn btn-link text-muted p-0 text-decoration-none small"
+                            >
+                                忘記密碼？
+                            </Link>
+                        </div>
 
                         <div className="text-center">
                             <span className="text-muted small opacity-50">

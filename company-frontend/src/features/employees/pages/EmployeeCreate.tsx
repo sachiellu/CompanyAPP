@@ -4,6 +4,7 @@ import { api } from '../../../services/api';
 import type { Company } from '../../companies/types';
 import { useEscBack } from '../../../hooks/useEscBack';
 import { EmployeeFormFields } from '../components/EmployeeFormFields';
+import { extractErrorMessage } from '../../../utils/errorHandler';
 
 
 export default function EmployeeCreate() {
@@ -22,9 +23,13 @@ export default function EmployeeCreate() {
     const [loading, setLoading] = useState(false);
 
     useEffect(() => {
-        api.get<Company[]>('/companies').then(res => {
-            if (res.ok) setCompanies(res.data);
-        });
+        api.get<Company[]>('/companies')
+           .then(res => {
+               setCompanies(res.data || []); // 加上 || [] 是一種防呆好習慣
+           })
+           .catch(err => {
+               console.error("載入廠商清單失敗", err); // 養成用 axios 順手加 catch 的習慣
+           });
     }, []);
 
     const handleChange = (key: string, value: string) => {
@@ -35,14 +40,25 @@ export default function EmployeeCreate() {
         e.preventDefault();
         setLoading(true);
         try {
-            // 將 companyId 轉為數字再送出
-            const payload = {
-                ...formData,
-                companyId: Number(formData.companyId)
+            const payload = { 
+                ...formData, 
+                companyId: Number(formData.companyId) 
             };
-            const res = await api.post('/employees', payload);
-            if (res.ok) navigate('/employees');
-        } finally { setLoading(false); }
+            
+            // Axios 只要能過這行，就是成功
+            await api.post('/employees', payload); 
+            alert("員工建立成功！");
+            navigate('/employees');
+
+        } catch (err: unknown) {
+            console.error("建立失敗:", err);
+            
+            const errorMsg = extractErrorMessage(err);
+            alert(errorMsg); 
+            
+        } finally { 
+            setLoading(false); 
+        }
     };
 
     return (
@@ -54,7 +70,7 @@ export default function EmployeeCreate() {
 
             <form onSubmit={handleSubmit} className="card shadow border-0 p-4 mx-auto text-start" style={{ maxWidth: '850px' }}>
 
-                {/* 🔥 4. 把原本手刻的一堆 <input> 刪掉，換成呼叫元件！ */}
+                {/* 把原本手刻的一堆 <input> 刪掉，換成呼叫元件！ */}
                 <EmployeeFormFields
                     data={formData}
                     companies={companies}

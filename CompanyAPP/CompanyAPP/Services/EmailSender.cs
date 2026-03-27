@@ -19,6 +19,7 @@ namespace CompanyAPP.Services
 
         public async Task SendEmailAsync(string email, string subject, string htmlMessage)
         {
+            Console.WriteLine($"[EmailSender] 🚀 準備寄信給: {email}"); // 加入追蹤點 1
             try
             {
                 // 1. 從 appsettings (或 Fly Secrets) 讀取資料
@@ -27,6 +28,8 @@ namespace CompanyAPP.Services
                 int port = int.Parse(_configuration["EmailSettings:Port"] ?? "587");
                 string myEmail = _configuration["EmailSettings:SenderEmail"] ?? string.Empty;
                 string myPassword = _configuration["EmailSettings:AppPassword"] ?? string.Empty;
+
+                Console.WriteLine($"[EmailSender] 🚀 準備寄信給: {email}"); // 加入追蹤點 1
 
                 // 2. 檢查關鍵資料是否為空
                 if (string.IsNullOrEmpty(myEmail) || string.IsNullOrEmpty(myPassword))
@@ -51,17 +54,25 @@ namespace CompanyAPP.Services
                     };
                     mailMessage.To.Add(email);
 
+                    Console.WriteLine($"[EmailSender] ⏳ 正在連線 SMTP 伺服器發送..."); // 加入追蹤點 3
+
                     // 5. 發送
                     await client.SendMailAsync(mailMessage);
                     _logger.LogInformation($"成功發送郵件給：{email}");
+
+                    Console.WriteLine($"[EmailSender] ✅ 成功發送郵件給：{email}"); // 加入追蹤點 4
                 }
             }
             catch (Exception ex)
             {
+                _logger.LogError(ex, $"寄信失敗！目標：{email}, 錯誤訊息：{ex.Message}");
                 // 捕捉錯誤，不要讓網站掛掉 (500 Error)
                 // 這樣可以在 fly logs 看到紅字，不會看到網頁壞掉
                 _logger.LogError(ex, $"寄信失敗！目標：{email}, 錯誤訊息：{ex.Message}");
                 // 這裡可以選擇是否要 throw，如果不 throw，程式會繼續執行 (註冊流程會跑完，只是沒收到信)
+
+                Console.WriteLine($"[EmailSender] ❌ 寄信發生嚴重錯誤: {ex.ToString()}"); // 強制印出完整錯誤
+                throw; // 再次提醒：開發階段一定要加上 throw，讓前端知道失敗了！
             }
         }
     }

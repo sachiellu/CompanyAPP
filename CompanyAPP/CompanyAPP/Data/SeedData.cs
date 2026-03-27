@@ -1,6 +1,6 @@
-﻿using Microsoft.AspNetCore.Identity;
+﻿using CompanyAPP.Models;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-
 
 namespace CompanyAPP.Data
 {
@@ -10,9 +10,9 @@ namespace CompanyAPP.Data
         {
             var userManager = serviceProvider.GetRequiredService<UserManager<IdentityUser>>();
             var roleManager = serviceProvider.GetRequiredService<RoleManager<IdentityRole>>();
-            var configuration = serviceProvider.GetRequiredService<IConfiguration>();
+            var context = serviceProvider.GetRequiredService<CompanyAppContext>();
 
-            // 1. 確保角色存在
+            // 1. 確保所有角色存在
             string[] roleNames = { "Admin", "Manager", "User" };
             foreach (var roleName in roleNames)
             {
@@ -22,46 +22,51 @@ namespace CompanyAPP.Data
                 }
             }
 
-            // 2. 讀取設定檔中的管理員資訊 (避免寫死在程式碼)
-            // 如果 appsettings 沒設，就用後面那個預設值
-            var adminEmail = configuration["AdminSettings:Email"] ?? "admin@default.com";
-            var adminPwd = configuration["AdminSettings:Password"] ?? "Admin123!";
-
-            // 3. 檢查管理員是否存在
+            // 2. 建立管理員 (admin@default.com)
+            var adminEmail = "admin@default.com";
             var adminUser = await userManager.FindByEmailAsync(adminEmail);
-
             if (adminUser == null)
             {
-                // 建立一個新的最高管理權限帳戶，並直接設為已驗證
-                var newAdmin = new IdentityUser
-                {
-                    UserName = adminEmail,
-                    Email = adminEmail,
-                    EmailConfirmed = true
-                };
-
-                var createResult = await userManager.CreateAsync(newAdmin, adminPwd);
-
-                if (createResult.Succeeded)
+                var newAdmin = new IdentityUser { UserName = adminEmail, Email = adminEmail, EmailConfirmed = true };
+                var result = await userManager.CreateAsync(newAdmin, "Admin123!");
+                if (result.Succeeded)
                 {
                     await userManager.AddToRoleAsync(newAdmin, "Admin");
                 }
             }
-            else
+
+            // 3. 建立一般員工 (user@default.com)
+            var userEmail = "user@default.com";
+            var normalUser = await userManager.FindByEmailAsync(userEmail);
+            if (normalUser == null)
             {
-                // 已有既有資料庫,補上權限與驗證狀態
-
-                // 補權限
-                if (!await userManager.IsInRoleAsync(adminUser, "Admin"))
+                var newUser = new IdentityUser { UserName = userEmail, Email = userEmail, EmailConfirmed = true };
+                var result = await userManager.CreateAsync(newUser, "User123!");
+                if (result.Succeeded)
                 {
-                    await userManager.AddToRoleAsync(adminUser, "Admin");
+                    await userManager.AddToRoleAsync(newUser, "User");
                 }
+                normalUser = newUser; // 讓後面的員工綁定邏輯可以拿到 ID
+            }
 
-                // 補驗證 (特赦既有的 Admin)
-                if (!adminUser.EmailConfirmed)
+            // 4. 關鍵：確保「一般員工」在 Employee 資料表也有檔案 (否則登入後會報錯)
+            // 這裡抓出剛才建立或已存在的 User
+            var existingUser = await userManager.FindByEmailAsync(userEmail);
+            if (existingUser != null)
+            {
+                // 檢查 Employee 表是否有這名員工，沒有就補上
+                var empProfile = await context.Employee.FirstOrDefaultAsync(e => e.Email == userEmail);
+                if (empProfile == null)
                 {
-                    adminUser.EmailConfirmed = true;
-                    await userManager.UpdateAsync(adminUser);
+                    context.Employee.Add(new Employee
+                    {
+                        Name = "示範員工",
+                        Email = userEmail,
+                        UserId = existingUser.Id, // 綁定 Identity ID
+                        Status = Employee.EmployeeStatus.Active,
+                        StaffId = "DEMO001"
+                    });
+                    await context.SaveChangesAsync();
                 }
             }
         }

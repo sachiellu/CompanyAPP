@@ -10,6 +10,7 @@ using Microsoft.EntityFrameworkCore;
 using System.Text.Json.Serialization;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.DataProtection;
+using Microsoft.AspNetCore.Identity.UI.Services; // IEmailSender 所在的命名空間
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -56,7 +57,8 @@ builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<IImageService, ImageService>();
 builder.Services.AddScoped<ICompanyService, CompanyService>();
 builder.Services.AddScoped<IEmployeeService, EmployeeService>();
-builder.Services.AddTransient<Microsoft.AspNetCore.Identity.UI.Services.IEmailSender, CompanyAPP.Services.EmailSender>();
+builder.Services.AddScoped<IEmployeeExcelService, EmployeeExcelService>();
+
 
 builder.Services.AddDbContext<CompanyAppContext>(options =>
     options.UseSqlite(connectionString));
@@ -70,9 +72,10 @@ builder.Services.AddCors(options =>
     options.AddPolicy("AllowAll",
         policy =>
         {
-            policy.AllowAnyOrigin()
+            policy.WithOrigins("http://localhost:5173")
                   .AllowAnyHeader()
-                  .AllowAnyMethod();
+                  .AllowAnyMethod()
+                  .AllowCredentials(); // 必須允許傳送憑據(Cookie)
         });
 });
 
@@ -102,15 +105,19 @@ builder.Services.AddDefaultIdentity<IdentityUser>(options =>
     .AddErrorDescriber<CustomIdentityErrorDescriber>()
     .AddEntityFrameworkStores<CompanyAppContext>();
 
+builder.Services.AddTransient<IEmailSender, EmailSender>();
 // 設定 Cookie 安全性 (給 Razor Pages 用)
 builder.Services.ConfigureApplicationCookie(options =>
 {
     options.Cookie.HttpOnly = true;
     options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
     options.Cookie.SameSite = SameSiteMode.Lax;
+    options.ExpireTimeSpan = TimeSpan.FromDays(7); // 留存 7 天cookies
+    options.SlidingExpiration = true;             // 「滑動過期」：只要有操作，就自動幫你再續 7 天
+
 });
 
-//  關鍵修改：整合 JWT 設定到 Authentication Pipeline 
+// 整合 JWT 設定到 Authentication Pipeline 
 // 這裡同時設定了預設驗證方案為 JWT，確保 API 優先使用 Token
 builder.Services.AddAuthentication(options =>
 {
@@ -134,6 +141,17 @@ builder.Services.AddAuthentication(options =>
     // 這裡是用來攔截錯誤，防止回傳 HTML 的關鍵
     options.Events = new JwtBearerEvents
     {
+        OnMessageReceived = context =>
+        {
+            // 從剛才設定的 Cookie 名稱 "X-Access-Token" 讀取
+            var accessToken = context.Request.Cookies["X-Access-Token"];
+            if (!string.IsNullOrEmpty(accessToken))
+            {
+                context.Token = accessToken;
+            }
+            return Task.CompletedTask;
+        },
+
         OnChallenge = context =>
         {
             // 強制取消預設的轉導行為

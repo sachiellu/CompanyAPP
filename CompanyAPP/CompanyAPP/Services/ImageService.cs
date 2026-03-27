@@ -31,7 +31,16 @@ namespace CompanyAPP.Services
             };
 
             var uploadResult = await _cloudinary.UploadAsync(uploadParams);
-            return uploadResult.SecureUrl.ToString(); // 回傳雲端圖片網址
+            // 防呆檢查 
+            if (uploadResult.Error != null)
+            {
+                // 上傳失敗時，印出錯誤訊息，並回傳空字串，不要讓程式崩潰
+                Console.WriteLine($"Cloudinary 上傳失敗: {uploadResult.Error.Message}");
+                return string.Empty;
+            }
+
+            // 確保 SecureUrl 不是 null 才呼叫 ToString
+            return uploadResult.SecureUrl?.ToString() ?? string.Empty;
         }
 
         public async Task DeleteImageAsync(string publicId)

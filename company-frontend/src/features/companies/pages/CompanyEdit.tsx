@@ -5,6 +5,7 @@ import { api } from '../../../services/api';
 import type { Company, Contact } from '../types';
 import { CompanyFormFields } from '../components/CompanyFormFields';
 import { useEscBack } from '../../../hooks/useEscBack';
+import { extractErrorMessage } from '../../../utils/errorHandler';
 
 export default function CompanyEdit() {
     useEscBack('/companies');
@@ -29,17 +30,19 @@ export default function CompanyEdit() {
         setLoading(true);
         try {
             const res = await api.get<Company>(`/companies/${compId}`);
-            if (res.ok) {
-                const d = res.data;
-                setName(d.name || "");
-                setTaxId(d.taxId || "");
-                setIndustry(d.industry || "");
-                setAddress(d.address || "");
-                setExistingLogo(d.logoPath || "");
-                setContacts(d.contacts || []); // 載入聯絡人
-                if (d.foundedDate) setFoundedDate(d.foundedDate.split('T')[0]);
+            const d = res.data;
+            setName(d.name || "");
+            setTaxId(d.taxId || "");
+            setIndustry(d.industry || "");
+            setAddress(d.address || "");
+            setExistingLogo(d.logoPath || "");
+            setContacts(d.contacts || []); // 載入聯絡人
+            if (d.foundedDate) setFoundedDate(d.foundedDate.split('T')[0]);
+        } catch (err) {
+                console.error(err);
+            } finally { 
+                setLoading(false); 
             }
-        } finally { setLoading(false); }
     }, []);
 
     useEffect(() => { if (id) fetchDetail(id); }, [id, fetchDetail]);
@@ -90,10 +93,15 @@ export default function CompanyEdit() {
         });
 
         try {
-            const res = await api.put(`/companies/${id}`, formData);
-            if (res.ok) navigate('/companies');
-        } finally { setLoading(false); }
-    };
+            await api.put(`/companies/${id}`, formData);
+            navigate('/companies');
+        } catch (err) {
+        const errorMessage = extractErrorMessage(err); 
+            alert(errorMessage);
+        } finally { 
+            setLoading(false); 
+        }
+};
 
     return (
         <div className="page-container position-relative px-4 pt-3">

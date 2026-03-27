@@ -17,7 +17,7 @@ export default function UserList() {
         setLoading(true);
         try {
             const res = await userApi.getUsers();
-            if (res.ok) {
+            if (res.data) {
                 setUsers(res.data || []);
             }
         } catch (err) {
@@ -29,7 +29,7 @@ export default function UserList() {
 
     useEffect(() => {
         fetchData();
-    }, [fetchData]);
+    }, [fetchData]); // 當 fetchData 說明書準備好時，立即執行一次
 
     // 處理角色變更
     const handleRoleChange = async (userId: string, newRole: string) => {
@@ -38,7 +38,7 @@ export default function UserList() {
         try {
             setLoading(true);
             const res = await userApi.changeRole(userId, newRole);
-            if (res.ok) {
+            if (res.data) {
                 alert("權限更新成功！");
                 fetchData(); // 重新整理列表
             }
@@ -52,8 +52,8 @@ export default function UserList() {
 
     // 簡單的前端搜尋過濾
     const filteredUsers = users.filter(u =>
-        u.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        u.linkedEmployeeName.toLowerCase().includes(searchTerm.toLowerCase())
+        (u.email ?? "").toLowerCase().includes(searchTerm.toLowerCase()) ||
+        (u.linkedEmployeeName ?? "").toLowerCase().includes(searchTerm.toLowerCase())
     );
 
     // 畫面渲染邏輯：在這裡才進行權限判斷
@@ -61,7 +61,7 @@ export default function UserList() {
         return (
             <div className="p-5 text-center mt-5 text-danger">
                 <h2>⛔ 拒絕存取</h2>
-                <p>親，您沒有權限進入此頁面。</p>
+                <p>親愛的，您沒有權限進入此頁面。</p>
             </div>
         );
     }

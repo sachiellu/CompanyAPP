@@ -38,25 +38,38 @@ namespace CompanyAPP.Controllers.Api
         [HttpPost("register")]
         public async Task<IActionResult> Register([FromBody] RegisterDto dto)
         {
-            var user = new IdentityUser { UserName = dto.Email, Email = dto.Email };
-            var result = await _userManager.CreateAsync(user, dto.Password);
+            // 1. 先確認這名員工在不在你的列表中
+            var employee = await _context.Employee.FirstOrDefaultAsync(e => e.Email == dto.Email);
+            if (employee == null) return BadRequest(new { message = "員工資料未建檔，請聯繫管理員。" });
 
-            if (result.Succeeded)
+            // 2. 處理 IdentityUser (Identity 資料庫)
+            var user = await _userManager.FindByEmailAsync(dto.Email);
+
+            if (user == null)
             {
-                // --- Stage 2 核心邏輯：綁定員工 ---
-                var employee = await _context.Employee
-                    .FirstOrDefaultAsync(e => e.Email == dto.Email && e.Status == Employee.EmployeeStatus.Unregistered);
-
-                if (employee != null)
-                {
-                    employee.UserId = user.Id;
-                    employee.Status = Employee.EmployeeStatus.Active;
-                    await _context.SaveChangesAsync();
-                }
-
-                return Ok(new { message = "註冊成功且身分已自動綁定" });
+                // 如果是全新的
+                user = new IdentityUser { UserName = dto.Email, Email = dto.Email };
+                var result = await _userManager.CreateAsync(user, dto.Password);
+                if (!result.Succeeded) return BadRequest(result.Errors);
             }
-            return BadRequest(result.Errors);
+            else
+            {
+                // 解決「邏輯打架」：如果帳號已存在（可能是之前註冊中斷或管理員預創）
+                // 我們直接重設密碼完成開通
+                var resetToken = await _userManager.GeneratePasswordResetTokenAsync(user);
+                await _userManager.ResetPasswordAsync(user, resetToken, dto.Password);
+            }
+
+            // 3. 重點：完成綁定與狀態轉換
+            user.EmailConfirmed = true;
+            await _userManager.UpdateAsync(user);
+
+            employee.UserId = user.Id;           // 綁定 UserId
+            employee.Status = Employee.EmployeeStatus.Active; // 將「待註冊」改為「Active」
+
+            await _context.SaveChangesAsync();
+
+            return Ok(new { message = "帳號已成功開通，身分已綁定！" });
         }
 
         public class LoginDto { public string Email { get; set; } = string.Empty; public string Password { get; set; } = string.Empty; }
@@ -81,20 +94,33 @@ namespace CompanyAPP.Controllers.Api
 
                 var authSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["JwtSettings:Key"] ?? "YourDefaultKeyThatIsLongEnough"));
 
+                // JwtSecurityToken 定義區塊
                 var token = new JwtSecurityToken(
                     issuer: _configuration["JwtSettings:Issuer"],
-                    audience: _configuration["JwtSettings:Audience"],
-                    expires: DateTime.Now.AddHours(3),
+                    audience: _configuration["JwtSettings:Issuer"], // 建議跟 Issuer 設一樣
+                    expires: DateTime.Now.AddDays(7),
                     claims: authClaims,
                     signingCredentials: new SigningCredentials(authSigningKey, SecurityAlgorithms.HmacSha256)
                 );
 
-                // 修正 3: 同時回傳 token 和主要的 Role，方便前端 React 判斷
+                var tokenString = new JwtSecurityTokenHandler().WriteToken(token);
+
+                Response.Cookies.Append("X-Access-Token", tokenString, new CookieOptions
+                {
+                    HttpOnly = true,       // 呼應在 Program.cs 的限制，JS 拿不到
+                    Secure = Request.IsHttps,         // 呼應在 Program.cs 的限制，沒 HTTPS 不傳
+                                                      //     Secure = false,      //  本地 http 測試先改為 false，否則瀏覽器絕對不存
+                    SameSite = SameSiteMode.Lax,
+                    Expires = DateTimeOffset.UtcNow.AddDays(7) // 這裡決定留存時間
+                });
+
                 return Ok(new
                 {
-                    token = new JwtSecurityTokenHandler().WriteToken(token),
-                    role = userRoles.FirstOrDefault() ?? "User", // 取第一個角色作為主要身分
+                    message = "登入成功",
+                    role = userRoles.FirstOrDefault(), // 不再回傳 token 字串了！
+                    token = "cookie-mode",              // 主要是為了騙過檢查 localStorage 的前端邏輯
                     email = user.Email
+
                 });
             }
             return Unauthorized(new { message = "帳號或密碼錯誤" });

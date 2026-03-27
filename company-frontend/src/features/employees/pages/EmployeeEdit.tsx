@@ -5,6 +5,7 @@ import { type Employee, EmployeeStatus } from '../types';
 import type { Company } from '../../companies/types';
 import { useEscBack } from '../../../hooks/useEscBack';
 import { EmployeeFormFields } from '../components/EmployeeFormFields';
+import { extractErrorMessage } from '../../../utils/errorHandler';
 
 export default function EmployeeEdit() {
     useEscBack('/employees');
@@ -14,7 +15,6 @@ export default function EmployeeEdit() {
 
     const userRole = localStorage.getItem('userRole');
     const isAdmin = userRole === 'Admin'; // 判斷是否為管理員
-
 
     const [formData, setFormData] = useState({
         staffId: "",
@@ -30,22 +30,29 @@ export default function EmployeeEdit() {
         setLoading(true);
         try {
             const [resComp, resEmp] = await Promise.all([
-                api.get<Company[]>('/companies'),
-                api.get<Employee>(`/employees/${employeeId}`)
+                api.get<Company[]>(`/companies`), 
+                api.get<Employee>(`/employees/${employeeId}`) 
             ]);
-            if (resComp.ok) setCompanies(resComp.data);
-            if (resEmp.ok) {
-                const emp = resEmp.data;
-                setFormData({
-                    staffId: emp.staffId || "",
-                    name: emp.name || "",
-                    position: emp.position || "",
-                    email: emp.email || "",
-                    companyId: emp.companyId?.toString() || "",
-                    status: emp.status
-                });
-            }
-        } finally { setLoading(false); }
+
+            // Axios 直接拿 data，不需要檢查 .ok
+            setCompanies(resComp.data); 
+            const emp = resEmp.data;    
+            
+            setFormData({
+                staffId: emp.staffId || "",
+                name: emp.name || "",
+                position: emp.position || "",
+                email: emp.email || "",
+                companyId: emp.companyId?.toString() || "",
+                status: emp.status
+            });
+        } catch (err) {
+            console.error("讀取資料失敗:", err);
+            // 如果你的 api.ts 有寫攔截器，這裡甚至可以不用寫 alert
+        } finally { 
+            setLoading(false); 
+        }
+        //  這裡補上了遺失的 closing brackets
     }, []);
 
     useEffect(() => {
@@ -59,15 +66,25 @@ export default function EmployeeEdit() {
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setLoading(true);
-        // 4. 使用 formData 建立 payload
         const payload = {
             ...formData,
             companyId: Number(formData.companyId)
         };
+        
         try {
-            const res = await api.put(`/employees/${id}`, payload);
-            if (res.ok) navigate('/employees');
-        } finally { setLoading(false); }
+            await api.put(`/employees/${id}`, payload);
+            alert("修改成功！");
+            navigate('/employees');
+            
+        } catch (err: unknown) {
+            console.error("修改失敗:", err);
+            
+            const errorMsg = extractErrorMessage(err);
+            alert(errorMsg); 
+
+        } finally { 
+            setLoading(false); 
+        }
     };
 
     return (
@@ -79,8 +96,6 @@ export default function EmployeeEdit() {
 
             <form onSubmit={handleSubmit} className="card shadow border-0 p-4 mx-auto text-start" style={{ maxWidth: '850px' }}>
 
-                {/* 5. 呼叫元件，取代掉原本的一堆 HTML */}
-                {/* 記得加上 isEdit={true}，這樣 Email 鎖定邏輯才會生效 */}
                 <EmployeeFormFields
                     data={formData}
                     companies={companies}

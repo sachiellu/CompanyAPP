@@ -7,6 +7,8 @@ export const StatusBadge: React.FC<{ status: EmployeeStatus }> = ({ status }) =>
         [EmployeeStatus.Active]: { label: '已啟動', cls: 'bg-success' },
         [EmployeeStatus.Disabled]: { label: '已停用', cls: 'bg-danger' },
     };
+    
     const config = configs[status] || configs[EmployeeStatus.Unregistered];
+    
     return <span className={`badge ${config.cls}`}>{config.label}</span>;
 };
