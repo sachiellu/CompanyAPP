@@ -72,7 +72,7 @@ builder.Services.AddCors(options =>
     options.AddPolicy("AllowAll",
         policy =>
         {
-            policy.WithOrigins("http://localhost:5173")
+            policy.WithOrigins("http://localhost:5173", "https://companyapp-luyu.fly.dev")
                   .AllowAnyHeader()
                   .AllowAnyMethod()
                   .AllowCredentials(); // 必須允許傳送憑據(Cookie)

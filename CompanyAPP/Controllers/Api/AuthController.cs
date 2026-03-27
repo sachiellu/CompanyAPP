@@ -108,9 +108,8 @@ namespace CompanyAPP.Controllers.Api
                 Response.Cookies.Append("X-Access-Token", tokenString, new CookieOptions
                 {
                     HttpOnly = true,       // 呼應在 Program.cs 的限制，JS 拿不到
-                    Secure = Request.IsHttps,         // 呼應在 Program.cs 的限制，沒 HTTPS 不傳
-                                                      //     Secure = false,      //  本地 http 測試先改為 false，否則瀏覽器絕對不存
-                    SameSite = SameSiteMode.Lax,
+                    Secure = true,        // 呼應在 Program.cs 的限制，沒 HTTPS 不傳
+                    SameSite = SameSiteMode.None,
                     Expires = DateTimeOffset.UtcNow.AddDays(7) // 這裡決定留存時間
                 });
 
