@@ -1,0 +1,109 @@
+﻿<!DOCTYPE html>
+<html lang="zh-tw">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - 嗨!你好😊</title>
+    <script type="importmap"></script>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/project01.styles.css" asp-append-version="true" />
+</head>
+<body>
+    <header>
+        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
+            <div class="container-fluid">
+                <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">企業管理系統</a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
+                        aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+
+                @* ==== 這是正確的折疊容器：所有連結必須在這裡面 ==== *@
+                <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
+                    @* 1. 左側主連結區塊 (佔據左側所有空間) *@
+                    <ul class="navbar-nav flex-grow-1">
+                     @* 首頁 (所有人都能看) *@
+                        <li class="nav-item">
+                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">首頁</a>
+                        </li>
+
+                        <li class="nav-item">
+                            <a class="nav-link text-dark" asp-area="" asp-controller="Companies" asp-action="Index">廠商管理</a>
+                        </li>
+
+                        <li class="nav-item">
+                            <a class="nav-link text-dark" asp-controller="Employees" asp-action="Index">員工管理</a>
+                        </li>
+
+                        <li class="nav-item">
+                            <a class="nav-link nav-link text-dark" asp-controller="Missions" asp-action="Index">派工管理</a>
+                        </li>
+
+                        @* 只有 Admin 才能看到帳號管理 *@
+                        @if (User.IsInRole("Admin"))
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link text-danger fw-bold" asp-controller="Users" asp-action="Index">帳號管理</a>
+                            </li>
+
+                            <li class="nav-item">
+                                <a class="nav-link text-info fw-bold" asp-controller="AuditLogs" asp-action="Index"> 稽核紀錄</a>
+                            </li>
+                        }
+                    </ul>
+
+                    @* 2. 右側登入/登出 PartialView 區塊 (Bootstrap 會自動將其推到右邊) *@
+                    <ul class="navbar-nav ms-auto">
+                        <partial name="_LoginPartial" />
+                    </ul>
+
+                </div>
+            </div>
+        </nav>
+    </header>
+    <div class="container">
+        <main role="main" class="pb-3">
+            @RenderBody()
+        </main>
+    </div>
+
+    <footer class="border-top footer text-muted">
+        <div class="container">
+            &copy; 2025 - 嗨!你好😊企業資源管理系統 版本 1.0 - <a asp-area="" asp-controller="Home" asp-action="Privacy">隱私</a>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <script>
+        // 檢查後端有沒有傳來成功訊息
+        var successMsg = '@Html.Raw(TempData["SuccessMessage"])';
+
+        if (successMsg) {
+            Swal.fire({
+                text: successMsg,           // 改用 text，字體較小
+                target: 'body',
+                toast: true,
+                position: 'bottom-right',   // 改到右下角 (比較不擋視線)
+                showConfirmButton: false,
+                timer: 2000,                // 縮短時間 (1.5秒)
+                background: '#333',         // 黑底
+                color: '#fff',              // 白字
+                customClass: {
+                    popup: 'colored-toast'  // 可以自訂 CSS 去掉陰影
+                },
+                showClass: { popup: '' },   // 去掉跳出來的動畫，直接浮現
+                hideClass: { popup: '' }
+            });
+        }
+    </script>
+
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

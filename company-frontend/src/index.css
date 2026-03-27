@@ -1,0 +1,139 @@
+﻿/* ==========================================================================
+   1. 地基層 (Base/Global)：針對標籤的基本設定
+   ========================================================================== */
+:root {
+    font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
+    line-height: 1.5;
+    font-weight: 400;
+    /* 縮減數值以適配 100% 視角 */
+    --header-height: 48px;
+    --page-padding: 20px;
+    scrollbar-gutter: stable;
+}
+
+body {
+    margin: 0;
+    padding: 0;
+    min-width: 320px;
+    min-height: 100vh;
+    overflow-x: hidden;
+    font-size: 14px; /* 標準字體 */
+    background-color: #f8f9fa;
+}
+
+a {
+    font-weight: 500;
+    color: #646cff;
+    text-decoration: inherit;
+}
+
+    a:hover {
+        color: #535bf2;
+    }
+
+/* ==========================================================================
+   2. 組件基礎 (Components Base)：通用樣式
+   ========================================================================== */
+h1 {
+    font-size: 3.2em;
+    line-height: 1.1;
+    margin: 0;
+}
+
+button {
+    border-radius: 8px;
+    border: 1px solid transparent;
+    padding: 0.6em 1.2em;
+    font-size: 1em;
+    font-weight: 500;
+    font-family: inherit;
+    background-color: #1a1a1a;
+    cursor: pointer;
+    transition: border-color 0.25s;
+}
+
+    button:hover {
+        border-color: #646cff;
+    }
+
+    button:focus,
+    button:focus-visible {
+        outline: 4px auto -webkit-focus-ring-color;
+    }
+
+
+/* 針對所有的 main 區域強制預留捲軸空間 */
+main {
+    /* 這是關鍵：它會強制保留捲軸的空間，不論有沒有內容，
+       這樣 List 和 Detail 的寬度就會完全一模一樣 */
+    scrollbar-gutter: stable;
+    overflow-y: auto;
+}
+
+
+/* ==========================================================================
+   3 核心佈局 (Layout)：垂直排列
+   ========================================================================== */
+.page-container {
+    display: flex;
+    flex-direction: column; /* 讓 Header 和 Content 垂直排列 */
+    width: 100%;
+    min-height: 100vh;
+    padding: var(--page-padding);
+    box-sizing: border-box;
+    background-color: #f8f9fa; /* 稍微給一點背景色比較好看 */
+}
+
+/* ==========================================================================
+   4 功能性樣式 (Feature)：改為相對定位 
+   ========================================================================== */
+.page-header-wrapper {
+    position: relative; /* 改為 relative，它就會佔據空間，把內容往下推 */
+    width: 100%;
+    height: auto; /* 高度隨內容自動調整 */
+    min-height: var(--header-height);
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between;
+    margin-bottom: 2rem !important; /* 強制給標題下方留 2rem 的空間 */
+    z-index: 100;
+}
+
+.page-header-wrapper h2 {
+    margin: 0 !important;
+    line-height: 1.2 !important;
+    white-space: nowrap;
+    font-size: 1.75rem;
+    font-weight: 700;
+}
+
+
+/* ==========================================================================
+   5. 媒體查詢與深色模式 (Overrides)
+   ========================================================================== */
+@media (prefers-color-scheme: light) {
+    :root {
+        color: #213547;
+        background-color: #ffffff;
+    }
+
+    a:hover {
+        color: #747bff;
+    }
+
+    button {
+        background-color: #f9f9f9;
+    }
+}
+
+/* Dashboard hover card */
+
+.dashboard-card {
+    transition: all 0.2s ease;
+}
+
+    .dashboard-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 10px 20px rgba(0,0,0,0.12);
+        background-color: #f8f9fa;  
+    }
