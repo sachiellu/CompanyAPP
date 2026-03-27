@@ -87,13 +87,13 @@
 
 
                                     @* 刪除按鈕 *@
-                                    @if (User.Identity.Name != user.Email)
+                                    if (User.Identity.Name != user.Email)
                                     {
                                         <a asp-action="Delete" asp-route-id="@user.UserId"
                                            class="btn btn-outline-danger btn-sm ms-1"
                                            onclick="return confirm('確定要刪除此帳號？');">刪除</a>
                                     }
-                                }
+                                }S
                             </div>
                         </td>
                     </tr>

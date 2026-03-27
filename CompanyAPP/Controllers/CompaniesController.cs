@@ -1,9 +1,9 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using CompanyAPP.Data;
-using CompanyAPP.Models;
 using Microsoft.AspNetCore.Authorization;
 using CompanyAPP.Services;
+using CompanyAPP.Models;
+using Microsoft.AspNetCore.Mvc;
 
 namespace CompanyAPP.Controllers
 {
@@ -21,7 +21,7 @@ namespace CompanyAPP.Controllers
         public async Task<IActionResult> Index(string searchString)
         {
             var companies = await _companyService.GetAllAsync(searchString);
-            
+
             ViewData["CurrentFilter"] = searchString;
             return View(companies);
         }
@@ -51,13 +51,13 @@ namespace CompanyAPP.Controllers
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Create(Company company)
         {
-             if (ModelState.IsValid) 
-             {
+            if (ModelState.IsValid)
+            {
                 await _companyService.AddAsync(company);
 
                 TempData["SuccessMessage"] = "廠商已新增成功！";
                 return RedirectToAction(nameof(Index));
-             }
+            }
             return View(company);
         }
 
@@ -79,7 +79,7 @@ namespace CompanyAPP.Controllers
             try
             {
                 // 呼叫 Service 更新
-                await _companyService.UpdateAsync(company);
+                await _companyService.UpdateAsync(company, new List<ContactDto>());
             }
             catch (Exception) // 簡化錯誤捕捉
             {

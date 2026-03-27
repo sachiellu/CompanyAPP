@@ -33,9 +33,9 @@ namespace CompanyAPP.Controllers
             if (!string.IsNullOrEmpty(searchString))
             {
                 employees = employees.Where(s => s.Name.Contains(searchString));
-                                          //|| s.Position.Contains(searchString)
-                                          //|| s.Email.Contains(searchString)
-                                          //|| s.Company.Name.Contains(searchString));
+                //|| s.Position.Contains(searchString)
+                //|| s.Email.Contains(searchStrings)
+                //|| s.Company.Name.Contains(searchString));
             }
 
             switch (sortOrder)
@@ -226,7 +226,7 @@ namespace CompanyAPP.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(Employee employee)
         {
-            if (ModelState.IsValid) 
+            if (ModelState.IsValid)
             {
                 _context.Add(employee);
                 await _context.SaveChangesAsync();

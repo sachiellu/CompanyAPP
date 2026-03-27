@@ -5,7 +5,7 @@
 using System;
 using Microsoft.AspNetCore.Mvc.Rendering;
 
-namespace  CompanyAPP.Areas.Identity.Pages.Account.Manage
+namespace CompanyAPP.Areas.Identity.Pages.Account.Manage
 {
     public static class ManageNavPages
     {

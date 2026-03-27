@@ -1,4 +1,5 @@
-﻿Microsoft Visual Studio Solution File, Format Version 12.00
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.0.31903.59
 MinimumVisualStudioVersion = 10.0.40219.1
@@ -16,5 +17,15 @@ Global
 		{8F6A4A7C-0C5F-4E9D-A6C7-6B1B1E1E1E1E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{8F6A4A7C-0C5F-4E9D-A6C7-6B1B1E1E1E1E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{8F6A4A7C-0C5F-4E9D-A6C7-6B1B1E1E1E1E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9F6A4A7C-0C5F-4E9D-A6C7-6B1B1E1E1E1E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9F6A4A7C-0C5F-4E9D-A6C7-6B1B1E1E1E1E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9F6A4A7C-0C5F-4E9D-A6C7-6B1B1E1E1E1E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9F6A4A7C-0C5F-4E9D-A6C7-6B1B1E1E1E1E}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {F6BB713B-DD55-4EA8-A075-C5E7A7877B6C}
 	EndGlobalSection
 EndGlobal

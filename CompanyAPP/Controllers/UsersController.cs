@@ -98,7 +98,7 @@ namespace CompanyAPP.Controllers
             if (!removeResult.Succeeded)
             {
                 ModelState.AddModelError("", "移除權限失敗");
-                    TempData["StatusMessage"] = "錯誤：移除權限失敗";
+                TempData["StatusMessage"] = "錯誤：移除權限失敗";
                 return View("Index");
             }
 

@@ -32,7 +32,7 @@ namespace CompanyAPP.Areas.Identity.Pages.Account.Manage
 
         public class InputModel
         {
- 
+
             [Required]
             [StringLength(100, ErrorMessage = "{0} 長度至少必須為 {2} 個字元長。", MinimumLength = 6)]
             [DataType(DataType.Password)]
