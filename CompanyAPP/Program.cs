@@ -154,12 +154,16 @@ builder.Services.AddAuthentication(options =>
 
         OnChallenge = context =>
         {
-            // 強制取消預設的轉導行為
-            context.HandleResponse();
-            // 直接回傳 401 狀態碼
-            context.Response.StatusCode = StatusCodes.Status401Unauthorized;
-            context.Response.ContentType = "application/json";
-            return context.Response.WriteAsync("{\"error\": \"Unauthorized: Token missing or invalid\"}");
+            if (context.Request.Path.StartsWithSegments("/api"))
+            {
+                context.HandleResponse();
+                context.Response.StatusCode = StatusCodes.Status401Unauthorized;
+                context.Response.ContentType = "application/json";
+                return context.Response.WriteAsync("{\"error\": \"Unauthorized: Token missing or invalid\"}");
+            }
+
+            // 如果是首頁或前端路由，不執行 HandleResponse，讓它流向後面的 MapFallbackToFile
+            return Task.CompletedTask;
         }
     };
 });
@@ -190,6 +194,7 @@ app.UseForwardedHeaders(new ForwardedHeadersOptions
 {
     ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto
 });
+
 
 // Seed Data 初始化
 using (var scope = app.Services.CreateScope())
@@ -225,6 +230,8 @@ if (!app.Environment.IsDevelopment())
     app.UseHsts();
 }
 
+
+app.UseDefaultFiles();
 app.UseStaticFiles();
 app.UseRouting();
 
@@ -242,5 +249,7 @@ app.MapControllerRoute(
     pattern: "{controller=Home}/{action=Index}/{id?}");
 
 app.MapRazorPages();
+
+app.MapFallbackToFile("index.html").AllowAnonymous();
 
 app.Run();

@@ -109,7 +109,7 @@ namespace CompanyAPP.Controllers.Api
                 {
                     HttpOnly = true,       // 呼應在 Program.cs 的限制，JS 拿不到
                     Secure = true,        // 呼應在 Program.cs 的限制，沒 HTTPS 不傳
-                    SameSite = SameSiteMode.None,
+                    SameSite = SameSiteMode.Lax,
                     Expires = DateTimeOffset.UtcNow.AddDays(7) // 這裡決定留存時間
                 });
 
