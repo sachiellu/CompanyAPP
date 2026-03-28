@@ -2,7 +2,9 @@
 
 // 1. 建立實例
 export const api = axios.create({
-    baseURL: import.meta.env.VITE_API_URL || 'http://localhost:5203/api',
+// 修改這裡：如果是生產環境，直接用相對路徑 '/api'
+    // 這樣不管你是在 localhost 還是 fly.dev，它都會自動對齊
+    baseURL: import.meta.env.DEV ? 'http://localhost:5203/api' : '/api', 
     withCredentials: true,
     headers: {
         'Content-Type': 'application/json',
