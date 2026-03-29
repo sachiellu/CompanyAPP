@@ -31,18 +31,28 @@ export default function CompanyEdit() {
         try {
             const res = await api.get<Company>(`/companies/${compId}`);
             const d = res.data;
+
+            // 基礎欄位設定
             setName(d.name || "");
             setTaxId(d.taxId || "");
             setIndustry(d.industry || "");
             setAddress(d.address || "");
             setExistingLogo(d.logoPath || "");
-            setContacts(d.contacts || []); // 載入聯絡人
-            if (d.foundedDate) setFoundedDate(d.foundedDate.split('T')[0]);
-        } catch (err) {
-                console.error(err);
-            } finally { 
-                setLoading(false); 
+            setContacts(d.contacts || []); 
+            
+            // 聯絡人設定
+            setContacts(d.contacts || []); 
+
+            // 修正 Date 報錯：先取值，確認是字串再 split
+            const rawDate = d.foundedDate;
+            if (typeof rawDate === 'string') {
+                setFoundedDate(rawDate.split('T')[0]);
             }
+        } catch (err) {
+            console.error("載入詳情失敗:", err);
+        } finally { 
+            setLoading(false); 
+        }
     }, []);
 
     useEffect(() => { if (id) fetchDetail(id); }, [id, fetchDetail]);
@@ -115,7 +125,14 @@ export default function CompanyEdit() {
                 <div className="text-center mb-4 pb-4 border-bottom">
                     <div className="d-inline-block border bg-light shadow-sm mb-3 p-1">
                         <div className="bg-white d-flex align-items-center justify-content-center overflow-hidden" style={{ width: '200px', height: '200px' }}>
-                            <img src={previewUrl || existingLogo} className="w-100 h-100 object-fit-contain" alt="logo" />
+                            <img 
+                                // 只有當 existingLogo 是 http 開頭（雲端圖片）才顯示，否則顯示 null
+                                src={previewUrl || (existingLogo?.startsWith('http') ? existingLogo : null) || ""} 
+                                className="w-100 h-100 object-fit-contain" 
+                                alt="logo" 
+                                // 當圖片載入失敗（404）時，隱藏它，避免出現難看的破碎圖示
+                                onError={(e) => { e.currentTarget.style.display = 'none'; }}
+                            />
                         </div>
                     </div>
                     <div className="mx-auto" style={{ maxWidth: '350px' }}>

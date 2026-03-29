@@ -1,16 +1,15 @@
-﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.IdentityModel.Tokens;
-using System.Text;
-
-using CompanyAPP;
+﻿using CompanyAPP;
 using CompanyAPP.Data;
 using CompanyAPP.Services;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.EntityFrameworkCore;
-using System.Text.Json.Serialization;
-using Microsoft.AspNetCore.HttpOverrides;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.DataProtection;
+using Microsoft.AspNetCore.HttpOverrides;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI.Services; // IEmailSender 所在的命名空間
+using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
+using System.Text.Json.Serialization;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -174,7 +173,8 @@ builder.Services.AddAuthentication(options =>
 builder.Services.AddControllersWithViews()
     .AddJsonOptions(options =>
     {
-        options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
+        options.JsonSerializerOptions.PropertyNamingPolicy = System.Text.Json.JsonNamingPolicy.CamelCase;
+        options.JsonSerializerOptions.ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.IgnoreCycles;
     });
 
 // ==========================================
@@ -220,6 +220,24 @@ app.Use(async (context, next) =>
     context.Response.Headers.Append("X-Frame-Options", "DENY");
     context.Response.Headers.Remove("Server");
     context.Response.Headers.Remove("X-Powered-By");
+
+    // ============================================================
+    // 修正：Content Security Policy (CSP)
+    // 我們需要允許 img-src 去連 Cloudinary 的伺服器 (*.cloudinary.com)
+    // 這樣瀏覽器才不會擋掉上傳成功的圖片。
+    // ============================================================
+    string csp = "default-src 'self'; " +
+                 "script-src 'self'; " + // SPA 必備
+                 "style-src 'self'; " +  // CSS 必備
+                 "img-src 'self' data: blob: https://res.cloudinary.com https://*.cloudinary.com; " +
+                 "connect-src 'self'; " + // API 連線
+                 "font-src 'self'; " +
+                 "object-src 'none'; " +
+                 "base-uri 'self';";
+
+
+    context.Response.Headers.Append("Content-Security-Policy", csp);
+
     await next();
 });
 

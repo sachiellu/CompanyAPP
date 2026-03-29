@@ -43,13 +43,7 @@ export default function CompanyList() {
         setLoading(true);
         try {
             const res = await companyApi.getCompanies(s);
-            let realData: Company[] = [];
-            if (Array.isArray(res)) {
-                realData = res;
-            } else if (res && Array.isArray(res.data)) {
-                realData = res.data;
-            }
-            setCompanies(realData);
+            setCompanies(res.data || []); 
         } catch (err) {
             console.error("載入失敗:", err);
             setCompanies([]);
@@ -209,14 +203,10 @@ export default function CompanyList() {
                                                     handleCheck(company.id, fakeEvent);
                                                 }}
                                             >
-                                                {company.logoPath ? (
-                                                    <img
-                                                        src={company.logoPath}
-                                                        alt="logo"
-                                                        style={{ width: '100%', height: '100%', objectFit: 'contain', pointerEvents: 'none' }}
-                                                    />
+                                                {company.logoPath && company.logoPath.startsWith('http') ? (
+                                                    <img src={company.logoPath} alt="logo" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
                                                 ) : (
-                                                    <i className="bi bi-building text-secondary fs-5" style={{ pointerEvents: 'none' }}></i>
+                                                    <i className="bi bi-building text-secondary fs-5"></i>
                                                 )}
                                             </div>
 
