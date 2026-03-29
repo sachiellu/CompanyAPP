@@ -18,6 +18,13 @@ export interface Company {
     logoPath?: string;
     foundedDate?: string;
 
+    Name?: string;     
+    Industry?: string;
+    Address?: string;
+    LogoPath?: string;
+    TaxId?: string;
+    FoundedDate?: string;
+
     employees?: Employee[];
     contacts?: Contact[];
 }

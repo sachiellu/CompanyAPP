@@ -204,7 +204,7 @@ export default function CompanyList() {
                                                 }}
                                             >
                                                 {company.logoPath && company.logoPath.startsWith('http') ? (
-                                                    <img src={company.logoPath} alt="logo" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
+                                                    <img src={company.logoPath || company.LogoPath || ""} alt="logo" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
                                                 ) : (
                                                     <i className="bi bi-building text-secondary fs-5"></i>
                                                 )}
@@ -223,17 +223,17 @@ export default function CompanyList() {
                                                 }}
                                             />
 
-                                            <h6 className="card-title fw-bold mb-0 text-truncate" style={{ fontSize: '1.05rem' }}>{company.name}</h6>
+                                            <h6 className="card-title fw-bold mb-0 text-truncate" style={{ fontSize: '1.05rem' }}> {company.name || company.Name || '未知名稱'} </h6>
                                         </div>
 
                                         <div className="small text-muted mt-2" style={{ fontSize: '0.85rem' }}>
                                             <div className="d-flex align-items-center mb-2">
                                                 <span className="badge bg-light text-dark border me-2 fw-normal" style={{ fontSize: '0.7rem' }}>產業</span>
-                                                <span className="text-dark">{company.industry || '未填'}</span>
+                                                <span className="text-dark">{company.industry || company.Industry || '未填'}</span>
                                             </div>
                                             <div className="d-flex align-items-center">
                                                 <span className="badge bg-light text-dark border me-2 fw-normal" style={{ fontSize: '0.7rem' }}>地址</span>
-                                                <span className="text-dark text-truncate" style={{ maxWidth: '180px' }}>{company.address || '未填'}</span>
+                                                <span className="text-dark text-truncate" style={{ maxWidth: '180px' }}>{company.address || company.Address || '未填'}</span>
                                             </div>
                                         </div>
                                     </div>
