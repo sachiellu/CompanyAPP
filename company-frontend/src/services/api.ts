@@ -1,15 +1,32 @@
 ﻿import axios, { AxiosError } from 'axios';
 
+type UnknownObject = { [key: string]: unknown };
+
+// 把物件所有的 Key 轉為小寫開頭 (camelCase)
+const toCamel = (obj: unknown): unknown => {
+  if (Array.isArray(obj)) {
+    // 這裡使用 unknown[] 就不會報 any 錯誤
+    return obj.map((v) => toCamel(v));
+  } else if (obj !== null && typeof obj === 'object' && obj.constructor === Object) {
+    // 這裡參考你 errorHandler 的作法，將 obj 視為 UnknownObject
+    const safeObj = obj as UnknownObject;
+    return Object.keys(safeObj).reduce<UnknownObject>((result, key) => {
+      const camelKey = key.charAt(0).toLowerCase() + key.slice(1);
+      return {
+        ...result,
+        [camelKey]: toCamel(safeObj[key]),
+      };
+    }, {});
+  }
+  return obj;
+};
+
 // 1. 建立實例
 export const api = axios.create({
-// 修改這裡：如果是生產環境，直接用相對路徑 '/api'
-    // 這樣不管你是在 localhost 還是 fly.dev，它都會自動對齊
-    baseURL: import.meta.env.DEV ? 'http://localhost:5203/api' : '/api', 
+    baseURL: import.meta.env.DEV ? 'http://localhost:5203/api' : '/api',
     withCredentials: true,
-    headers: {
-        'Content-Type': 'application/json',
-    }
 });
+
 export const companyApi = {
     exportExcel: (ids: number[]) => 
         api.post('/companies/export', ids, { responseType: 'blob' }) // 關鍵：告知 Axios 這是檔案
@@ -26,24 +43,29 @@ api.interceptors.request.use((config) => {
     return config;
 });
 
-// 3. 回應攔截器：統一處理常見的那「四種錯誤」
+// 3. 回應攔截器 (合併功能)
 api.interceptors.response.use(
-    (response) => response, // 2xx 成功直接回傳
+    (response) => {
+        // A. 成功回傳時，自動將資料轉為小寫開頭
+        if (response.data && response.headers['content-type']?.includes('application/json')) {
+            response.data = toCamel(response.data);
+
+            
+            console.log("DEBUG: 轉換後的資料物件:", response.data);
+        }
+        return response;
+    },
     (error: AxiosError) => {
+        // B. 錯誤處理
         if (error.response) {
             const status = error.response.status;
-            
-            // 這就是「自動攔截」
-           if (status === 401 && !error.config?.url?.includes('/auth/login')) {
+            if (status === 401 && !error.config?.url?.includes('/auth/login')) {
                 alert("登入逾時，請重新登入");
                 window.location.href = '/login';
             }
-            
-            // 403, 500 維持原樣
             if (status === 403) alert("權限不足");
             if (status === 500) alert("伺服器故障");
-        }    
-        // 400 錯誤我們拋回去，讓頁面的 catch 處理具體驗證訊息
+        }
         return Promise.reject(error);
     }
 );

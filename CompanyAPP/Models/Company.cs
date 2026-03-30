@@ -33,7 +33,7 @@ namespace CompanyAPP.Models
 
         [Display(Name = "成立日期")]
         [DataType(DataType.Date)]
-        public DateTime FoundedDate { get; set; } = DateTime.Now.AddYears(-5);
+        public DateTime? FoundedDate { get; set; } = DateTime.Now.AddYears(-5);
 
         // --- 關聯屬性 ---
 

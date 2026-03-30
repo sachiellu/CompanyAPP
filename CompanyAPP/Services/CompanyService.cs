@@ -32,7 +32,7 @@ namespace CompanyAPP.Services
             if (id == null) return null;
             return await _context.Company
                 .Include(c => c.Employees) // 包含員工
-                .Include(c => c.Contacts)  // 修正：也要包含聯絡人
+                .Include(c => c.Contacts)  // 包含聯絡人
                 .FirstOrDefaultAsync(m => m.Id == id);
         }
 
@@ -49,31 +49,44 @@ namespace CompanyAPP.Services
 
         public async Task UpdateAsync(Company updatedCompany, List<ContactDto> contactDtos)
         {
-            // 1. 處理圖片 (保持原本邏輯)
-            if (updatedCompany.ImageFile != null)
-                updatedCompany.LogoPath = await _imageService.UploadImageAsync(updatedCompany.ImageFile);
 
-            // 2. 處理聯絡人同步邏輯
+            // 從資料庫抓出舊的 Company 資料 (包含現有的聯絡人)
             var existingCompany = await _context.Company
                 .Include(c => c.Contacts)
                 .FirstOrDefaultAsync(c => c.Id == updatedCompany.Id);
 
             if (existingCompany != null)
             {
-                _context.Entry(existingCompany).CurrentValues.SetValues(updatedCompany);
+                // 更新基本欄位 (這就是原本 SetValues 做的事，但我們手動寫，保護日期) ---
+                existingCompany.Name = updatedCompany.Name;
+                existingCompany.Industry = updatedCompany.Industry;
+                existingCompany.Address = updatedCompany.Address;
+                existingCompany.TaxId = updatedCompany.TaxId;
 
-                // 移除不在前端傳回來清單中的聯絡人 (Delete)
+                // 只有在日期不是預設值時才蓋掉舊日期
+                if (updatedCompany.FoundedDate.HasValue)
+                {
+                    existingCompany.FoundedDate = updatedCompany.FoundedDate.Value;
+                }
+
+                // 如果這次有新圖片網址，才更新 LogoPath
+                if (!string.IsNullOrEmpty(updatedCompany.LogoPath))
+                {
+                    existingCompany.LogoPath = updatedCompany.LogoPath;
+                }
+
+                // 移除不在前端清單中的舊聯絡人 (Delete)
                 var dtoIds = contactDtos.Select(d => d.Id).ToList();
                 var toRemove = existingCompany.Contacts.Where(c => !dtoIds.Contains(c.Id)).ToList();
                 foreach (var r in toRemove) _context.Remove(r);
 
-                // 更新或新增 (Update / Create)
+                // 更新現有的或新增沒看過的 (Update / Create)
                 foreach (var dto in contactDtos)
                 {
                     var existingContact = existingCompany.Contacts.FirstOrDefault(c => c.Id == dto.Id && c.Id != 0);
                     if (existingContact != null)
                     {
-                        // 更新舊有聯絡人
+                        // 更新舊有聯絡人內容
                         existingContact.Name = dto.Name;
                         existingContact.Phone = dto.Phone;
                         existingContact.Email = dto.Email;
@@ -81,7 +94,7 @@ namespace CompanyAPP.Services
                     }
                     else
                     {
-                        // 新增聯絡人
+                        // 新增全新的聯絡人到該公司下
                         existingCompany.Contacts.Add(new Contact
                         {
                             Name = dto.Name,
@@ -92,7 +105,7 @@ namespace CompanyAPP.Services
                     }
                 }
 
-                _context.Update(existingCompany);
+                // 3. 最後一次存檔
                 await _context.SaveChangesAsync();
             }
         }

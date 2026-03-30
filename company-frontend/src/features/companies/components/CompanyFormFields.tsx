@@ -22,7 +22,18 @@ export function CompanyFormFields({ data, onChange }: Props) {
             </div>
             <div className="col-md-4">
                 <label className="form-label fw-bold text-secondary small text-uppercase">統一編號</label>
-                <input className="form-control" value={data.taxId} onChange={e => onChange('taxId', e.target.value)} placeholder="8 位數字" />
+                <input 
+                    className="form-control" 
+                    value={data.taxId} 
+                    //  限制最大長度 8 碼
+                    maxLength={8} 
+                    onChange={e => {
+                        // 使用正則表達式，把所有「非數字」的東西替換成空字串
+                        const onlyNums = e.target.value.replace(/[^0-9]/g, '');
+                        onChange('taxId', onlyNums);
+                    }} 
+                    placeholder="8 位數字" 
+                />
             </div>
             <div className="col-md-6">
                 <label className="form-label fw-bold text-secondary small text-uppercase">產業類別</label>

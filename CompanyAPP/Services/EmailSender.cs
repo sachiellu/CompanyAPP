@@ -1,8 +1,6 @@
 ﻿using Microsoft.AspNetCore.Identity.UI.Services;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Logging; // 加入 Logger
-using System.Net;
-using System.Net.Mail;
+using System.Text;
+using System.Text.Json;
 
 namespace CompanyAPP.Services
 {
@@ -10,69 +8,61 @@ namespace CompanyAPP.Services
     {
         private readonly IConfiguration _configuration;
         private readonly ILogger<EmailSender> _logger;
+        private readonly HttpClient _httpClient;
 
         public EmailSender(IConfiguration configuration, ILogger<EmailSender> logger)
         {
             _configuration = configuration;
             _logger = logger;
+            _httpClient = new HttpClient();
         }
 
         public async Task SendEmailAsync(string email, string subject, string htmlMessage)
         {
-            Console.WriteLine($"[EmailSender] 🚀 準備寄信給: {email}"); // 加入追蹤點 1
+            // 使用結構化讀取，對應 BrevoSettings:ApiKey
+            var apiKey = _configuration["BrevoSettings:ApiKey"];
+            var senderEmail = _configuration["BrevoSettings:SenderEmail"];
+
+            if (string.IsNullOrEmpty(apiKey) || string.IsNullOrEmpty(senderEmail))
+            {
+                _logger.LogError("EmailSender failed: BrevoSettings:ApiKey or SenderEmail is missing in configuration.");
+                return;
+            }
+
+            var mailData = new
+            {
+                sender = new { name = "Company ERP System", email = senderEmail },
+                to = new[] { new { email = email } },
+                subject = subject,
+                htmlContent = htmlMessage
+            };
+
+            var json = JsonSerializer.Serialize(mailData);
+            var content = new StringContent(json, Encoding.UTF8, "application/json");
+
+            _httpClient.DefaultRequestHeaders.Clear();
+            _httpClient.DefaultRequestHeaders.Add("api-key", apiKey);
+
             try
             {
-                // 1. 從 appsettings (或 Fly Secrets) 讀取資料
-                // 使用 ?. 運算子防止 null 崩潰，並提供預設值
-                string host = _configuration["EmailSettings:Host"] ?? "smtp.gmail.com";
-                int port = int.Parse(_configuration["EmailSettings:Port"] ?? "587");
-                string myEmail = _configuration["EmailSettings:SenderEmail"] ?? string.Empty;
-                string myPassword = _configuration["EmailSettings:AppPassword"] ?? string.Empty;
+                _logger.LogInformation("Attempting to send email via Brevo API to: {Email}", email);
 
-                Console.WriteLine($"[EmailSender] 🚀 準備寄信給: {email}"); // 加入追蹤點 1
+                var response = await _httpClient.PostAsync("https://api.brevo.com/v3/smtp/email", content);
 
-                // 2. 檢查關鍵資料是否為空
-                if (string.IsNullOrEmpty(myEmail) || string.IsNullOrEmpty(myPassword))
+                if (response.IsSuccessStatusCode)
                 {
-                    throw new Exception("Email 設定讀取失敗：SenderEmail 或 AppPassword 為空。請檢查 Fly Secrets。");
+                    _logger.LogInformation("Email successfully delivered to Brevo API queue for: {Email}", email);
                 }
-
-                // 3. 設定 SMTP
-                using (var client = new SmtpClient(host, port))
+                else
                 {
-                    client.EnableSsl = true;
-                    client.UseDefaultCredentials = false;
-                    client.Credentials = new NetworkCredential(myEmail, myPassword);
-
-                    // 4. 建立信件
-                    var mailMessage = new MailMessage
-                    {
-                        From = new MailAddress(myEmail, "企業資源系統管理員"),
-                        Subject = subject,
-                        Body = htmlMessage,
-                        IsBodyHtml = true
-                    };
-                    mailMessage.To.Add(email);
-
-                    Console.WriteLine($"[EmailSender] ⏳ 正在連線 SMTP 伺服器發送..."); // 加入追蹤點 3
-
-                    // 5. 發送
-                    await client.SendMailAsync(mailMessage);
-                    _logger.LogInformation($"成功發送郵件給：{email}");
-
-                    Console.WriteLine($"[EmailSender] ✅ 成功發送郵件給：{email}"); // 加入追蹤點 4
+                    var errorDetails = await response.Content.ReadAsStringAsync();
+                    _logger.LogError("Brevo API returned non-success status: {StatusCode}, Details: {Details}",
+                        response.StatusCode, errorDetails);
                 }
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, $"寄信失敗！目標：{email}, 錯誤訊息：{ex.Message}");
-                // 捕捉錯誤，不要讓網站掛掉 (500 Error)
-                // 這樣可以在 fly logs 看到紅字，不會看到網頁壞掉
-                _logger.LogError(ex, $"寄信失敗！目標：{email}, 錯誤訊息：{ex.Message}");
-                // 這裡可以選擇是否要 throw，如果不 throw，程式會繼續執行 (註冊流程會跑完，只是沒收到信)
-
-                Console.WriteLine($"[EmailSender] ❌ 寄信發生嚴重錯誤: {ex.ToString()}"); // 強制印出完整錯誤
-                throw; // 再次提醒：開發階段一定要加上 throw，讓前端知道失敗了！
+                _logger.LogError(ex, "An unexpected error occurred while calling Brevo API for: {Email}", email);
             }
         }
     }

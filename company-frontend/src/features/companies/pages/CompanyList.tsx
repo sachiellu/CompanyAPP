@@ -43,6 +43,7 @@ export default function CompanyList() {
         setLoading(true);
         try {
             const res = await companyApi.getCompanies(s);
+            console.log("API 原始回傳：", res.data[0]);
             setCompanies(res.data || []); 
         } catch (err) {
             console.error("載入失敗:", err);
@@ -83,15 +84,17 @@ export default function CompanyList() {
         setSortConfig({ key, direction: dir });
     };
 
-    const sortedCompanies = useMemo(() => {
-        if (!sortConfig) return companies;
-        return [...companies].sort((a: Company, b: Company) => {
-            const valA = a[sortConfig.key] ?? "";
-            const valB = b[sortConfig.key] ?? "";
-            if (valA < valB) return sortConfig.direction === 'asc' ? -1 : 1;
-            return sortConfig.direction === 'asc' ? 1 : -1;
-        });
-    }, [companies, sortConfig]);
+const sortedCompanies = useMemo(() => {
+    if (!sortConfig) return companies;
+    return [...companies].sort((a: Company, b: Company) => {
+        // 關鍵：取值時同時判斷大小寫
+        const valA = a[sortConfig.key] ?? "";
+        const valB = b[sortConfig.key] ?? "";
+        if (valA < valB) return sortConfig.direction === 'asc' ? -1 : 1;
+        if (valA > valB) return sortConfig.direction === 'asc' ? 1 : -1;
+        return 0;
+    });
+}, [companies, sortConfig]);
 
     const { selectedIds, setSelectedIds, previewIds, setPreviewIds, rowDragStartId, setRowDragStartId, handleCheck, handleCheckAll, handleRowMouseDown, handleRowMouseEnter } = useSelection(sortedCompanies);
     const { selectionBox, handleContainerMouseDown, handleContainerMouseMove } = useDragSelect({ containerRef, selectedIds, setSelectedIds, previewIds, setPreviewIds, rowDragStartId, setRowDragStartId });
@@ -141,6 +144,12 @@ export default function CompanyList() {
                 <div className="row g-4 mx-0">
                     {sortedCompanies.map(company => {
                         const active = selectedIds.includes(company.id) || previewIds.includes(company.id);
+
+                        const displayName = company.name || company.Name || '未知名稱';
+                        const displayIndustry = company.industry || company.Industry || '未填';
+                        const displayAddress = company.address || company.Address || '未填';
+                        const displayLogo = company.logoPath || company.LogoPath || "";
+
                         return (
                             <div key={company.id} className="col-12 col-md-6 col-lg-4 col-xl-3">
                                 <div
@@ -204,7 +213,7 @@ export default function CompanyList() {
                                                 }}
                                             >
                                                 {company.logoPath && company.logoPath.startsWith('http') ? (
-                                                    <img src={company.logoPath || company.LogoPath || ""} alt="logo" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
+                                                    <img src={displayLogo} alt="logo" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
                                                 ) : (
                                                     <i className="bi bi-building text-secondary fs-5"></i>
                                                 )}
@@ -223,17 +232,17 @@ export default function CompanyList() {
                                                 }}
                                             />
 
-                                            <h6 className="card-title fw-bold mb-0 text-truncate" style={{ fontSize: '1.05rem' }}> {company.name || company.Name || '未知名稱'} </h6>
+                                            <h6 className="card-title fw-bold mb-0 text-truncate" style={{ fontSize: '1.05rem' }}> {displayName} </h6>
                                         </div>
 
                                         <div className="small text-muted mt-2" style={{ fontSize: '0.85rem' }}>
                                             <div className="d-flex align-items-center mb-2">
                                                 <span className="badge bg-light text-dark border me-2 fw-normal" style={{ fontSize: '0.7rem' }}>產業</span>
-                                                <span className="text-dark">{company.industry || company.Industry || '未填'}</span>
+                                                <span className="text-dark">{displayIndustry}</span>
                                             </div>
                                             <div className="d-flex align-items-center">
                                                 <span className="badge bg-light text-dark border me-2 fw-normal" style={{ fontSize: '0.7rem' }}>地址</span>
-                                                <span className="text-dark text-truncate" style={{ maxWidth: '180px' }}>{company.address || company.Address || '未填'}</span>
+                                                <span className="text-dark text-truncate" style={{ maxWidth: '180px' }}>{displayAddress}</span>
                                             </div>
                                         </div>
                                     </div>

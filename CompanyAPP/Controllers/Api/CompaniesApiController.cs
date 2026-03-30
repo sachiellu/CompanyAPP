@@ -1,10 +1,12 @@
-﻿using CompanyAPP.Services;
+﻿using CompanyAPP.Data;
+using CompanyAPP.Dtos;
 using CompanyAPP.Models;
-using CompanyAPP.Data;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Authorization;
+using CompanyAPP.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.ComponentModel.DataAnnotations; // 確保這行在，驗證才有效
 
 namespace CompanyAPP.Controllers.Api
 {
@@ -14,25 +16,54 @@ namespace CompanyAPP.Controllers.Api
     public class CompaniesApiController : ControllerBase
     {
         private readonly ICompanyService _companyService;
-        private readonly CompanyAppContext _context;
+        private readonly IImageService _imageService; // 圖片服務變數
+        private readonly CompanyAppContext _context;     // 資料庫上下文變數
 
-        public CompaniesApiController(ICompanyService companyService, CompanyAppContext context)
+        // 建構子：確保三個服務都正確注入並賦值
+        public CompaniesApiController(
+            ICompanyService companyService,
+            IImageService imageService,
+            CompanyAppContext context)
         {
             _companyService = companyService;
-            _context = context;
+            _imageService = imageService; // 賦值給 private 變數
+            _context = context;           // 賦值給 private 變數
         }
 
+        // --- DTO 定義區 ---
         public class CompanyCreateDto
         {
-            public string Name { get; set; } = string.Empty;
-            public string? Industry { get; set; }
-            public string? Address { get; set; }
-            public string? TaxId { get; set; }
-            public DateTime? FoundedDate { get; set; }
-            public IFormFile? ImageFile { get; set; }
+            [FromForm(Name = "name")] public string Name { get; set; } = string.Empty;
+            [FromForm(Name = "industry")] public string? Industry { get; set; }
+            [FromForm(Name = "address")] public string? Address { get; set; }
 
-            // 關鍵修正：加入聯絡人清單，這樣 [FromForm] 才能抓到 Contacts[0].Name 這種資料
-            public List<ContactDto>? Contacts { get; set; }
+            [FromForm(Name = "taxId")]
+            [StringLength(8, MinimumLength = 8, ErrorMessage = "統一編號必須是 8 碼")]
+            [RegularExpression(@"^[0-9]*$", ErrorMessage = "統一編號只能包含數字")]
+            public string? TaxId { get; set; }
+
+            [FromForm(Name = "foundedDate")] public DateTime? FoundedDate { get; set; }
+            [FromForm(Name = "imageFile")] public IFormFile? ImageFile { get; set; }
+            [FromForm(Name = "contactsJson")] public string? ContactsJson { get; set; }
+        }
+
+        // --- API 方法區 ---
+
+        // 1. 新增：圖片即時上傳 Endpoint (對接 React 選圖後的 api.post)
+        [HttpPost("upload-logo")]
+        [Authorize(Roles = "Admin,Manager")]
+        public async Task<IActionResult> UploadLogo(IFormFile file)
+        {
+            if (file == null || file.Length == 0) return BadRequest("檔案無效");
+            try
+            {
+                var imageUrl = await _imageService.UploadImageAsync(file);
+                return Ok(new { url = imageUrl });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"圖片上傳失敗: {ex.Message}");
+            }
         }
 
         [HttpGet]
@@ -90,7 +121,7 @@ namespace CompanyAPP.Controllers.Api
         {
             var company = new Company
             {
-                Name = dto.Name,
+                Name = dto.Name ?? "未知",
                 Industry = dto.Industry,
                 Address = dto.Address,
                 TaxId = dto.TaxId,
@@ -104,19 +135,22 @@ namespace CompanyAPP.Controllers.Api
 
         [HttpPut("{id}")]
         [Authorize(Roles = "Admin,Manager")]
-        public async Task<IActionResult> UpdateCompany(int id, [FromForm] CompanyCreateDto dto)
+        public async Task<IActionResult> UpdateCompany(int id, [FromBody] CompanyUpdateJsonDto dto)
         {
-            var existing = await _context.Company.FindAsync(id);
-            if (existing == null) return NotFound();
+            if (id != dto.Id) return BadRequest("ID 不一致");
 
-            existing.Name = dto.Name;
-            existing.Industry = dto.Industry;
-            existing.Address = dto.Address;
-            existing.TaxId = dto.TaxId;
-            if (dto.FoundedDate.HasValue) existing.FoundedDate = dto.FoundedDate.Value;
-            if (dto.ImageFile != null) existing.ImageFile = dto.ImageFile;
+            var companyToUpdate = new Company
+            {
+                Id = id,
+                Name = dto.Name,
+                Industry = dto.Industry,
+                Address = dto.Address,
+                TaxId = dto.TaxId,
+                FoundedDate = dto.FoundedDate,
+                LogoPath = dto.LogoPath
+            };
 
-            await _companyService.UpdateAsync(existing, dto.Contacts ?? new List<ContactDto>());
+            await _companyService.UpdateAsync(companyToUpdate, dto.Contacts);
             return NoContent();
         }
 

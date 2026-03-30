@@ -67,10 +67,11 @@
         ];
 
         const chartConfig = {
-            labels: stats.chartData.map(d => d.name),
+            // 💡 移除 :any，讓 TypeScript 根據 DashboardStats 自動推斷 d 的型別
+            labels: stats?.chartData?.map(d => d.name) || [], 
             datasets: [{
                 label: '員工人數',
-                data: stats.chartData.map(d => d.count),
+                data: stats?.chartData?.map(d => d.count) || [],
                 backgroundColor: 'rgba(13, 110, 253, 0.7)',
                 borderRadius: 6
             }]

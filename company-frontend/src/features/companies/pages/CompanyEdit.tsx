@@ -20,8 +20,6 @@ export default function CompanyEdit() {
     const [address, setAddress] = useState("");
     const [foundedDate, setFoundedDate] = useState("");
     const [existingLogo, setExistingLogo] = useState("");
-    const [selectedFile, setSelectedFile] = useState<File | null>(null);
-    const [previewUrl, setPreviewUrl] = useState("");
 
     // 聯絡人狀態
     const [contacts, setContacts] = useState<Contact[]>([]);
@@ -38,9 +36,6 @@ export default function CompanyEdit() {
             setIndustry(d.industry || "");
             setAddress(d.address || "");
             setExistingLogo(d.logoPath || "");
-            setContacts(d.contacts || []); 
-            
-            // 聯絡人設定
             setContacts(d.contacts || []); 
 
             // 修正 Date 報錯：先取值，確認是字串再 split
@@ -84,34 +79,28 @@ export default function CompanyEdit() {
         e.preventDefault();
         setLoading(true);
 
-        const formData = new FormData();
-        formData.append('Name', name);
-        formData.append('TaxId', taxId);
-        formData.append('Industry', industry);
-        formData.append('Address', address);
-        formData.append('FoundedDate', foundedDate);
-        if (selectedFile) formData.append('ImageFile', selectedFile);
-
-        // --- 關鍵：將巢狀聯絡人塞入 FormData ---
-        contacts.forEach((contact, index) => {
-            // .NET 的 [FromForm] 辨識規則：PropertyName[index].FieldName
-            formData.append(`Contacts[${index}].Id`, (contact.id || 0).toString());
-            formData.append(`Contacts[${index}].Name`, contact.name || "");
-            formData.append(`Contacts[${index}].Phone`, contact.phone || "");
-            formData.append(`Contacts[${index}].Email`, contact.email || "");
-            formData.append(`Contacts[${index}].Remark`, contact.remark || "");
-        });
+        // 不再使用 FormData，直接傳物件
+        const payload = {
+            id: id,
+            name: name,
+            taxId: taxId,
+            industry: industry,
+            address: address,
+            foundedDate: foundedDate,
+            logoPath: existingLogo, // 這裡已經是上傳完後的 Cloudinary 網址了
+            contacts: contacts 
+        };
 
         try {
-            await api.put(`/companies/${id}`, formData);
+            await api.put(`/companies/${id}`, payload); // 後端接收 [FromBody]
+            alert("修改成功！");
             navigate('/companies');
         } catch (err) {
-        const errorMessage = extractErrorMessage(err); 
-            alert(errorMessage);
-        } finally { 
-            setLoading(false); 
+            alert(extractErrorMessage(err));
+        } finally {
+            setLoading(false);
         }
-};
+    };
 
     return (
         <div className="page-container position-relative px-4 pt-3">
@@ -125,20 +114,50 @@ export default function CompanyEdit() {
                 <div className="text-center mb-4 pb-4 border-bottom">
                     <div className="d-inline-block border bg-light shadow-sm mb-3 p-1">
                         <div className="bg-white d-flex align-items-center justify-content-center overflow-hidden" style={{ width: '200px', height: '200px' }}>
-                            <img 
-                                // 只有當 existingLogo 是 http 開頭（雲端圖片）才顯示，否則顯示 null
-                                src={previewUrl || (existingLogo?.startsWith('http') ? existingLogo : null) || ""} 
-                                className="w-100 h-100 object-fit-contain" 
-                                alt="logo" 
-                                // 當圖片載入失敗（404）時，隱藏它，避免出現難看的破碎圖示
-                                onError={(e) => { e.currentTarget.style.display = 'none'; }}
-                            />
+                            {/* 上傳中顯示轉圈圈 */}
+                            {loading && (
+                                <div className="position-absolute top-50 start-50 translate-middle" style={{ zIndex: 1 }}>
+                                    <div className="spinner-border spinner-border-sm text-primary"></div>
+                                </div>
+                            )}
+                            
+                            {existingLogo ? (
+                                <img 
+                                    src={existingLogo} 
+                                    className={`w-100 h-100 object-fit-contain ${loading ? 'opacity-25' : ''}`} 
+                                    alt="logo" 
+                                    onError={(e) => { e.currentTarget.style.display = 'none'; }}
+                                />
+                            ) : (
+                                <span className="text-muted small">尚未上傳 Logo</span>
+                            )}
                         </div>
                     </div>
                     <div className="mx-auto" style={{ maxWidth: '350px' }}>
-                        <input type="file" className="form-control form-control-sm" onChange={e => {
+                        <input type="file" className="form-control form-control-sm" 
+                        onChange={async(e) => {
                             const file = e.target.files?.[0];
-                            if (file) { setSelectedFile(file); setPreviewUrl(URL.createObjectURL(file)); }
+                            if (file) {
+                                setLoading(true); // 開始轉圈圈（圖片上傳中）
+                                try {
+                                    const formData = new FormData();
+                                    formData.append('file', file);
+                                    
+                                    // 呼叫一個獨立的上傳 API (你需要先在 Controller 寫好這個 Endpoint)
+                                    const res = await api.post('/companies/upload-logo', formData); 
+                                    
+                                    // 拿到 Cloudinary 回傳的網址
+                                    const newImageUrl = res.data.url; 
+                                    
+                                    setExistingLogo(newImageUrl); // 更新預覽圖
+                                    // 這樣 handleSubmit 時，existingLogo 就已經是網址了
+                                } catch (err) {
+                                    console.error(err);
+                                    alert("圖片上傳失敗");
+                                } finally {
+                                    setLoading(false);
+                                }
+                            }
                         }} />
                     </div>
                 </div>

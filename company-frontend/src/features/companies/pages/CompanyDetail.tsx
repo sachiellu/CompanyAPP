@@ -44,17 +44,17 @@ export default function CompanyDetail() {
         try {
             const res = await companyApi.exportExcel([company.id]);
 
-            const b = await res.data;
-            const u = window.URL.createObjectURL(b);
-            const a = document.createElement('a'); a.href = u; a.download = `${company.name}.xlsx`; a.click();
-            a.href = u; 
-            a.download = `${company.name}.xlsx`;
-            document.body.appendChild(a); 
-            a.click();
-            document.body.removeChild(a);
-            window.URL.revokeObjectURL(u); // 記得釋放記憶體
+            const blob = new Blob([res.data], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+                    a.href = url;
+                    a.download = `${company.name}.xlsx`;
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a); // 下載後移除
+                    window.URL.revokeObjectURL(url);
         } catch (err) {
-                console.error("導出失敗：", err);
+            console.error("導出失敗：", err);
         }
     };
 
@@ -89,7 +89,15 @@ export default function CompanyDetail() {
                             <div className="row align-items-center text-start">
                                 <div className="col-md-auto pe-4 border-end text-center" style={{ minWidth: '240px' }}>
                                     <div className="bg-light border mb-2 mx-auto" style={{ width: '160px', height: '160px' }}>
-                                        {company.logoPath && <img src={company.logoPath.startsWith('http') ? company.logoPath : `${backendUrl}${company.logoPath}`} className="w-100 h-100 object-fit-contain" alt="logo" />}
+                                        {company.logoPath ? (
+                                            <img 
+                                                src={company.logoPath.startsWith('http') ? company.logoPath : `${backendUrl}${company.logoPath}`} 
+                                                className="w-100 h-100 object-fit-contain" 
+                                                alt="logo" 
+                                            />
+                                        ) : (
+                                            <div className="text-muted small">No Logo</div>
+                                        )}
                                     </div>
                                     <h5 className="fw-bold m-0 text-primary">{company.name}</h5>
                                 </div>
@@ -112,19 +120,32 @@ export default function CompanyDetail() {
                                 <thead className="table-light">
                                     <tr><th className="px-4">工號</th><th>姓名</th><th>職位</th><th>狀態</th><th className="text-end px-4">操作</th></tr>
                                 </thead>
+
                                 <tbody>
-                                    {company.employees?.map((emp: Employee) => (
-                                        <tr key={emp.id}>
-                                            <td className="px-4"><code>{emp.staffId || '待編'}</code></td>
-                                            <td className="fw-bold">{emp.name}</td>
-                                            <td>{emp.position}</td>
-                                            <td><StatusBadge status={emp.status} /></td>
-                                            <td className="text-end px-4">
-                                                <Link to={`/employees/${emp.id}`} className="btn btn-xs btn-outline-primary py-1 px-2">詳情</Link>
-                                            </td>
-                                        </tr>
-                                    ))}
+                                    {company.employees && company.employees.length > 0 ? (
+                                            // 1. 如果有員工，就跑 map 渲染每一列
+                                            company.employees.map((emp: Employee) => (
+                                                <tr key={emp.id}>
+                                                    <td className="px-4"><code>{emp.staffId || '待編'}</code></td>
+                                                    <td className="fw-bold">{emp.name}</td>
+                                                    <td>{emp.position}</td>
+                                                    <td><StatusBadge status={emp.status} /></td>
+                                                    <td className="text-end px-4">
+                                                        <Link to={`/employees/${emp.id}`} className="btn btn-xs btn-outline-primary py-1 px-2">詳情</Link>
+                                                    </td>
+                                                </tr>
+                                            ))
+                                        ) : (
+                                            // 2. 如果沒有員工 (length 為 0)，就顯示這一行
+                                            <tr>
+                                                <td colSpan={5} className="text-center py-4 text-muted">
+                                                    <i className="bi bi-people mb-2 d-block fs-4"></i>
+                                                    目前尚無內部員工資料
+                                                </td>
+                                            </tr>
+                                        )}
                                 </tbody>
+                                
                             </table>
                         </div>
                     </div>
@@ -138,14 +159,20 @@ export default function CompanyDetail() {
                                     <tr><th className="px-4 py-2">姓名</th><th>電話</th><th>Email</th><th className="px-4">備註</th></tr>
                                 </thead>
                                 <tbody>
-                                    {company.contacts?.map((c: Contact) => (
-                                        <tr key={c.id} className="border-bottom">
-                                            <td className="px-4 fw-bold">{c.name}</td>
-                                            <td>{c.phone}</td>
-                                            <td>{c.email}</td>
-                                            <td className="px-4 text-muted small">{c.remark}</td>
+                                    {company.contacts && company.contacts.length > 0 ? (
+                                        company.contacts.map((c: Contact) => (
+                                            <tr key={c.id} className="border-bottom">
+                                                <td className="px-4 fw-bold">{c.name}</td>
+                                                <td>{c.phone}</td>
+                                                <td>{c.email}</td>
+                                                <td className="px-4 text-muted small">{c.remark}</td>
+                                            </tr>
+                                        ))
+                                    ) : (
+                                        <tr>
+                                            <td colSpan={4} className="text-center py-3 text-muted">暫無聯絡窗口</td>
                                         </tr>
-                                    ))}
+                                    )}
                                 </tbody>
                             </table>
                         </div>

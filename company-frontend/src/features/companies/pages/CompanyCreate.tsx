@@ -1,4 +1,4 @@
-﻿import { useState } from 'react';
+﻿import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { api } from '../../../services/api';
 import { CompanyFormFields } from '../components/CompanyFormFields';
@@ -15,13 +15,24 @@ export default function CompanyCreate() {
     const [industry, setIndustry] = useState('');
     const [address, setAddress] = useState('');
     const [foundedDate, setFoundedDate] = useState(() => {
-        const date = new Date();
+    const date = new Date();
         date.setFullYear(date.getFullYear() - 5);
         return date.toISOString().split('T')[0];
     });
 
     const [selectedFile, setSelectedFile] = useState<File | null>(null);
     const [previewUrl, setPreviewUrl] = useState('');
+
+    useEffect(() => {
+        // 這是一個「清潔工」函數
+        // 當這個組件被銷毀（例如用戶跳轉頁面）時，會執行 return 裡面的代碼
+        return () => {
+            if (previewUrl) {
+                URL.revokeObjectURL(previewUrl);
+                console.log("清理了預覽圖記憶體");
+            }
+        };
+    }, [previewUrl]); // 當 previewUrl 改變時，會先執行上一次的清理
 
     // 修正點：明確指定型別，避免 any 報錯
     const handleFieldChange = (key: string, value: string) => {
@@ -36,36 +47,46 @@ export default function CompanyCreate() {
     const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
         if (file) {
+            // 如果原本已經有預覽圖，先釋放舊的
+            if (previewUrl) URL.revokeObjectURL(previewUrl);
+
             setSelectedFile(file);
             setPreviewUrl(URL.createObjectURL(file));
         }
     };
 
+
     const handleSubmit = async (e: React.FormEvent) => {
-        e.preventDefault();
-        setLoading(true);
-        const formData = new FormData();
-        formData.append("Name", name);
-        formData.append("Industry", industry);
-        formData.append("Address", address);
-        formData.append("TaxId", taxId);
-        formData.append("FoundedDate", foundedDate);
-        if (selectedFile) formData.append("ImageFile", selectedFile);
+    e.preventDefault();
+    setLoading(true);
 
-        try {
-            await api.post('/companies', formData);
-            alert("建立成功！"); 
-            navigate('/companies');
-            
-        } catch (err) {
-            console.error("建立失敗:", err);
+    // 🚨 關鍵：必須使用 FormData 才能對應後端的 [FromForm]
+    const formData = new FormData();
+    formData.append('name', name);       // 👈 這裡用小寫，對應後端的 Name="name"
+    formData.append('industry', industry);
+    formData.append('address', address);
+    formData.append('taxId', taxId);
+    formData.append('foundedDate', foundedDate);
+    
+    // 如果有選圖片
+    if (selectedFile) {
+        formData.append('imageFile', selectedFile);
+    }
 
-            const errorMsg = extractErrorMessage(err);
-            alert(errorMsg); 
-        } finally {
-            setLoading(false);
-        }
-    };   
+    try {
+        await api.post('/companies', formData);
+        alert("建立成功！"); 
+        navigate('/companies');
+        
+    } catch (err) {
+        console.error("建立失敗:", err);
+
+        const errorMsg = extractErrorMessage(err);
+        alert(errorMsg); 
+    } finally {
+        setLoading(false);
+    }
+};
 
     return (
         <div className="page-container position-relative px-4 pt-3">
