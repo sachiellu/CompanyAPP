@@ -291,7 +291,7 @@ namespace CompanyAPP.Controllers.Api
         [Authorize(Roles = "Admin,Manager")]
         public async Task<IActionResult> SendInvite(int id)
         {
-            Console.WriteLine($"\n\n🚨🚨 進入 SendInvite API！ 目標 ID: {id} 🚨🚨\n\n");
+            Console.WriteLine($"\n\n 進入 SendInvite API！ 目標 ID: {id} \n\n");
 
             var emp = await _employeeService.GetByIdAsync(id);
             if (emp == null) return NotFound(new { message = "找不到此員工" });
@@ -299,7 +299,7 @@ namespace CompanyAPP.Controllers.Api
             if (emp.Status == Employee.EmployeeStatus.Active) return BadRequest(new { message = "該員工已經註冊過了" });
 
             // 產生前端的註冊網址
-            var frontendUrl = _config["FrontendUrl"] ?? "http://localhost:5173";
+            var frontendUrl = _config["AppSettings:FrontendUrl"] ?? "http://localhost:5173";
             var registerLink = $"{frontendUrl}/register?email={Uri.EscapeDataString(emp.Email)}";
 
             // 組裝精美的信件內容
