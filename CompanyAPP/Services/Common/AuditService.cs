@@ -4,7 +4,7 @@ using CompanyAPP.Models;
 using Microsoft.AspNetCore.Http; // 需要注入 IHttpContextAccessor
 using System.Security.Claims;
 
-namespace CompanyAPP.Services
+namespace CompanyAPP.Services.Common
 {
     public class AuditService
     {

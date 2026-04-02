@@ -21,26 +21,27 @@ interface Props {
 
 export function EmployeeFormFields({ data, companies, onChange, isEdit, canEditStaffId }: Props) {
 
-    const isStaffIdLocked = isEdit && !canEditStaffId;
+    const isStaffIdLocked = !isEdit || (isEdit && !canEditStaffId);
 
     return (
         <div className="row g-3 text-start">
             <div className="col-md-4">
-                <div className="col-md-6">
-                    <label className="form-label fw-bold text-secondary small text-uppercase">員工編號</label>
-                    <input
-                        className={`form-control form-control-sm ${isEdit ? 'bg-light' : ''}`} // 編輯時變灰
-                        value={data.staffId}
-                        onChange={e => onChange('staffId', e.target.value)}
-                        placeholder="例如: EMP-001"
-
-                        // 如果是編輯模式 (isEdit=true)，就鎖死不讓改
-                        readOnly={isStaffIdLocked}
-                    />
-                    {/* 加上提示字 */}
-                    {isStaffIdLocked && <small className="text-muted">如需修改請洽管理員</small>}
-                </div>
+                <label className="form-label fw-bold text-secondary small text-uppercase">員工編號</label>
+                <input
+                    className={`form-control form-control-sm ${isStaffIdLocked ? 'bg-light text-muted' : ''}`} 
+                    value={data.staffId}
+                    onChange={e => onChange('staffId', e.target.value)}
+                    readOnly={isStaffIdLocked} 
+                    placeholder={isEdit ? "" : "系統自動分配"} 
+                    style={isStaffIdLocked ? { cursor: 'not-allowed' } : {}}
+                />
+                {isStaffIdLocked && (
+                    <small className="text-muted" style={{ fontSize: '10px' }}>
+                        {isEdit ? "如需修改請洽管理員" : "編號將於存檔後自動產生"}
+                    </small>
+                )}
             </div>
+
             <div className="col-md-8">
                 <label className="form-label fw-bold text-secondary small text-uppercase">姓名</label>
                 <input className="form-control form-control-sm" value={data.name} onChange={e => onChange('name', e.target.value)} required />

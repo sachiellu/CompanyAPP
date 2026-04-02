@@ -2,7 +2,7 @@
 using System.Text;
 using System.Text.Json;
 
-namespace CompanyAPP.Services
+namespace CompanyAPP.Services.Common
 {
     public class EmailSender : IEmailSender
     {
@@ -32,8 +32,8 @@ namespace CompanyAPP.Services
             var mailData = new
             {
                 sender = new { name = "Company ERP System", email = senderEmail },
-                to = new[] { new { email = email } },
-                subject = subject,
+                to = new[] { new { email } },
+                subject,
                 htmlContent = htmlMessage
             };
 

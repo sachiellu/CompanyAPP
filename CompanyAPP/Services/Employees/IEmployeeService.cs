@@ -1,6 +1,6 @@
 ﻿using CompanyAPP.Models;
 
-namespace CompanyAPP.Services
+namespace CompanyAPP.Services.Employees
 {
     public interface IEmployeeService
     {

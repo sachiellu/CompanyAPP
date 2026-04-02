@@ -1,4 +1,6 @@
-﻿namespace CompanyAPP.Dtos
+﻿using CompanyAPP.Dtos.Reports;
+
+namespace CompanyAPP.Dtos.Common
 {
     public class ImportResult
     {

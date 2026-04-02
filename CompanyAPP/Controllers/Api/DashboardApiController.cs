@@ -25,7 +25,7 @@ namespace CompanyAPP.Controllers.Api
                 .Select(c => new
                 {
                     name = c.Name,
-                    count = c.Employees.Count()
+                    count = c.Employees != null ? c.Employees.Count() : 0
                 }).ToListAsync();
 
             return Ok(new

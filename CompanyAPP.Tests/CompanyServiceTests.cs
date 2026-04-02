@@ -1,10 +1,10 @@
 ﻿using Xunit;
 using Moq;
-using CompanyAPP.Services;
 using CompanyAPP.Data;
 using CompanyAPP.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
+using CompanyAPP.Services.Common;
 
 namespace CompanyAPP.Tests;
 

@@ -3,7 +3,7 @@ using CloudinaryDotNet.Actions;
 using Microsoft.Extensions.Configuration;
 using Microsoft.AspNetCore.Http;
 
-namespace CompanyAPP.Services
+namespace CompanyAPP.Services.Common
 {
     public class ImageService : IImageService
     {

@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Http;
 
-namespace CompanyAPP.Services
+namespace CompanyAPP.Services.Common
 {
     public interface IImageService
     {

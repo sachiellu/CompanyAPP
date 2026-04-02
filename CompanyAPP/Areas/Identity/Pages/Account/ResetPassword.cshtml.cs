@@ -39,7 +39,7 @@ namespace CompanyAPP.Areas.Identity.Pages.Account
             public string Code { get; set; } = string.Empty;
         }
 
-        public IActionResult OnGet(string code = null, string email = null)
+        public IActionResult OnGet(string? code = null, string? email = null)
         {
             if (code == null)
             {

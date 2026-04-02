@@ -18,7 +18,7 @@ export interface Employee {
     userId?: string;
     companyId: number;
     company?: Company;
-    companyName?: string;
+    companyName: string;
     processStatus?: string;
 }
 

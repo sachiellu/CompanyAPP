@@ -1,4 +1,4 @@
-﻿namespace CompanyAPP.Dtos
+﻿namespace CompanyAPP.Dtos.Reports
 {
     public class RowReport
     {

@@ -4,19 +4,19 @@ import { api } from '../../../services/api';
 import { useEscBack } from '../../../hooks/useEscBack';
 import type { Mission } from '../types';
 
-// 權限邏輯
+export default function MissionDetail() {
+    useEscBack('/missions');
+    const { id } = useParams<{ id: string }>();
+    const [mission, setMission] = useState<Mission | null>(null);
+    const [loading, setLoading] = useState(false); // 修正：現在會用到它
+
+    // 權限邏輯
     const userRole = localStorage.getItem('userRole') || 'User';
     const isAdmin = userRole === 'Admin';
     const isManager = userRole === 'Manager';
 
     // 任務的權限操作能力
     const canEdit = isAdmin || isManager; // 新增、編輯任務 (Manager 可以派工)
-
-export default function MissionDetail() {
-    useEscBack('/missions');
-    const { id } = useParams<{ id: string }>();
-    const [mission, setMission] = useState<Mission | null>(null);
-    const [loading, setLoading] = useState(false); // 修正：現在會用到它
 
     const fetchDetail = useCallback(async (mid: string) => {
         setLoading(true);

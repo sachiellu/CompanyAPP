@@ -3,8 +3,11 @@ using CompanyAPP.Models;
 using Microsoft.EntityFrameworkCore;
 using ClosedXML.Excel;
 using CompanyAPP.Dtos;
+using CompanyAPP.Dtos.Common;
+using CompanyAPP.Dtos.Reports;
 
-namespace CompanyAPP.Services
+
+namespace CompanyAPP.Services.Employees
 {
     public class EmployeeExcelService : IEmployeeExcelService
     {

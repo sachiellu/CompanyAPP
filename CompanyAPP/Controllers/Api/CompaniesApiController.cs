@@ -1,12 +1,16 @@
 ﻿using CompanyAPP.Data;
-using CompanyAPP.Dtos;
+using CompanyAPP.Dtos.Companies; // 讀取廠商 DTO
 using CompanyAPP.Models;
-using CompanyAPP.Services;
+using CompanyAPP.Services.Common;
+using CompanyAPP.Services.Companies;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using System.ComponentModel.DataAnnotations; // 確保這行在，驗證才有效
+using System; // 為了 DateTime
+using System.Collections.Generic; // 為了 List
+using System.Linq; // 為了 Select 轉型
+
 
 namespace CompanyAPP.Controllers.Api
 {
@@ -30,26 +34,7 @@ namespace CompanyAPP.Controllers.Api
             _context = context;           // 賦值給 private 變數
         }
 
-        // --- DTO 定義區 ---
-        public class CompanyCreateDto
-        {
-            [FromForm(Name = "name")] public string Name { get; set; } = string.Empty;
-            [FromForm(Name = "industry")] public string? Industry { get; set; }
-            [FromForm(Name = "address")] public string? Address { get; set; }
-
-            [FromForm(Name = "taxId")]
-            [StringLength(8, MinimumLength = 8, ErrorMessage = "統一編號必須是 8 碼")]
-            [RegularExpression(@"^[0-9]*$", ErrorMessage = "統一編號只能包含數字")]
-            public string? TaxId { get; set; }
-
-            [FromForm(Name = "foundedDate")] public DateTime? FoundedDate { get; set; }
-            [FromForm(Name = "imageFile")] public IFormFile? ImageFile { get; set; }
-            [FromForm(Name = "contactsJson")] public string? ContactsJson { get; set; }
-        }
-
-        // --- API 方法區 ---
-
-        // 1. 新增：圖片即時上傳 Endpoint (對接 React 選圖後的 api.post)
+        // 圖片即時上傳 Endpoint (對接 React 選圖後的 api.post)
         [HttpPost("upload-logo")]
         [Authorize(Roles = "Admin,Manager")]
         public async Task<IActionResult> UploadLogo(IFormFile file)
@@ -135,7 +120,7 @@ namespace CompanyAPP.Controllers.Api
 
         [HttpPut("{id}")]
         [Authorize(Roles = "Admin,Manager")]
-        public async Task<IActionResult> UpdateCompany(int id, [FromBody] CompanyUpdateJsonDto dto)
+        public async Task<IActionResult> UpdateCompany(int id, [FromBody] CompanyUpdateDto dto)
         {
             if (id != dto.Id) return BadRequest("ID 不一致");
 
@@ -150,7 +135,18 @@ namespace CompanyAPP.Controllers.Api
                 LogoPath = dto.LogoPath
             };
 
-            await _companyService.UpdateAsync(companyToUpdate, dto.Contacts);
+            // 將 DTO 的 ContactDto 轉回 Model 的 Contact，Service 才吃
+            var contactModels = dto.Contacts.Select(c => new Contact
+            {
+                Id = c.Id,
+                Name = c.Name,
+                Phone = c.Phone,
+                Email = c.Email,
+                Remark = c.Remark,
+                CompanyId = id
+            }).ToList();
+
+            await _companyService.UpdateAsync(companyToUpdate, contactModels);
             return NoContent();
         }
 

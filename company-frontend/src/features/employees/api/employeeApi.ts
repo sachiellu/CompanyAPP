@@ -8,7 +8,7 @@ export const employeeApi = {
     deleteBatch: (ids: number[]) => api.post('/employees/batch-delete', ids),
     restoreEmployee: (id: number) => api.post(`/employees/${id}/restore`),
     hardDeleteEmployee: (id: number) =>api.delete(`/employees/${id}/hard`),
-    exportExcel: (ids: number[]) => api.post<Blob>('/employees/export', ids),
+    exportExcel: (ids: number[]) => api.post('/employees/export', ids, { responseType: 'blob' }),
     importExcel: (file: File) => {
         const fd = new FormData();
         fd.append("excelFile", file);

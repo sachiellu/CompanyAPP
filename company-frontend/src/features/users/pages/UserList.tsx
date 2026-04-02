@@ -3,7 +3,7 @@ import { useEffect, useState, useCallback } from 'react';
 import { userApi, type User } from '../api/userApi';
 
 export default function UserList() {
-    const userRole = localStorage.getItem('userRole');
+    const [userRole] = useState(() => localStorage.getItem('userRole') || 'User');
     const isAdmin = userRole === 'Admin';
 
     const [users, setUsers] = useState<User[]>([]);

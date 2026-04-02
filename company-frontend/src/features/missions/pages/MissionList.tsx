@@ -6,10 +6,7 @@ import { MissionStatusBadge } from '../components/MissionStatusBadge';
 
 
 export default function MissionList() {
-    const [missions, setMissions] = useState<Mission[]>([]);
-    const [loading, setLoading] = useState(false);
-
-// 權限邏輯
+    // 權限邏輯
     const userRole = localStorage.getItem('userRole') || 'User';
     const isAdmin = userRole === 'Admin';
     const isManager = userRole === 'Manager';
@@ -17,6 +14,9 @@ export default function MissionList() {
     // 任務的權限操作能力
     const canEdit = isAdmin || isManager; // 新增、編輯任務 (Manager 可以派工)
     const canDelete = isAdmin;            // 刪除任務 (只有 Admin 能刪除)
+    
+    const [missions, setMissions] = useState<Mission[]>([]);
+    const [loading, setLoading] = useState(false);
 
     const fetchMissions = useCallback(async () => {
         setLoading(true);

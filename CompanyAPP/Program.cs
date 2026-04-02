@@ -1,6 +1,9 @@
 ﻿using CompanyAPP;
 using CompanyAPP.Data;
-using CompanyAPP.Services;
+using CompanyAPP.Services.Common;
+using CompanyAPP.Services.Companies;
+using CompanyAPP.Services.Employees;
+using CompanyAPP.Services.Missions;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.HttpOverrides;
@@ -53,10 +56,13 @@ builder.Services.AddHttpContextAccessor();
 // ==========================================
 // 3. 註冊應用程式服務 (DI)
 // ==========================================
+builder.Services.AddHttpContextAccessor();
+builder.Services.AddScoped<AuditService>();
 builder.Services.AddScoped<IImageService, ImageService>();
 builder.Services.AddScoped<ICompanyService, CompanyService>();
 builder.Services.AddScoped<IEmployeeService, EmployeeService>();
 builder.Services.AddScoped<IEmployeeExcelService, EmployeeExcelService>();
+builder.Services.AddScoped<IMissionService, MissionService>();
 
 
 builder.Services.AddDbContext<CompanyAppContext>(options =>
@@ -174,6 +180,8 @@ builder.Services.AddControllersWithViews()
     .AddJsonOptions(options =>
     {
         options.JsonSerializerOptions.PropertyNameCaseInsensitive = true;
+        
+        //轉換前後端大小寫對應
         options.JsonSerializerOptions.PropertyNamingPolicy = System.Text.Json.JsonNamingPolicy.CamelCase;
         options.JsonSerializerOptions.ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.IgnoreCycles;
     });

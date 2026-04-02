@@ -1,9 +1,11 @@
-﻿using System.ComponentModel.DataAnnotations;
-using CompanyAPP.Models; // 確保能讀到 ContactDto 或相關型別
+﻿using System; // 為了 DateTime
+using System.Collections.Generic; // 為了 List
+using System.ComponentModel.DataAnnotations; // 為了 [Required]
+using CompanyAPP.Models; // 關鍵！為了讀取你 Models 資料夾裡的 ContactDto
 
-namespace CompanyAPP.Dtos
+namespace CompanyAPP.Dtos.Companies
 {
-    public class CompanyUpdateJsonDto
+    public class CompanyUpdateDto
     {
         public int Id { get; set; }
 

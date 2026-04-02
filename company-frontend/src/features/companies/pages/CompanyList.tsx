@@ -145,10 +145,10 @@ const sortedCompanies = useMemo(() => {
                     {sortedCompanies.map(company => {
                         const active = selectedIds.includes(company.id) || previewIds.includes(company.id);
 
-                        const displayName = company.name || company.Name || '未知名稱';
-                        const displayIndustry = company.industry || company.Industry || '未填';
-                        const displayAddress = company.address || company.Address || '未填';
-                        const displayLogo = company.logoPath || company.LogoPath || "";
+                        const displayName = company.name || '未知名稱';
+                        const displayIndustry = company.industry ||  '未填';
+                        const displayAddress = company.address || '未填';
+                        const displayLogo = company.logoPath ||  "";
 
                         return (
                             <div key={company.id} className="col-12 col-md-6 col-lg-4 col-xl-3">

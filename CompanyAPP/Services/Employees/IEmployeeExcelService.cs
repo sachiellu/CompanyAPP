@@ -1,6 +1,6 @@
-﻿using CompanyAPP.Dtos;
+﻿using CompanyAPP.Dtos.Common;
 
-namespace CompanyAPP.Services
+namespace CompanyAPP.Services.Employees
 {
     public interface IEmployeeExcelService
     {

@@ -127,13 +127,31 @@ export default function EmployeeList() {
     const handleExport = async (ids: number[]) => {
         const exportList = ids.length > 0 ? ids : employees.map(e => e.id);
         if (!window.confirm(`確定匯出 ${exportList.length} 筆員工資料？`)) return;
-        try {
+        
+    try {
             const res = await employeeApi.exportExcel(exportList);
-            const blobData = res.data;
             
-            const url = window.URL.createObjectURL(blobData);
-            const a = document.createElement('a'); a.href = url; a.download = 'Employees.xlsx'; a.click();
-        } catch (err) { console.error("匯出失敗", err); }
+            // ✨ 關鍵修正：不管 res.data 是什麼，手動把它封裝成 Blob
+            // 如果 res.data 已經是 Blob，這行不會壞；如果它是 ArrayBuffer 或字串，這行會修好它。
+            const blob = new Blob([res.data], { 
+                type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' 
+            });
+
+            const url = window.URL.createObjectURL(blob); // 這樣就不會 Overload failed 了
+            
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'Employees.xlsx';
+            document.body.appendChild(a); // 補上這行，確保在所有瀏覽器都能跑
+            a.click();
+            
+            // 執行完畢後清理
+            document.body.removeChild(a);
+            window.URL.revokeObjectURL(url);
+        } catch (err) { 
+            console.error("匯出失敗", err); 
+            alert("匯出發生錯誤，請查看控制台");
+        }
     };
 
     const uploadFile = async (file: File) => {
