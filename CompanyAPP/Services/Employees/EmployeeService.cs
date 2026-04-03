@@ -91,7 +91,7 @@ namespace CompanyAPP.Services.Employees
                 entityName: "Employee",
                 action: "Update",
                 keyValues: $"StaffId: {employee.StaffId}",
-                changes: $"管理者修改了員工 {employee.Name} 的資料 (ID: {employee.Id})"
+                changes: $"修改了員工 {employee.Name} 的資料 (ID: {employee.Id})"
             );
         }
 

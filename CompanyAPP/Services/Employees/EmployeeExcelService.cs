@@ -77,28 +77,30 @@ namespace CompanyAPP.Services.Employees
 
             foreach (var row in rows)
             {
+                string name = row.Cell(2).GetValue<string>() ?? "";
+                string email = row.Cell(4).GetValue<string>() ?? "";
+                string position = row.Cell(3).GetValue<string>() ?? "";
+                string companyName = row.Cell(5).GetValue<string>() ?? "";
+
                 try
                 {
-                    var name = row.Cell(2).GetValue<string>();
-                    var position = row.Cell(3).GetValue<string>();
-                    var email = row.Cell(4).GetValue<string>();
-                    var companyName = row.Cell(5).GetValue<string>();
-
                     if (string.IsNullOrWhiteSpace(name) || string.IsNullOrWhiteSpace(email)) continue;
 
+                    // 檢查 Email 是否重複
                     var isEmailExist = await _context.Employee.AnyAsync(e => e.Email == email);
                     if (isEmailExist)
                     {
-                        // 直接丟出異常，會被你下面的 catch 抓到並記錄在 Reports 裡
                         throw new Exception($"Email {email} 已存在於系統中，不可重複匯入。");
                     }
 
-                    var company = await _context.Company
-                        .FirstOrDefaultAsync(c => c.Name == companyName);
-
+                    // 檢查公司
+                    var company = await _context.Company.FirstOrDefaultAsync(c => c.Name == companyName);
                     if (company == null)
-                        throw new Exception($"找不到公司 {companyName}");
+                    {
+                        throw new Exception($"找不到公司: {companyName}");
+                    }
 
+                    // 加入資料庫
                     _context.Add(new Employee
                     {
                         Name = name,
@@ -115,13 +117,21 @@ namespace CompanyAPP.Services.Employees
                     result.Reports.Add(new RowReport
                     {
                         RowNumber = row.RowNumber(),
+                        Name = name,
+                        Email = email,
                         Message = ex.Message
                     });
                 }
             }
 
+            // 3. 埋下 Audit Log
             if (result.SuccessCount > 0)
+            {
                 await _context.SaveChangesAsync();
+
+                // 如果你有注入 _auditService，記得加這行
+                // await _auditService.LogAsync("Employee", "Import", $"Count: {result.SuccessCount}", $"批次從 Excel 匯入了 {result.SuccessCount} 筆員工資料");
+            }
 
             return result;
         }
