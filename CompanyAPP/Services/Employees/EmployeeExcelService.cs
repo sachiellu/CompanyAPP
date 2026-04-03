@@ -1,10 +1,11 @@
-﻿using CompanyAPP.Data;
-using CompanyAPP.Models;
-using Microsoft.EntityFrameworkCore;
-using ClosedXML.Excel;
+﻿using ClosedXML.Excel;
+using CompanyAPP.Data;
 using CompanyAPP.Dtos;
 using CompanyAPP.Dtos.Common;
 using CompanyAPP.Dtos.Reports;
+using CompanyAPP.Models;
+using CompanyAPP.Services.Common;
+using Microsoft.EntityFrameworkCore;
 
 
 namespace CompanyAPP.Services.Employees
@@ -12,10 +13,12 @@ namespace CompanyAPP.Services.Employees
     public class EmployeeExcelService : IEmployeeExcelService
     {
         private readonly CompanyAppContext _context;
+        private readonly AuditService _auditService;
 
-        public EmployeeExcelService(CompanyAppContext context)
+        public EmployeeExcelService(CompanyAppContext context, AuditService auditService)
         {
             _context = context;
+            _auditService = auditService;
         }
 
         public async Task<byte[]> ExportToExcelAsync(List<int>? ids)
@@ -77,27 +80,28 @@ namespace CompanyAPP.Services.Employees
 
             foreach (var row in rows)
             {
-                string name = row.Cell(2).GetValue<string>() ?? "";
-                string email = row.Cell(4).GetValue<string>() ?? "";
-                string position = row.Cell(3).GetValue<string>() ?? "";
-                string companyName = row.Cell(5).GetValue<string>() ?? "";
+                string name = row.Cell(2).GetValue<string>()?.Trim() ?? "";
+                string position = row.Cell(3).GetValue<string>()?.Trim() ?? "";
+                string email = row.Cell(4).GetValue<string>()?.Trim() ?? "";
+                string companyName = row.Cell(5).GetValue<string>()?.Trim() ?? "";
 
                 try
                 {
-                    if (string.IsNullOrWhiteSpace(name) || string.IsNullOrWhiteSpace(email)) continue;
+                    if (string.IsNullOrWhiteSpace(name)) continue;
 
-                    // 檢查 Email 是否重複
+                    // 檢查 Email 格式 (簡單檢查)
+                    if (!email.Contains("@")) throw new Exception("Email 格式不正確");
+
                     var isEmailExist = await _context.Employee.AnyAsync(e => e.Email == email);
-                    if (isEmailExist)
-                    {
-                        throw new Exception($"Email {email} 已存在於系統中，不可重複匯入。");
-                    }
+                    if (isEmailExist) throw new Exception("Email 已存在，不可重複匯入。");
 
                     // 檢查公司
                     var company = await _context.Company.FirstOrDefaultAsync(c => c.Name == companyName);
                     if (company == null)
                     {
-                        throw new Exception($"找不到公司: {companyName}");
+                        // 這裡處理空白名稱的顯示
+                        string displayComp = string.IsNullOrWhiteSpace(companyName) ? "(空白)" : companyName;
+                        throw new Exception($"找不到公司: {displayComp}");
                     }
 
                     // 加入資料庫
@@ -129,8 +133,7 @@ namespace CompanyAPP.Services.Employees
             {
                 await _context.SaveChangesAsync();
 
-                // 如果你有注入 _auditService，記得加這行
-                // await _auditService.LogAsync("Employee", "Import", $"Count: {result.SuccessCount}", $"批次從 Excel 匯入了 {result.SuccessCount} 筆員工資料");
+                await _auditService.LogAsync("Employee", "Import", $"Count: {result.SuccessCount}", $"批次從 Excel 匯入了 {result.SuccessCount} 筆員工資料");
             }
 
             return result;
