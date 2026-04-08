@@ -180,7 +180,7 @@ builder.Services.AddControllersWithViews()
     .AddJsonOptions(options =>
     {
         options.JsonSerializerOptions.PropertyNameCaseInsensitive = true;
-        
+
         //轉換前後端大小寫對應
         options.JsonSerializerOptions.PropertyNamingPolicy = System.Text.Json.JsonNamingPolicy.CamelCase;
         options.JsonSerializerOptions.ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.IgnoreCycles;
@@ -233,7 +233,7 @@ app.Use(async (context, next) =>
     // ============================================================
     // 修正：Content Security Policy (CSP)
     // 我們需要允許 img-src 去連 Cloudinary 的伺服器 (*.cloudinary.com)
-    // 這樣瀏覽器才不會擋掉上傳成功的圖片。
+    // 這樣瀏覽器才不會擋掉上傳成功的圖片。   
     // ============================================================
     string csp = "default-src 'self'; " +
                  "script-src 'self'; " + // SPA 必備

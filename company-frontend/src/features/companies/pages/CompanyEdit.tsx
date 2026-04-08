@@ -92,7 +92,7 @@ export default function CompanyEdit() {
         };
 
         try {
-            await api.put(`/companies/${id}`, payload); // 後端接收 [FromBody]
+            await api.post(`/companies/${id}`, payload); // 後端接收 [FromBody]
             alert("修改成功！");
             navigate('/companies');
         } catch (err) {

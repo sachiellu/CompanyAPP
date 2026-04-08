@@ -15,6 +15,7 @@ import { companyRoutes } from "./features/companies/routes";
 import { employeeRoutes } from "./features/employees/routes";
 import { missionRoutes } from "./features/missions/routes";
 import { userRoutes } from "./features/users/routes";
+import { auditRoutes } from './features/audit/routes';
 
 export default function App() {
     return (
@@ -34,6 +35,7 @@ export default function App() {
                     {employeeRoutes}
                     {missionRoutes}
                     {userRoutes}
+                    {auditRoutes} 
 
                 </Route>
             </Route>

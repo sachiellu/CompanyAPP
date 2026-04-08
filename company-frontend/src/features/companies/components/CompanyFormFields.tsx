@@ -54,5 +54,4 @@ export function CompanyFormFields({ data, onChange }: Props) {
         </div>
 
     );
-
 }

@@ -9,12 +9,12 @@ export default function CompanyCreate() {
     useEscBack('/companies');
     const navigate = useNavigate();
     const [loading, setLoading] = useState(false);
-
     const [name, setName] = useState('');
     const [taxId, setTaxId] = useState('');
     const [industry, setIndustry] = useState('');
     const [address, setAddress] = useState('');
     const [foundedDate, setFoundedDate] = useState(() => {
+
     const date = new Date();
         date.setFullYear(date.getFullYear() - 5);
         return date.toISOString().split('T')[0];
@@ -43,22 +43,22 @@ export default function CompanyCreate() {
         else if (key === 'foundedDate') setFoundedDate(value);
     };
 
+
     // 新增：處理檔案選取函式，確保 logic 完整
     const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
         if (file) {
             // 如果原本已經有預覽圖，先釋放舊的
             if (previewUrl) URL.revokeObjectURL(previewUrl);
-
             setSelectedFile(file);
             setPreviewUrl(URL.createObjectURL(file));
         }
     };
 
-
     const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
+
 
     // 🚨 關鍵：必須使用 FormData 才能對應後端的 [FromForm]
     const formData = new FormData();
@@ -67,7 +67,7 @@ export default function CompanyCreate() {
     formData.append('address', address);
     formData.append('taxId', taxId);
     formData.append('foundedDate', foundedDate);
-    
+   
     // 如果有選圖片
     if (selectedFile) {
         formData.append('imageFile', selectedFile);
@@ -75,14 +75,12 @@ export default function CompanyCreate() {
 
     try {
         await api.post('/companies', formData);
-        alert("建立成功！"); 
+        alert("建立成功！");
         navigate('/companies');
-        
     } catch (err) {
         console.error("建立失敗:", err);
-
         const errorMsg = extractErrorMessage(err);
-        alert(errorMsg); 
+        alert(errorMsg);
     } finally {
         setLoading(false);
     }
@@ -102,11 +100,11 @@ export default function CompanyCreate() {
 
             {/* 內容卡片：p-4 縮減內距，防止 100% 下過大 */}
             <form onSubmit={handleSubmit} className="card shadow border-0 p-4 mx-auto" style={{ maxWidth: '850px' }}>
-
                 {/* 表單欄位：CompanyFormFields 內部已配合縮減 */}
                 <div className="mb-4">
                     <CompanyFormFields data={{ name, taxId, industry, address, foundedDate }} onChange={handleFieldChange} />
                 </div>
+
 
                 {/* 圖片上傳：尺寸縮減至 200px */}
                 <div className="border-top pt-4">
@@ -123,6 +121,7 @@ export default function CompanyCreate() {
                                 )}
                             </div>
                         </div>
+
                         <div className="flex-grow-1">
                             {/* 使用標準大小 input */}
                             <input type="file" className="form-control form-control-sm mb-3 shadow-sm" accept="image/*" onChange={handleFileChange} />
@@ -145,5 +144,7 @@ export default function CompanyCreate() {
                 </div>
             </form>
         </div>
+
     );
+
 }
