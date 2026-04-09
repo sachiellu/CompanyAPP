@@ -24,7 +24,7 @@ public class CompanyServiceTests
 
         // 給 AuditService 傳入 null, null 是因為 Moq 只負責模擬外殼
         // 但記得去 AuditService.cs 的 LogAsync 加上 virtual 關鍵字！
-        _mockAuditService = new Mock<AuditService>(new Mock<CompanyAppContext>().Object, _mockAccessor.Object);
+        _mockAuditService = new Mock<AuditService>(null!, null!);
     }
 
     [Fact]
@@ -37,7 +37,7 @@ public class CompanyServiceTests
 
         using var context = new CompanyAppContext(options, _mockAccessor.Object);
 
-        // 🚨 修正：現在實例化必須傳入 3 個參數
+        // 現在實例化必須傳入 3 個參數
         var service = new CompanyService(context, _mockImageService.Object, _mockAuditService.Object);
 
         // 塞入測試資料
