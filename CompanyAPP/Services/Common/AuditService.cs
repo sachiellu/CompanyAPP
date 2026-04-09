@@ -18,7 +18,7 @@ namespace CompanyAPP.Services.Common
         }
 
         // 核心功能：記錄一筆日誌
-        public async Task LogAsync(string entityName, string action, string keyValues, string changes)
+        public virtual async Task LogAsync(string entityName, string action, string keyValues, string changes)
         {
             // 獲取當前用戶資訊 (這是 Who/誰在操作 的關鍵)
             var user = _httpContextAccessor.HttpContext?.User;

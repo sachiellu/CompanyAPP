@@ -2,6 +2,7 @@
 using CompanyAPP.Data;
 using CompanyAPP.Models;
 using CompanyAPP.Services.Common;
+using CompanyAPP.Services.Companies;
 using DocumentFormat.OpenXml.Wordprocessing;
 using Microsoft.EntityFrameworkCore;
 using System;
