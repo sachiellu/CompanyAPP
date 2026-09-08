@@ -1,3 +1,70 @@
+## 本機開發設定（建議練習流程）
+
+以本機為主、Git 同步為準。Cloud Agent 改完後，請在本機 `git pull` 接回。
+
+### 前置需求
+- [.NET 9 SDK](https://dotnet.microsoft.com/download)
+- [Node.js 20+](https://nodejs.org/)
+- Git
+
+### 第一次取得專案
+```bash
+git clone https://github.com/sachiellu/CompanyAPP.git
+cd CompanyAPP
+```
+
+若本機已有資料夾（例如 `C:\C_projects\01_CompanyAPP`），請確認 remote 指向同一 repo 後直接拉最新：
+```bash
+git remote -v
+git pull origin main
+```
+
+### Windows 一鍵設定
+在專案根目錄用 PowerShell 執行：
+```powershell
+.\setup-local.ps1
+```
+
+### 手動設定
+```bash
+# 信任本機 HTTPS 憑證（登入 Cookie 需要 HTTPS）
+dotnet dev-certs https --trust
+
+# 後端
+dotnet restore CompanyAPP.sln
+
+# 前端
+cd company-frontend
+npm install
+```
+
+### 日常啟動（開兩個終端機）
+```bash
+# 終端機 1：後端 API → https://localhost:5203
+cd CompanyAPP
+dotnet run
+
+# 終端機 2：前端 → http://localhost:5173
+cd company-frontend
+npm run dev
+```
+
+瀏覽器開啟：http://localhost:5173  
+預設管理員：`admin@default.com` / `Admin123!`
+
+### 日常 Git 同步
+```bash
+# 拉最新
+git pull origin main
+
+# 練習後推上去
+git add .
+git commit -m "你的說明"
+git push origin main
+```
+
+---
+
 ## [v3.0] - 架構現代化：React + Web API 轉型 (Current)
 本次更新架構升級，將原有的單體 MVC 架構拆分為前後端分離架構，顯著提升開發效率與資安等級。
 
