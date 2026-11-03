@@ -52,11 +52,20 @@ export default function MissionCreate() {
         setFormData(prev => ({ ...prev, [key]: value }));
     };
 
+    const buildMissionPayload = (data: typeof formData) => ({
+        title: data.title,
+        description: data.description || null,
+        deadline: data.deadline,
+        status: data.status,
+        companyId: Number(data.companyId),
+        employeeId: Number(data.employeeId),
+    });
+
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setLoading(true);
         try {
-            const res = await api.post('/missions', formData);
+            const res = await api.post('/missions', buildMissionPayload(formData));
             if (res.data) navigate('/missions');
         } finally { setLoading(false); }
     };

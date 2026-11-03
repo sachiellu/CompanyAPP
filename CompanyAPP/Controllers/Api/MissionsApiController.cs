@@ -45,19 +45,49 @@ namespace CompanyAPP.Controllers.Api
 
         [HttpPost]
         [Authorize(Roles = "Admin,Manager")]
-        public async Task<IActionResult> CreateMission([FromBody] Mission mission)
+        public async Task<IActionResult> CreateMission([FromBody] MissionCreateDto dto)
         {
             if (!ModelState.IsValid) return BadRequest(ModelState);
-            mission.CreateDate = DateTime.UtcNow;
+
+            if (!Enum.TryParse<MissionStatus>(dto.Status, ignoreCase: true, out var status))
+            {
+                status = MissionStatus.Pending;
+            }
+
+            var mission = new Mission
+            {
+                Title = dto.Title,
+                Description = dto.Description,
+                Deadline = dto.Deadline,
+                Status = status,
+                CompanyId = dto.CompanyId,
+                EmployeeId = dto.EmployeeId
+            };
+
             await _missionService.AddAsync(mission);
             return Ok(new { message = "任務指派成功！" });
         }
 
         [HttpPut("{id}")]
         [Authorize(Roles = "Admin,Manager")]
-        public async Task<IActionResult> UpdateMission(int id, [FromBody] Mission mission)
+        public async Task<IActionResult> UpdateMission(int id, [FromBody] MissionUpdateDto dto)
         {
-            if (id != mission.Id) return BadRequest("ID 不符");
+            if (!Enum.TryParse<MissionStatus>(dto.Status, ignoreCase: true, out var status))
+            {
+                status = MissionStatus.Pending;
+            }
+
+            var mission = new Mission
+            {
+                Id = id,
+                Title = dto.Title,
+                Description = dto.Description,
+                Deadline = dto.Deadline ?? DateTime.UtcNow,
+                Status = status,
+                CompanyId = dto.CompanyId ?? 0,
+                EmployeeId = dto.EmployeeId ?? 0
+            };
+
             await _missionService.UpdateAsync(mission);
             return Ok(new { message = "任務更新成功！" });
         }

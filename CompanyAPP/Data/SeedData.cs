@@ -1,6 +1,7 @@
 ﻿using CompanyAPP.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Hosting;
 
 namespace CompanyAPP.Data
 {
@@ -11,6 +12,7 @@ namespace CompanyAPP.Data
             var userManager = serviceProvider.GetRequiredService<UserManager<IdentityUser>>();
             var roleManager = serviceProvider.GetRequiredService<RoleManager<IdentityRole>>();
             var context = serviceProvider.GetRequiredService<CompanyAppContext>();
+            var env = serviceProvider.GetRequiredService<IHostEnvironment>();
 
             // 1. 確保所有角色存在
             string[] roleNames = { "Admin", "Manager", "User" };
@@ -34,6 +36,16 @@ namespace CompanyAPP.Data
                     await userManager.AddToRoleAsync(newAdmin, "Admin");
                 }
             }
+            else if (env.IsDevelopment())
+            {
+                // 本機反覆刪 DB / 半套 Seed 時，確保預設管理員密碼可用
+                var resetToken = await userManager.GeneratePasswordResetTokenAsync(adminUser);
+                await userManager.ResetPasswordAsync(adminUser, resetToken, "Admin123!");
+                if (!await userManager.IsInRoleAsync(adminUser, "Admin"))
+                {
+                    await userManager.AddToRoleAsync(adminUser, "Admin");
+                }
+            }
 
             // 3. 建立一般員工 (user@default.com)
             var userEmail = "user@default.com";
@@ -49,12 +61,25 @@ namespace CompanyAPP.Data
                 normalUser = newUser; // 讓後面的員工綁定邏輯可以拿到 ID
             }
 
-            // 4. 關鍵：確保「一般員工」在 Employee 資料表也有檔案 (否則登入後會報錯)
-            // 這裡抓出剛才建立或已存在的 User
+            // 4. 本機示範廠商（派工頁需 CompanyId 外鍵）
+            var demoCompany = await context.Company.FirstOrDefaultAsync(c => c.Name == "示範廠商");
+            if (demoCompany == null)
+            {
+                demoCompany = new Company
+                {
+                    Name = "示範廠商",
+                    Category = Company.CompanyCategory.Client,
+                    TaxId = "00000000",
+                    Industry = "示範"
+                };
+                context.Company.Add(demoCompany);
+                await context.SaveChangesAsync();
+            }
+
+            // 5. 確保「一般員工」在 Employee 資料表也有檔案 (否則登入後會報錯)
             var existingUser = await userManager.FindByEmailAsync(userEmail);
             if (existingUser != null)
             {
-                // 檢查 Employee 表是否有這名員工，沒有就補上
                 var empProfile = await context.Employee.FirstOrDefaultAsync(e => e.Email == userEmail);
                 if (empProfile == null)
                 {
@@ -62,7 +87,8 @@ namespace CompanyAPP.Data
                     {
                         Name = "示範員工",
                         Email = userEmail,
-                        UserId = existingUser.Id, // 綁定 Identity ID
+                        UserId = existingUser.Id,
+                        CompanyId = demoCompany.Id,
                         Status = Employee.EmployeeStatus.Active,
                         StaffId = "DEMO001"
                     });

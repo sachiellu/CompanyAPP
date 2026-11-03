@@ -3,7 +3,8 @@ using CompanyAPP.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.IdentityModel.Tokens;
-using Microsoft.EntityFrameworkCore; // 記得引用這個才能用 FirstOrDefaultAsync
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Hosting;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
@@ -16,16 +17,19 @@ namespace CompanyAPP.Controllers.Api
     {
         private readonly UserManager<IdentityUser> _userManager;
         private readonly IConfiguration _configuration;
-        private readonly CompanyAppContext _context; // 修正 1: 注入資料庫 Context
+        private readonly CompanyAppContext _context;
+        private readonly IHostEnvironment _env;
 
         public AuthController(
             UserManager<IdentityUser> userManager,
             IConfiguration configuration,
-            CompanyAppContext context)
+            CompanyAppContext context,
+            IHostEnvironment env)
         {
             _userManager = userManager;
             _configuration = configuration;
             _context = context;
+            _env = env;
         }
 
         // 修正 2: 定義 RegisterDto
@@ -107,10 +111,12 @@ namespace CompanyAPP.Controllers.Api
 
                 Response.Cookies.Append("X-Access-Token", tokenString, new CookieOptions
                 {
-                    HttpOnly = true,       // 呼應在 Program.cs 的限制，JS 拿不到
-                    Secure = true,        // 呼應在 Program.cs 的限制，沒 HTTPS 不傳
+                    HttpOnly = true,
+                    // 本機 Vite 是 http://localhost:517x + proxy；Secure=true 時 Cookie 存不進去 → 進首頁就 401
+                    Secure = !_env.IsDevelopment(),
                     SameSite = SameSiteMode.Lax,
-                    Expires = DateTimeOffset.UtcNow.AddDays(7) // 這裡決定留存時間
+                    Path = "/",
+                    Expires = DateTimeOffset.UtcNow.AddDays(7)
                 });
 
                 return Ok(new

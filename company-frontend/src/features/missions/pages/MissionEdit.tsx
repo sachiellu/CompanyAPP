@@ -75,7 +75,14 @@ export default function MissionEdit() {
         e.preventDefault();
         setLoading(true);
         try {
-            await api.put(`/missions/${id}`, formData);
+            await api.put(`/missions/${id}`, {
+                title: formData.title,
+                description: formData.description || null,
+                deadline: formData.deadline,
+                status: formData.status,
+                companyId: Number(formData.companyId),
+                employeeId: Number(formData.employeeId),
+            });
             navigate('/missions');
 
         } catch (err: unknown) {

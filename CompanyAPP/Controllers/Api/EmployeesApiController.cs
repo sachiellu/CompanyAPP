@@ -50,6 +50,7 @@ namespace CompanyAPP.Controllers.Api
                 Position = e.Position,
                 Email = e.Email,
                 Status = (int)e.Status, // 將 Enum 轉為數字
+                CompanyId = e.CompanyId,
                 CompanyName = e.Company?.Name ?? "未分配"
             }).ToList();
 

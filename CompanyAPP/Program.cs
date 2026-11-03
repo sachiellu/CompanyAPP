@@ -77,10 +77,27 @@ builder.Services.AddCors(options =>
     options.AddPolicy("AllowAll",
         policy =>
         {
-            policy.WithOrigins("http://localhost:5173", "https://companyapp-luyu.fly.dev")
-                  .AllowAnyHeader()
+            if (builder.Environment.IsDevelopment())
+            {
+                // Vite 若 5173 被占用會改用 5174、5175…
+                policy.SetIsOriginAllowed(origin =>
+                {
+                    if (!Uri.TryCreate(origin, UriKind.Absolute, out var uri)) return false;
+                    return uri.Host is "localhost" or "127.0.0.1"
+                        && uri.Scheme == "http"
+                        && uri.Port is >= 5173 and <= 5180;
+                });
+            }
+            else
+            {
+                policy.WithOrigins(
+                    "https://companyapp-luyu.fly.dev",
+                    "https://companyapp-foyu.fly.dev");
+            }
+
+            policy.AllowAnyHeader()
                   .AllowAnyMethod()
-                  .AllowCredentials(); // 必須允許傳送憑據(Cookie)
+                  .AllowCredentials();
         });
 });
 

@@ -8,6 +8,7 @@
         public string? Position { get; set; }
         public string Email { get; set; } = string.Empty;
         public int Status { get; set; }
+        public int CompanyId { get; set; }
         public string CompanyName { get; set; } = "未分配";
     }
 }

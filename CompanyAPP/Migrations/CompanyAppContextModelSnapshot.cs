@@ -70,7 +70,7 @@ namespace CompanyAPP.Migrations
                     b.Property<int>("Category")
                         .HasColumnType("INTEGER");
 
-                    b.Property<DateTime>("FoundedDate")
+                    b.Property<DateTime?>("FoundedDate")
                         .HasColumnType("TEXT");
 
                     b.Property<string>("Industry")

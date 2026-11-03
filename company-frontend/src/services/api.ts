@@ -21,9 +21,11 @@ const toCamel = (obj: unknown): unknown => {
   return obj;
 };
 
-// 1. 建立實例
+// 本機走 Vite proxy（/api → 5203），Cookie 與前端同源；正式環境用 /api
+const apiBase = import.meta.env.VITE_API_URL ?? '/api';
+
 export const api = axios.create({
-    baseURL: import.meta.env.DEV ? 'http://localhost:5203/api' : '/api',
+    baseURL: apiBase,
     withCredentials: true,
 });
 
