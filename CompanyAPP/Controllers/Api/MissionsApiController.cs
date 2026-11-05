@@ -43,6 +43,27 @@ namespace CompanyAPP.Controllers.Api
             return Ok(result);
         }
 
+        [HttpGet("{id:int}")]
+        public async Task<IActionResult> GetMission(int id)
+        {
+            var m = await _missionService.GetByIdAsync(id);
+            if (m == null) return NotFound(new { message = "找不到任務" });
+
+            return Ok(new
+            {
+                m.Id,
+                m.Title,
+                m.Description,
+                CreateDate = m.CreateDate,
+                Deadline = m.Deadline,
+                Status = m.Status.ToString(),
+                m.CompanyId,
+                m.EmployeeId,
+                CompanyName = m.Company?.Name ?? "未指定",
+                EmployeeName = m.Employee?.Name ?? "未指派"
+            });
+        }
+
         [HttpPost]
         [Authorize(Roles = "Admin,Manager")]
         public async Task<IActionResult> CreateMission([FromBody] MissionCreateDto dto)
@@ -72,6 +93,11 @@ namespace CompanyAPP.Controllers.Api
         [Authorize(Roles = "Admin,Manager")]
         public async Task<IActionResult> UpdateMission(int id, [FromBody] MissionUpdateDto dto)
         {
+            if (string.IsNullOrWhiteSpace(dto.Title))
+                return BadRequest(new { message = "請填寫任務名稱" });
+            if (dto.CompanyId is null or <= 0 || dto.EmployeeId is null or <= 0)
+                return BadRequest(new { message = "請選擇廠商與員工" });
+
             if (!Enum.TryParse<MissionStatus>(dto.Status, ignoreCase: true, out var status))
             {
                 status = MissionStatus.Pending;
@@ -84,8 +110,8 @@ namespace CompanyAPP.Controllers.Api
                 Description = dto.Description,
                 Deadline = dto.Deadline ?? DateTime.UtcNow,
                 Status = status,
-                CompanyId = dto.CompanyId ?? 0,
-                EmployeeId = dto.EmployeeId ?? 0
+                CompanyId = dto.CompanyId.Value,
+                EmployeeId = dto.EmployeeId.Value
             };
 
             await _missionService.UpdateAsync(mission);

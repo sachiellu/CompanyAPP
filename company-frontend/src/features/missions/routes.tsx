@@ -8,8 +8,8 @@ import MissionEdit from './pages/MissionEdit';
 export const missionRoutes = (
     <>
         <Route path="/missions" element={<MissionList />} />
-        <Route path="/missions/:id" element={<MissionDetail />} />
         <Route path="/missions/create" element={<MissionCreate />} />
         <Route path="/missions/edit/:id" element={<MissionEdit />} />
+        <Route path="/missions/:id" element={<MissionDetail />} />
     </>
 );

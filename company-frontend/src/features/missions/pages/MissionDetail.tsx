@@ -20,10 +20,12 @@ export default function MissionDetail() {
 
     const fetchDetail = useCallback(async (mid: string) => {
         setLoading(true);
+        setMission(null);
         try {
             const res = await api.get<Mission>(`/missions/${mid}`);
-            if (res.status === 200)     
-                setMission(res.data);
+            setMission(res.data);
+        } catch {
+            setMission(null);
         } finally {
             setLoading(false);
         }
@@ -34,6 +36,15 @@ export default function MissionDetail() {
     }, [id, fetchDetail]);
 
     if (loading && !mission) return <div className="page-container p-5 text-center text-muted">載入中...</div>;
+
+    if (!loading && !mission) {
+        return (
+            <div className="page-container p-5 text-center">
+                <p className="text-muted">找不到任務資料</p>
+                <Link to="/missions" className="btn btn-sm btn-outline-secondary">返回列表</Link>
+            </div>
+        );
+    }
 
     return (
         <div className="page-container position-relative px-4 pt-3">

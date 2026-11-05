@@ -8,6 +8,21 @@ import type { Company } from '../../companies/types';
 import type { Employee } from '../../employees/types';
 import { extractErrorMessage } from '../../../utils/errorHandler';
 
+function missionStatusToFormValue(status: Mission['status'] | number | string): string {
+    if (typeof status === 'number') {
+        return ['Pending', 'Processing', 'Completed'][status] ?? 'Pending';
+    }
+    const s = String(status);
+    if (s === 'Progress') return 'Processing';
+    if (s === 'Delayed') return 'Pending';
+    return s;
+}
+
+function formatDateField(value: string | undefined): string {
+    if (!value) return '';
+    return value.includes('T') ? value.split('T')[0] : value;
+}
+
 export default function MissionEdit() {
     useEscBack('/missions');
     const { id } = useParams<{ id: string }>();
@@ -27,10 +42,15 @@ export default function MissionEdit() {
     const [companies, setCompanies] = useState<Company[]>([]);
     const [allEmployees, setAllEmployees] = useState<Employee[]>([]);
     const [filteredEmployees, setFilteredEmployees] = useState<Employee[]>([]);
+    const [loadError, setLoadError] = useState<string | null>(null);
+    const [missionLoaded, setMissionLoaded] = useState(false);
 
     // 1. 初始化讀取
     const loadData = useCallback(async () => {
+        if (!id) return;
         setLoading(true);
+        setLoadError(null);
+        setMissionLoaded(false);
         try {
             const [resComp, resEmp, resMission] = await Promise.all([
                 api.get<Company[]>('/companies'),
@@ -45,13 +65,15 @@ export default function MissionEdit() {
             setFormData({
                 title: m.title,
                 description: m.description || "",
-                createDate: m.createDate.split('T')[0],
-                deadline: m.deadline.split('T')[0],
-                status: m.status,
-                companyId: m.companyId.toString(),
-                employeeId: m.employeeId.toString()
+                createDate: formatDateField(m.createDate),
+                deadline: formatDateField(m.deadline),
+                status: missionStatusToFormValue(m.status),
+                companyId: m.companyId?.toString() ?? '',
+                employeeId: m.employeeId?.toString() ?? '',
             });
-  
+            setMissionLoaded(true);
+        } catch (err: unknown) {
+            setLoadError(extractErrorMessage(err) || '無法載入任務資料');
         } finally { setLoading(false); }
     }, [id]);
 
@@ -109,11 +131,14 @@ export default function MissionEdit() {
                     <label className="form-label fw-bold text-primary small">任務進度狀態</label>
                     <select className="form-select form-select-sm" value={formData.status} onChange={e => handleFieldChange('status', e.target.value)}>
                         <option value="Pending">待處理</option>
-                        <option value="Progress">執行中</option>
+                        <option value="Processing">執行中</option>
                         <option value="Completed">已完工</option>
-                        <option value="Delayed">已延遲</option>
                     </select>
                 </div>
+
+                {loadError && (
+                    <div className="alert alert-danger py-2 small">{loadError}</div>
+                )}
 
                 <MissionFormFields
                     data={formData}
@@ -123,7 +148,7 @@ export default function MissionEdit() {
                 />
 
                 <div className="d-flex justify-content-end gap-3 mt-5 pt-3 border-top">
-                    <button type="submit" className="btn btn-sm btn-primary px-5 py-2 fw-bold shadow-sm" disabled={loading}>
+                    <button type="submit" className="btn btn-sm btn-primary px-5 py-2 fw-bold shadow-sm" disabled={loading || !missionLoaded}>
                         儲存任務變更
                     </button>
                 </div>
