@@ -85,7 +85,7 @@ git push
 ```
 ---
 
-## [v3.0] - 架構現代化：React + Web API 轉型 (Current)
+## [v3.0] - 架構現代化：React + Web API 轉型
 本次更新架構升級，將原有的單體 MVC 架構拆分為前後端分離架構，顯著提升開發效率與資安等級。
 
 ### 核心變動
@@ -113,36 +113,26 @@ git push
 
 ### 部署與架構說明
 本專案採用「前後端整合部署」模式：
-1. 前端透過 `npm run build` 產生編譯後的靜態檔案（可用根目錄 `.\deploy.ps1`）。
+1. 前端透過 `npm run build` 產生編譯後的靜態檔案。
 2. 靜態檔案託管於 .NET 的 `wwwroot` 資料夾。
 3. 由 .NET 9 統一處理 API 請求與網頁路由，大幅節省雲端伺服器 (Fly.io) 記憶體資源。
-4. 只改 `company-frontend` 的原始碼、沒有重新 build 拷進 `wwwroot`，雲端看到的仍是舊前端（`.\deploy.ps1`；Node 需 20.19+）。
 
-### 雲端環境（QA 與正式站分開）
-兩個 Fly app、兩顆 SQLite volume，資料互不覆蓋：
+---
 
-| 環境 | 網址 | Fly app | 設定檔 | GitHub Secret |
-|---|---|---|---|---|
-| QA | https://companyapp-qa.fly.dev | `companyapp-qa` | `CompanyAPP/fly.qa.toml` | `FLY_API_TOKEN_QA` |
-| 正式站 | https://companyapp-luyu.fly.dev | `companyapp-luyu` | `CompanyAPP/fly.toml` | `FLY_API_TOKEN` |
+## [v3.1] - 2026-11 專案重新接上雲端與 CI (Current)
+v3.0 架構不變。這次是把停很久的測試、品質分析與部署接回來，讓 QA／正式站能跟著 `main` 走。
 
-推上 `main` 後，GitHub Actions（`.github/workflows/dotnet.yml`）順序是：
+### 這次修正
+- **CI/CD：** `main` 推送後跑編譯測試 → SonarCloud → 同時部署 QA 與正式站（`.github/workflows/dotnet.yml`）。
+- **任務詳情：** 正式站 `/missions/{id}` 補回詳情 API，截止日期缺漏時不再白屏。
+- **邀請開通：** 必須使用邀請信中的 token；寄信仍走 Brevo 交易信 API。
+- **登入態：** 登出會清 HttpOnly Cookie；儀表板 API 需登入；密碼錯誤達 5 次鎖定 5 分鐘。
+- **密鑰：** JWT、Brevo API Key 不進 Git，放 GitHub Secrets / Fly secrets。
 
-1. **Build and Test**（必過）
-2. **SonarCloud**（分析；失敗不擋部署）
-3. **Deploy QA** 與 **Deploy Prod** 並行
-
-請到 [Actions](https://github.com/sachiellu/CompanyAPP/actions) 確認四格都綠，再去對應網址驗收。分析品質看 [SonarCloud](https://sonarcloud.io/project/overview?id=sachiellu_CompanyAPP)（Secret：`SONAR_TOKEN`）。
-
-JWT 簽章金鑰不要寫進 Git。本機用 `appsettings.Development.json`；雲端請設 Fly secret（GitHub Secret 名稱 `JWT_KEY`，對應 Fly 的 `JwtSettings__Key`）：
-
-```powershell
-fly secrets set JwtSettings__Key="請換成夠長的隨機字串" -a companyapp-qa
-fly secrets set JwtSettings__Key="請換成夠長的隨機字串" -a companyapp-luyu
-```
-
-先前 repo 裡那把舊 Key 已進過 Git，正式環境應換成新的。開通帳號必須走管理員寄出的邀請連結（含 token），不能只靠 email。
-
-寄信走 Brevo。金鑰不進 Git，雲端用 `BrevoSettings__ApiKey`（正式站若已有就不用重設；QA 要另外設一次）。沒設金鑰時，邀請按鈕應顯示錯誤，不應假裝寄出。
-
-先前 pipeline 只接 QA，所以 Git 上的最新版會先出現在 QA；正式站要等 Deploy Prod 成功才會對齊。新功能再另外開 branch；文件與 pipeline 修正直接走 `main` 即可。
+### 環境
+- **QA：** https://companyapp-qa.fly.dev （`FLY_API_TOKEN_QA`）
+- **正式站：** https://companyapp-luyu.fly.dev （`FLY_API_TOKEN`）
+- **Actions：** https://github.com/sachiellu/CompanyAPP/actions
+- **SonarCloud：** https://sonarcloud.io/project/overview?id=sachiellu_CompanyAPP （`SONAR_TOKEN`）
+- 雲端 JWT：`JWT_KEY`（GitHub）對應 Fly `JwtSettings__Key`；寄信：Fly `BrevoSettings__ApiKey`（Transactional email 權限需可寄出）。
+- 前端要進雲端請在專案根目錄跑 `.\deploy.ps1`（Node 20.19+），只改 `company-frontend` 原始碼不會更新 `wwwroot`。
