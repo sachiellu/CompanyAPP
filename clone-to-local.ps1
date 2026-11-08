@@ -13,7 +13,7 @@
 param(
     [string]$TargetPath = "C:\C_projects\01_CompanyAPP",
     [string]$RepoUrl = "https://github.com/sachiellu/CompanyAPP.git",
-    [string]$Branch = "cursor/local-dev-setup-1b50"
+    [string]$Branch = "main"
 )
 
 $ErrorActionPreference = "Stop"

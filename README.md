@@ -14,10 +14,10 @@
 
 ```powershell
 # 預設位置
-git clone -b cursor/local-dev-setup-1b50 https://github.com/sachiellu/CompanyAPP.git C:\C_projects\01_CompanyAPP
+git clone -b main https://github.com/sachiellu/CompanyAPP.git C:\C_projects\01_CompanyAPP
 
 # 若要改成其他位置，例如：
-# git clone -b cursor/local-dev-setup-1b50 https://github.com/sachiellu/CompanyAPP.git D:\Dev\CompanyAPP
+# git clone -b main https://github.com/sachiellu/CompanyAPP.git D:\Dev\CompanyAPP
 
 cd C:\C_projects\01_CompanyAPP
 .\setup-local.ps1
@@ -35,8 +35,8 @@ powershell -ExecutionPolicy Bypass -File .\clone-to-local.ps1 -TargetPath "D:\De
 ```powershell
 cd C:\C_projects\01_CompanyAPP
 git fetch origin
-git checkout cursor/local-dev-setup-1b50
-git pull origin cursor/local-dev-setup-1b50
+git checkout main
+git pull origin main
 .\setup-local.ps1
 ```
 
@@ -113,6 +113,25 @@ git push
 
 ### 部署與架構說明
 本專案採用「前後端整合部署」模式：
-1. 前端透過 `npm run build` 產生編譯後的靜態檔案。
+1. 前端透過 `npm run build` 產生編譯後的靜態檔案（可用根目錄 `.\deploy.ps1`）。
 2. 靜態檔案託管於 .NET 的 `wwwroot` 資料夾。
 3. 由 .NET 9 統一處理 API 請求與網頁路由，大幅節省雲端伺服器 (Fly.io) 記憶體資源。
+4. 只改 `company-frontend` 的原始碼、沒有重新 build 拷進 `wwwroot`，雲端看到的仍是舊前端。
+
+### 雲端環境（QA 與正式站分開）
+兩個 Fly app、兩顆 SQLite volume，資料互不覆蓋：
+
+| 環境 | 網址 | Fly app | 設定檔 | GitHub Secret |
+|---|---|---|---|---|
+| QA | https://companyapp-qa.fly.dev | `companyapp-qa` | `CompanyAPP/fly.qa.toml` | `FLY_API_TOKEN_QA` |
+| 正式站 | https://companyapp-luyu.fly.dev | `companyapp-luyu` | `CompanyAPP/fly.toml` | `FLY_API_TOKEN` |
+
+推上 `main` 後，GitHub Actions（`.github/workflows/dotnet.yml`）順序是：
+
+1. **Build and Test**（必過）
+2. **SonarCloud**（分析；失敗不擋部署）
+3. **Deploy QA** 與 **Deploy Prod** 並行
+
+請到 [Actions](https://github.com/sachiellu/CompanyAPP/actions) 確認四格都綠，再去對應網址驗收。分析品質看 [SonarCloud](https://sonarcloud.io/project/overview?id=sachiellu_CompanyAPP)（Secret：`SONAR_TOKEN`）。
+
+先前 pipeline 只接 QA，所以 Git 上的最新版會先出現在 QA；正式站要等 Deploy Prod 成功才會對齊。新功能再另外開 branch；文件與 pipeline 修正直接走 `main` 即可。
