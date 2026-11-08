@@ -121,6 +121,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN_QA }}
+      JWT_KEY: ${{ secrets.JWT_KEY }}
     steps:
       - name: Require FLY_API_TOKEN_QA
         run: |
@@ -151,6 +152,15 @@ jobs:
         run: |
           set -euo pipefail
           flyctl auth whoami
+          if flyctl secrets list -a companyapp-qa 2>/dev/null | grep -q JwtSettings__Key; then
+            echo "Fly QA 已有 JwtSettings__Key"
+          elif [ -n "${JWT_KEY:-}" ]; then
+            flyctl secrets set JwtSettings__Key="$JWT_KEY" -a companyapp-qa
+          else
+            echo "QA 缺少 JwtSettings__Key。在 GitHub Secrets 新增 JWT_KEY，或先執行："
+            echo "fly secrets set JwtSettings__Key=\"金鑰\" -a companyapp-qa"
+            exit 1
+          fi
           if ! flyctl status -a companyapp-qa >/dev/null 2>&1; then
             echo "companyapp-qa 不存在，以 org personal 重建"
             flyctl apps create companyapp-qa --org personal
@@ -165,6 +175,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
+      JWT_KEY: ${{ secrets.JWT_KEY }}
     steps:
       - name: Require FLY_API_TOKEN
         run: |
@@ -196,4 +207,13 @@ jobs:
           set -euo pipefail
           flyctl auth whoami
           flyctl status -a companyapp-luyu
+          if flyctl secrets list -a companyapp-luyu 2>/dev/null | grep -q JwtSettings__Key; then
+            echo "Fly 正式站已有 JwtSettings__Key"
+          elif [ -n "${JWT_KEY:-}" ]; then
+            flyctl secrets set JwtSettings__Key="$JWT_KEY" -a companyapp-luyu
+          else
+            echo "正式站缺少 JwtSettings__Key。在 GitHub Secrets 新增 JWT_KEY，或先執行："
+            echo "fly secrets set JwtSettings__Key=\"金鑰\" -a companyapp-luyu"
+            exit 1
+          fi
           flyctl deploy --config fly.toml --remote-only -a companyapp-luyu

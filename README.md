@@ -116,7 +116,7 @@ git push
 1. 前端透過 `npm run build` 產生編譯後的靜態檔案（可用根目錄 `.\deploy.ps1`）。
 2. 靜態檔案託管於 .NET 的 `wwwroot` 資料夾。
 3. 由 .NET 9 統一處理 API 請求與網頁路由，大幅節省雲端伺服器 (Fly.io) 記憶體資源。
-4. 只改 `company-frontend` 的原始碼、沒有重新 build 拷進 `wwwroot`，雲端看到的仍是舊前端。
+4. 只改 `company-frontend` 的原始碼、沒有重新 build 拷進 `wwwroot`，雲端看到的仍是舊前端（`.\deploy.ps1`；Node 需 20.19+）。
 
 ### 雲端環境（QA 與正式站分開）
 兩個 Fly app、兩顆 SQLite volume，資料互不覆蓋：
@@ -133,5 +133,14 @@ git push
 3. **Deploy QA** 與 **Deploy Prod** 並行
 
 請到 [Actions](https://github.com/sachiellu/CompanyAPP/actions) 確認四格都綠，再去對應網址驗收。分析品質看 [SonarCloud](https://sonarcloud.io/project/overview?id=sachiellu_CompanyAPP)（Secret：`SONAR_TOKEN`）。
+
+JWT 簽章金鑰不要寫進 Git。本機用 `appsettings.Development.json`；雲端請設 Fly secret（GitHub Secret 名稱 `JWT_KEY`，對應 Fly 的 `JwtSettings__Key`）：
+
+```powershell
+fly secrets set JwtSettings__Key="請換成夠長的隨機字串" -a companyapp-qa
+fly secrets set JwtSettings__Key="請換成夠長的隨機字串" -a companyapp-luyu
+```
+
+先前 repo 裡那把舊 Key 已進過 Git，正式環境應換成新的。開通帳號必須走管理員寄出的邀請連結（含 token），不能只靠 email。
 
 先前 pipeline 只接 QA，所以 Git 上的最新版會先出現在 QA；正式站要等 Deploy Prod 成功才會對齊。新功能再另外開 branch；文件與 pipeline 修正直接走 `main` 即可。

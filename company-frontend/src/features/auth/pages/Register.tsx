@@ -11,6 +11,7 @@ export default function Register() {
     const location = useLocation();
 
     const [email, setEmail] = useState("");
+    const [token, setToken] = useState("");
     const [password, setPassword] = useState("");
     const [confirmPassword, setConfirmPassword] = useState("");
     const [loading, setLoading] = useState(false);
@@ -18,12 +19,19 @@ export default function Register() {
     useEffect(() => {
         const params = new URLSearchParams(location.search);
         const emailFromUrl = params.get('email');
+        const tokenFromUrl = params.get('token');
         if (emailFromUrl) setEmail(emailFromUrl);
+        if (tokenFromUrl) setToken(tokenFromUrl);
     }, [location]);
 
     const handleRegister = async (e: React.FormEvent) => {
         e.preventDefault();
         
+        if (!token) {
+            alert("請使用邀請信中的連結開通帳號。");
+            return;
+        }
+
         if (password !== confirmPassword) {
             alert("兩次輸入的密碼不一致！");
             return;
@@ -31,8 +39,7 @@ export default function Register() {
 
         setLoading(true);
         try {
-            // 這裡指定一下成功時的回傳型別
-            const response = await api.post<{ message: string }>('/auth/register', { email, password });
+            const response = await api.post<{ message: string }>('/auth/register', { email, password, token });
             
             const successMsg = response.data?.message || "註冊成功！";
             alert(successMsg);
@@ -78,7 +85,7 @@ export default function Register() {
                             <img src={EsLogo} alt="Logo" style={{ width: '46px', height: '46px' }} />
                         </div>
                         <h4 className="fw-bold text-white mt-3 mb-1">員工帳號開通</h4>
-                        <p className="text-muted small">請設定您的登入密碼</p>
+                        <p className="text-muted small">{token ? "請設定您的登入密碼" : "請使用邀請信中的連結開通"}</p>
                     </div>
 
                     <form onSubmit={handleRegister} className="text-start">

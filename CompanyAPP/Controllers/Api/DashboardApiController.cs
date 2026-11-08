@@ -1,5 +1,7 @@
 ﻿using CompanyAPP.Data;
 using CompanyAPP.Models; // 關鍵：一定要引用這個
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -7,6 +9,7 @@ namespace CompanyAPP.Controllers.Api
 {
     [Route("api/dashboard")]
     [ApiController]
+    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     public class DashboardApiController : ControllerBase
     {
         private readonly CompanyAppContext _context;

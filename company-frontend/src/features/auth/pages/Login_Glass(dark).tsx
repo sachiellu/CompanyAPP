@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { authApi } from '../authApi';
+import { extractErrorMessage } from '../../../utils/errorHandler';
 import loginBg from '../../../assets/images/login-bg.webp';
 import EsLogo from '../../../assets/icons/Logo.svg';
 
@@ -22,7 +23,7 @@ export default function Login() {
             navigate('/');
         } catch (err) {
             console.error(err);
-            alert("帳號或密碼錯誤");
+            alert(extractErrorMessage(err));
         } finally {
             setLoading(false);
         }

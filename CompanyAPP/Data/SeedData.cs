@@ -24,21 +24,25 @@ namespace CompanyAPP.Data
                 }
             }
 
-            // 2. 建立管理員 (admin@default.com)
+            // 2. 預設帳號只在本機建立，避免雲端用公開密碼開出管理員
+            if (!env.IsDevelopment())
+            {
+                return;
+            }
+
             var adminEmail = "admin@default.com";
             var adminUser = await userManager.FindByEmailAsync(adminEmail);
             if (adminUser == null)
             {
-                var newAdmin = new IdentityUser { UserName = adminEmail, Email = adminEmail, EmailConfirmed = true };
+                var newAdmin = new IdentityUser { UserName = adminEmail, Email = adminEmail, EmailConfirmed = true, LockoutEnabled = true };
                 var result = await userManager.CreateAsync(newAdmin, "Admin123!");
                 if (result.Succeeded)
                 {
                     await userManager.AddToRoleAsync(newAdmin, "Admin");
                 }
             }
-            else if (env.IsDevelopment())
+            else
             {
-                // 本機反覆刪 DB / 半套 Seed 時，確保預設管理員密碼可用
                 var resetToken = await userManager.GeneratePasswordResetTokenAsync(adminUser);
                 await userManager.ResetPasswordAsync(adminUser, resetToken, "Admin123!");
                 if (!await userManager.IsInRoleAsync(adminUser, "Admin"))

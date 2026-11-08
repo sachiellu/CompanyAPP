@@ -45,6 +45,10 @@ namespace CompanyAPP.Models
         [Display(Name = "關聯帳號ID")]
         public string? UserId { get; set; }
 
+        public string? InviteTokenHash { get; set; }
+
+        public DateTime? InviteExpiresAt { get; set; }
+
         // --- 5. 外部關聯與導覽屬性 (這部分通常放最後) ---
         [Display(Name = "所屬廠商")]
         public int CompanyId { get; set; }

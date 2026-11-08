@@ -9,6 +9,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using CompanyAPP.Dtos;
 using CompanyAPP.Services.Employees;
+using CompanyAPP.Services.Common;
 
 namespace CompanyAPP.Controllers.Api
 {
@@ -293,9 +294,13 @@ namespace CompanyAPP.Controllers.Api
             if (string.IsNullOrEmpty(emp.Email)) return BadRequest(new { message = "該員工沒有設定 Email" });
             if (emp.Status == Employee.EmployeeStatus.Active) return BadRequest(new { message = "該員工已經註冊過了" });
 
-            // 產生前端的註冊網址
+            var rawToken = InviteToken.Create();
+            emp.InviteTokenHash = InviteToken.Hash(rawToken);
+            emp.InviteExpiresAt = DateTime.UtcNow.AddDays(7);
+            await _employeeService.UpdateAsync(emp);
+
             var frontendUrl = _config["AppSettings:FrontendUrl"] ?? "http://localhost:5173";
-            var registerLink = $"{frontendUrl}/register?email={Uri.EscapeDataString(emp.Email)}";
+            var registerLink = $"{frontendUrl}/register?email={Uri.EscapeDataString(emp.Email)}&token={Uri.EscapeDataString(rawToken)}";
 
             // 組裝精美的信件內容
             string subject = "【企業管理系統】帳號開通邀請";

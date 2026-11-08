@@ -20,6 +20,7 @@ primary_region = 'sin'
 [env]
   ASPNETCORE_URLS = "http://+:8080"
   DATABASE_PATH = "/data/company.db"
+  AppSettings__FrontendUrl = "https://companyapp-luyu.fly.dev"
 
   [[vm]]
   memory = '1gb'

@@ -133,6 +133,12 @@ namespace CompanyAPP.Migrations
                         .IsRequired()
                         .HasColumnType("TEXT");
 
+                    b.Property<DateTime?>("InviteExpiresAt")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("InviteTokenHash")
+                        .HasColumnType("TEXT");
+
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("TEXT");

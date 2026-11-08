@@ -1,5 +1,6 @@
 ﻿    import { Link, useLocation, useNavigate } from 'react-router-dom';
     import { useState } from 'react';
+    import { authApi } from '../features/auth/authApi';
 
     // 引入選單圖示
     import DashboardSvg from '../assets/icons/Dashboard.svg';
@@ -43,11 +44,15 @@
             location.pathname === '/users' || location.pathname === '/audit-logs'
         );
 
-        const handleLogout = () => {
-            if (window.confirm("確定要登出系統嗎？")) {
-                localStorage.clear();
-                navigate('/login');
+        const handleLogout = async () => {
+            if (!window.confirm("確定要登出系統嗎？")) return;
+            try {
+                await authApi.logout();
+            } catch {
+                // Cookie 清不掉也先離開畫面
             }
+            localStorage.clear();
+            navigate('/login');
         };
 
         // 圖示樣式處理函式
