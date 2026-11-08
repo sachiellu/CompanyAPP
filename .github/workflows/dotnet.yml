@@ -39,18 +39,44 @@ jobs:
             echo "再貼到 https://github.com/sachiellu/CompanyAPP/settings/secrets/actions"
             exit 1
           fi
+          echo "SONAR_TOKEN 長度: ${#SONAR_TOKEN}"
+          echo "SONAR_TOKEN 前綴: ${SONAR_TOKEN:0:4}"
           case "$SONAR_TOKEN" in
-            FlyV1*)
-              echo "SONAR_TOKEN 貼成 Fly 的 FlyV1 令牌了。這裡只能貼 SonarCloud 的 token（通常 squ_ 開頭）。"
+            FlyV1*|fo1_*)
+              echo "SONAR_TOKEN 貼成 Fly 令牌了。這裡只能貼 SonarCloud 的 token。"
               exit 1
               ;;
-            squ_*)
-              echo "SONAR_TOKEN 格式看起來是 SonarCloud user token。"
+            ghp_*|github_pat_*|gho_*|ghu_*)
+              echo "SONAR_TOKEN 貼成 GitHub PAT 了。要貼 SonarCloud Access tokens 頁產生的那一把。"
+              exit 1
+              ;;
+            squ_*|sqp_*|sqa_*|sqo_*)
+              echo "SONAR_TOKEN 前綴看起來是 SonarCloud。"
               ;;
             *)
-              echo "SONAR_TOKEN 不是 Fly 令牌，但前綴不是 squ_。若分析仍 401，到 SonarCloud 組織 呂紹瑜 底下重產一把 User token。"
+              echo "前綴不是 squ_/sqp_。若等下 API 驗證失敗，到同一個 SonarCloud 帳號重產 Personal Token。"
               ;;
           esac
+          auth_code=$(curl -sS -o /tmp/sonar-auth.json -w "%{http_code}" \
+            -H "Authorization: Bearer $SONAR_TOKEN" \
+            "https://sonarcloud.io/api/authentication/validate")
+          echo "authentication/validate HTTP ${auth_code}"
+          cat /tmp/sonar-auth.json; echo
+          org_code=$(curl -sS -o /tmp/sonar-org.json -w "%{http_code}" \
+            -H "Authorization: Bearer $SONAR_TOKEN" \
+            "https://sonarcloud.io/api/organizations/search?organizations=sachiellu")
+          echo "organizations/search?organizations=sachiellu HTTP ${org_code}"
+          cat /tmp/sonar-org.json; echo
+          if [ "$auth_code" != "200" ] || ! grep -q '"valid":true' /tmp/sonar-auth.json; then
+            echo "GitHub 有 SONAR_TOKEN，但 SonarCloud 不認這把（帳號不符、複製不完整、或產生後沒整段貼上）。"
+            echo "到 https://sonarcloud.io/account/security 用「綁 GitHub 的同一個帳號」重產，立刻整段貼到 GitHub Secret SONAR_TOKEN。"
+            exit 1
+          fi
+          if ! grep -q '"key":"sachiellu"' /tmp/sonar-org.json; then
+            echo "這把 token 登入成功，但看不到組織 key=sachiellu。"
+            echo "到 https://sonarcloud.io/account/organizations 看實際 Key（不是顯示名稱 呂紹瑜），必須跟 workflow 的 sachiellu 一模一樣。"
+            exit 1
+          fi
 
       - uses: actions/checkout@v5
         with:
@@ -80,8 +106,6 @@ jobs:
             /o:"sachiellu" \
             /d:sonar.token="$SONAR_TOKEN" \
             /d:sonar.host.url="https://sonarcloud.io" \
-            /d:sonar.organization="sachiellu" \
-            /d:sonar.projectKey="sachiellu_CompanyAPP" \
             /d:sonar.scanner.apiBaseUrl="https://api.sonarcloud.io" \
             /d:sonar.cs.opencover.reportsPaths="**/TestResults/**/coverage.opencover.xml" \
             /d:sonar.qualitygate.wait=false
