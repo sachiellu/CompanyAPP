@@ -79,7 +79,7 @@ export default function MissionDetail() {
                             </div>
                             <div className="col-md-6">
                                 <label className="text-muted small d-block mb-1 fw-bold">截止日期</label>
-                                <div className="text-danger fw-bold"><i className="bi bi-calendar-x me-2"></i>{mission.deadline.split('T')[0]}</div>
+                                <div className="text-danger fw-bold"><i className="bi bi-calendar-x me-2"></i>{mission.deadline ? mission.deadline.split('T')[0] : '-'}</div>
                             </div>
                             <div className="col-12 bg-light p-3 rounded border">
                                 <label className="fw-bold text-secondary small mb-2 text-uppercase">詳細描述</label>

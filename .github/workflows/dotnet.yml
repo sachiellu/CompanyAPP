@@ -157,3 +157,43 @@ jobs:
             flyctl volumes create companyapp_qa_data --region sin --size 1 --yes -a companyapp-qa
           fi
           flyctl deploy --config fly.qa.toml --remote-only -a companyapp-qa
+
+  deploy-prod:
+    name: Deploy Prod (companyapp-luyu)
+    needs: build-and-test
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    runs-on: ubuntu-latest
+    env:
+      FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
+    steps:
+      - name: Require FLY_API_TOKEN
+        run: |
+          if [ -z "$FLY_API_TOKEN" ]; then
+            echo "GitHub Secret FLY_API_TOKEN 是空的。"
+            echo "這是正式站 companyapp-luyu 的 deploy token，不是 FLY_API_TOKEN_QA。"
+            exit 1
+          fi
+
+      - uses: actions/checkout@v5
+
+      - name: Install flyctl
+        run: |
+          set -euo pipefail
+          for i in 1 2 3 4 5; do
+            if curl -fsSL https://fly.io/install.sh | sh; then
+              echo "$HOME/.fly/bin" >> "$GITHUB_PATH"
+              exit 0
+            fi
+            echo "flyctl 安裝失敗（常見是 Fly/GitHub 504），第 ${i} 次，稍候重試"
+            sleep $((i * 8))
+          done
+          echo "flyctl 安裝連續失敗，這是 Fly 下載端暫時 504，不是正式站 token 或 companyapp-luyu 設定錯。"
+          exit 1
+
+      - name: Deploy production
+        working-directory: ./CompanyAPP
+        run: |
+          set -euo pipefail
+          flyctl auth whoami
+          flyctl status -a companyapp-luyu
+          flyctl deploy --config fly.toml --remote-only -a companyapp-luyu
