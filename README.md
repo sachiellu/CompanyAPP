@@ -143,4 +143,6 @@ fly secrets set JwtSettings__Key="請換成夠長的隨機字串" -a companyapp-
 
 先前 repo 裡那把舊 Key 已進過 Git，正式環境應換成新的。開通帳號必須走管理員寄出的邀請連結（含 token），不能只靠 email。
 
+寄信走 Brevo。金鑰不進 Git，雲端用 `BrevoSettings__ApiKey`（正式站若已有就不用重設；QA 要另外設一次）。沒設金鑰時，邀請按鈕應顯示錯誤，不應假裝寄出。
+
 先前 pipeline 只接 QA，所以 Git 上的最新版會先出現在 QA；正式站要等 Deploy Prod 成功才會對齊。新功能再另外開 branch；文件與 pipeline 修正直接走 `main` 即可。

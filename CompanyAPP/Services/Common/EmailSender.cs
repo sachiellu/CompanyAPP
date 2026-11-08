@@ -26,7 +26,7 @@ namespace CompanyAPP.Services.Common
             if (string.IsNullOrEmpty(apiKey) || string.IsNullOrEmpty(senderEmail))
             {
                 _logger.LogError("EmailSender failed: BrevoSettings:ApiKey or SenderEmail is missing in configuration.");
-                return;
+                throw new InvalidOperationException("尚未設定寄信金鑰（BrevoSettings:ApiKey）。請在本機 User Secrets 或 Fly secrets 設定後再寄邀請。");
             }
 
             var mailData = new
@@ -58,6 +58,7 @@ namespace CompanyAPP.Services.Common
                     var errorDetails = await response.Content.ReadAsStringAsync();
                     _logger.LogError("Brevo API returned non-success status: {StatusCode}, Details: {Details}",
                         response.StatusCode, errorDetails);
+                    throw new InvalidOperationException($"寄信失敗（Brevo {response.StatusCode}）。");
                 }
             }
             catch (Exception ex)
