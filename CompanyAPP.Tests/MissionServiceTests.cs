@@ -69,6 +69,50 @@ public class MissionServiceTests
     }
 
     [Fact]
+    public async Task UpdateAsync_ShouldChangeTitleAndAssignee()
+    {
+        using var context = TestDb.CreateContext();
+        var (company, employee) = await SeedCompanyAndEmployee(context);
+        var other = new Employee
+        {
+            Name = "陳大同",
+            StaffId = "EMP0002",
+            Email = "da@example.com",
+            CompanyId = company.Id
+        };
+        context.Employee.Add(other);
+        var mission = new Mission
+        {
+            Title = "原標題",
+            Deadline = DateTime.UtcNow.AddDays(1),
+            Status = MissionStatus.Pending,
+            CompanyId = company.Id,
+            EmployeeId = employee.Id
+        };
+        context.Mission.Add(mission);
+        await context.SaveChangesAsync();
+
+        var service = new MissionService(context, TestDb.CreateAuditMock().Object);
+        await service.UpdateAsync(new Mission
+        {
+            Id = mission.Id,
+            Title = "改派後標題",
+            Description = "補說明",
+            Deadline = DateTime.UtcNow.AddDays(5),
+            Status = MissionStatus.Processing,
+            CompanyId = company.Id,
+            EmployeeId = other.Id
+        });
+
+        var saved = await service.GetByIdAsync(mission.Id);
+        Assert.NotNull(saved);
+        Assert.Equal("改派後標題", saved.Title);
+        Assert.Equal("補說明", saved.Description);
+        Assert.Equal(MissionStatus.Processing, saved.Status);
+        Assert.Equal(other.Id, saved.EmployeeId);
+    }
+
+    [Fact]
     public async Task GetAllAsync_ShouldReturnNewestFirst()
     {
         using var context = TestDb.CreateContext();

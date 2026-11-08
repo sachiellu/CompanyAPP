@@ -27,9 +27,7 @@ jobs:
   sonar:
     name: SonarCloud (optional)
     needs: build-and-test
-    if: github.event_name == 'push' || github.event_name == 'pull_request'
     runs-on: ubuntu-latest
-    continue-on-error: true
     env:
       SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
     steps:
@@ -57,6 +55,7 @@ jobs:
 
       - name: Analyze
         if: env.SONAR_TOKEN != ''
+        continue-on-error: true
         run: |
           dotnet tool install --global dotnet-sonarscanner
           dotnet sonarscanner begin /k:"sachiellu_CompanyAPP" /o:"sachiellu" /d:sonar.token="$SONAR_TOKEN" /d:sonar.host.url="https://sonarcloud.io" /d:sonar.cs.opencover.reportsPaths="**/TestResults/**/coverage.opencover.xml"
@@ -90,5 +89,6 @@ jobs:
 
       - name: Deploy to Fly.io (QA)
         if: steps.fly.outputs.enabled == 'true'
+        continue-on-error: true
         working-directory: ./CompanyAPP
         run: flyctl deploy --remote-only -a companyapp-qa
