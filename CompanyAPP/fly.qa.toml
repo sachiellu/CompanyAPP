@@ -1,0 +1,26 @@
+# QA 環境：與正式站 companyapp-luyu 分開的 Fly app
+app = "companyapp-qa"
+primary_region = "sin"
+
+[build]
+  dockerfile = "Dockerfile"
+
+[http_service]
+  internal_port = 8080
+  force_https = true
+  auto_stop_machines = "stop"
+  auto_start_machines = true
+  min_machines_running = 0
+
+[env]
+  ASPNETCORE_URLS = "http://+:8080"
+  DATABASE_PATH = "/data/company.db"
+
+[[vm]]
+  memory = "512mb"
+  cpu_kind = "shared"
+  cpus = 1
+
+[mounts]
+  source = "companyapp_qa_data"
+  destination = "/data"

@@ -25,70 +25,74 @@ jobs:
           dotnet test CompanyAPP.sln --no-build --configuration Release --verbosity normal --collect:"XPlat Code Coverage" -- DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.Format=opencover
 
   sonar:
-    name: SonarCloud (optional)
+    name: SonarCloud
     needs: build-and-test
     runs-on: ubuntu-latest
     env:
       SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
     steps:
-      - name: Skip when token missing
-        if: env.SONAR_TOKEN == ''
-        run: echo "SONAR_TOKEN not set; skip SonarCloud."
+      - name: Require SONAR_TOKEN
+        run: |
+          if [ -z "$SONAR_TOKEN" ]; then
+            echo "GitHub Secret SONAR_TOKEN 是空的。"
+            echo "到 https://sonarcloud.io/account/security 產生 token，"
+            echo "再貼到 https://github.com/sachiellu/CompanyAPP/settings/secrets/actions"
+            exit 1
+          fi
 
       - uses: actions/checkout@v5
-        if: env.SONAR_TOKEN != ''
         with:
           fetch-depth: 0
 
       - name: Set up JDK 17
-        if: env.SONAR_TOKEN != ''
         uses: actions/setup-java@v5
         with:
           java-version: 17
           distribution: zulu
 
       - name: Setup .NET
-        if: env.SONAR_TOKEN != ''
         uses: actions/setup-dotnet@v5
         with:
           dotnet-version: 9.0.x
 
-      - name: Analyze
-        if: env.SONAR_TOKEN != ''
-        continue-on-error: true
+      - name: Install SonarCloud scanner
+        run: dotnet tool install --global dotnet-sonarscanner
+
+      - name: Analyze and upload
         run: |
-          dotnet tool install --global dotnet-sonarscanner
-          dotnet sonarscanner begin /k:"sachiellu_CompanyAPP" /o:"sachiellu" /d:sonar.token="$SONAR_TOKEN" /d:sonar.host.url="https://sonarcloud.io" /d:sonar.cs.opencover.reportsPaths="**/TestResults/**/coverage.opencover.xml"
+          dotnet sonarscanner begin /k:"sachiellu_CompanyAPP" /o:"sachiellu" /d:sonar.token="$SONAR_TOKEN" /d:sonar.host.url="https://sonarcloud.io" /d:sonar.cs.opencover.reportsPaths="**/TestResults/**/coverage.opencover.xml" /d:sonar.qualitygate.wait=false
           dotnet restore CompanyAPP.sln
           dotnet build CompanyAPP.sln --no-restore --configuration Release
           dotnet test CompanyAPP.sln --no-build --configuration Release --collect:"XPlat Code Coverage" -- DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.Format=opencover
           dotnet sonarscanner end /d:sonar.token="$SONAR_TOKEN"
 
   deploy-qa:
+    name: Deploy QA (companyapp-qa)
     needs: build-and-test
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
     runs-on: ubuntu-latest
     env:
       FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN_QA }}
     steps:
-      - name: Detect Fly token
-        id: fly
+      - name: Require FLY_API_TOKEN_QA
         run: |
-          if [ -n "$FLY_API_TOKEN" ]; then
-            echo "enabled=true" >> "$GITHUB_OUTPUT"
-          else
-            echo "enabled=false" >> "$GITHUB_OUTPUT"
-            echo "FLY_API_TOKEN_QA is not set; skip QA deploy."
+          if [ -z "$FLY_API_TOKEN" ]; then
+            echo "GitHub Secret FLY_API_TOKEN_QA 是空的。"
+            echo "到 https://fly.io/dashboard 產生 token 後貼到 GitHub Secrets。"
+            exit 1
           fi
 
       - uses: actions/checkout@v5
-        if: steps.fly.outputs.enabled == 'true'
 
       - uses: superfly/flyctl-actions/setup-flyctl@master
-        if: steps.fly.outputs.enabled == 'true'
 
-      - name: Deploy to Fly.io (QA)
-        if: steps.fly.outputs.enabled == 'true'
-        continue-on-error: true
+      - name: Create QA app if missing, then deploy
         working-directory: ./CompanyAPP
-        run: flyctl deploy --remote-only -a companyapp-qa
+        run: |
+          set -euo pipefail
+          if ! flyctl status -a companyapp-qa >/dev/null 2>&1; then
+            echo "DNS 已查不到 companyapp-qa，正在重建 Fly app"
+            flyctl apps create companyapp-qa
+            flyctl volumes create companyapp_qa_data --region sin --size 1 --yes -a companyapp-qa
+          fi
+          flyctl deploy --config fly.qa.toml --remote-only -a companyapp-qa

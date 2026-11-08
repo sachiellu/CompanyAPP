@@ -92,7 +92,8 @@ builder.Services.AddCors(options =>
             {
                 policy.WithOrigins(
                     "https://companyapp-luyu.fly.dev",
-                    "https://companyapp-foyu.fly.dev");
+                    "https://companyapp-foyu.fly.dev",
+                    "https://companyapp-qa.fly.dev");
             }
 
             policy.AllowAnyHeader()
