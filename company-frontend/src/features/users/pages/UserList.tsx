@@ -78,8 +78,7 @@ export default function UserList() {
 
                 <div className="d-flex align-items-center gap-2">
                     <input
-                        className="form-control form-control-sm shadow-sm"
-                        style={{ width: '300px' }}
+                        className="form-control form-control-sm shadow-sm toolbar-search"
                         value={searchTerm}
                         onChange={e => setSearchTerm(e.target.value)}
                         placeholder="搜尋 Email 或綁定員工..."
@@ -93,6 +92,7 @@ export default function UserList() {
 
             {/* 表格內容區 */}
             <div className="page-content bg-white shadow-sm rounded overflow-hidden">
+                <div className="table-responsive">
                 <table className="table table-hover align-middle mb-0 text-start" style={{ fontSize: '13.5px' }}>
                     <thead className="table-light">
                         <tr style={{ fontSize: '13px' }}>
@@ -149,6 +149,7 @@ export default function UserList() {
                         )}
                     </tbody>
                 </table>
+                </div>
             </div>
         </div>
     );

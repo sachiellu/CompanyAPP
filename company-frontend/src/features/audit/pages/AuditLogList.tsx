@@ -32,6 +32,7 @@ export default function AuditLogList() {
             </div>
 
             <div className="bg-white shadow-sm rounded overflow-hidden">
+                <div className="table-responsive">
                 <table className="table table-hover align-middle mb-0" style={{ fontSize: '13px' }}>
                     <thead className="table-light">
                         <tr>
@@ -66,6 +67,7 @@ export default function AuditLogList() {
                         )}
                     </tbody>
                 </table>
+                </div>
             </div>
         </div>
     );

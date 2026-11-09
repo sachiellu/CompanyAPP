@@ -234,7 +234,7 @@ export default function EmployeeList() {
                     員工管理 {loading && <span className="spinner-border spinner-border-sm ms-2 text-primary"></span>}
                 </h2>
                 <div className="d-flex align-items-center gap-2">
-                    <input className="form-control form-control-sm shadow-sm" style={{ width: '400px' }} value={searchTerm} onChange={e => setSearchTerm(e.target.value)} placeholder="搜尋員工姓名或工號..." />
+                    <input className="form-control form-control-sm shadow-sm toolbar-search" value={searchTerm} onChange={e => setSearchTerm(e.target.value)} placeholder="搜尋員工姓名或工號..." />
                     <div className="dropdown" onMouseEnter={() => setShowDropdown(true)} onMouseLeave={() => setShowDropdown(false)}>
                         <button type="button" className={`btn btn-sm btn-outline-secondary dropdown-toggle ${showDropdown ? 'show' : ''}`}>功能</button>
                         <ul className={`dropdown-menu shadow ${showDropdown ? 'show' : ''}`} style={{ marginTop: 0, fontSize: '13px' }}>
@@ -287,6 +287,7 @@ export default function EmployeeList() {
 
             {/* Table Area */}
             <div className="page-content bg-white shadow-sm rounded overflow-hidden">
+                <div className="table-responsive">
                 <table className="table table-hover align-middle mb-0 text-start" style={{ fontSize: '13.5px' }}>
                     <thead className="table-light">
                         <tr style={{ fontSize: '13px' }}>
@@ -391,6 +392,7 @@ export default function EmployeeList() {
                         })}
                     </tbody>
                 </table>
+                </div>
             </div>
 
             {/* Context Menu (右鍵選單) */}

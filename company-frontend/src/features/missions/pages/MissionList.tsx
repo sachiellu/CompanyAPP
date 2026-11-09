@@ -60,6 +60,7 @@ export default function MissionList() {
             </div>
 
             <div className="page-content bg-white shadow-sm rounded overflow-hidden">
+                <div className="table-responsive">
                 <table className="table table-hover align-middle mb-0 text-start" style={{ fontSize: '14px' }}>
                     <thead className="table-light">
                         <tr style={{ fontSize: '13px' }}>
@@ -108,6 +109,7 @@ export default function MissionList() {
                         ))}
                     </tbody>
                 </table>
+                </div>
             </div>
         </div>
     );

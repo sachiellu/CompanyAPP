@@ -19,14 +19,13 @@ namespace CompanyAPP.Services.Common
 
         public async Task SendEmailAsync(string email, string subject, string htmlMessage)
         {
-            // 使用結構化讀取，對應 BrevoSettings:ApiKey
             var apiKey = _configuration["BrevoSettings:ApiKey"];
             var senderEmail = _configuration["BrevoSettings:SenderEmail"];
 
             if (string.IsNullOrEmpty(apiKey) || string.IsNullOrEmpty(senderEmail))
             {
                 _logger.LogError("EmailSender failed: BrevoSettings:ApiKey or SenderEmail is missing in configuration.");
-                throw new InvalidOperationException("尚未設定寄信金鑰（BrevoSettings:ApiKey）。請在本機 User Secrets 或 Fly secrets 設定後再寄邀請。");
+                throw new InvalidOperationException("尚未設定寄信金鑰。請在 Fly 設定 BrevoSettings__ApiKey 後再寄邀請。");
             }
 
             var mailData = new
@@ -48,22 +47,32 @@ namespace CompanyAPP.Services.Common
                 _logger.LogInformation("Attempting to send email via Brevo API to: {Email}", email);
 
                 var response = await _httpClient.PostAsync("https://api.brevo.com/v3/smtp/email", content);
-
                 if (response.IsSuccessStatusCode)
                 {
                     _logger.LogInformation("Email successfully delivered to Brevo API queue for: {Email}", email);
+                    return;
                 }
-                else
-                {
-                    var errorDetails = await response.Content.ReadAsStringAsync();
-                    _logger.LogError("Brevo API returned non-success status: {StatusCode}, Details: {Details}",
-                        response.StatusCode, errorDetails);
-                    throw new InvalidOperationException($"寄信失敗（Brevo {response.StatusCode}）。");
-                }
+
+                var errorDetails = await response.Content.ReadAsStringAsync();
+                _logger.LogError("Brevo API returned non-success status: {StatusCode}, Details: {Details}",
+                    response.StatusCode, errorDetails);
+
+                var hint = (int)response.StatusCode == 401
+                    ? "金鑰無效或已停用，請在 Brevo 重產並更新 Fly secrets。"
+                    : (int)response.StatusCode == 400
+                        ? "寄件信箱可能尚未在 Brevo 驗證，或權限不是 Transactional email All。"
+                        : errorDetails.Length > 180 ? errorDetails[..180] : errorDetails;
+
+                throw new InvalidOperationException($"寄信失敗（Brevo {(int)response.StatusCode}）。{hint}");
+            }
+            catch (InvalidOperationException)
+            {
+                throw;
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "An unexpected error occurred while calling Brevo API for: {Email}", email);
+                throw new InvalidOperationException("寄信時發生連線錯誤，請稍後再試。");
             }
         }
     }
