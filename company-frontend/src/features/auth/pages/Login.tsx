@@ -55,7 +55,7 @@ export default function Login() {
     };
 
     return (
-        <div className="vh-100 vw-100 position-relative overflow-hidden bg-black">
+        <div className="auth-shell">
 
             {/* 1. 背景層 */}
             <div style={{
@@ -71,11 +71,11 @@ export default function Login() {
             </div>
 
             {/* 2. 內容層 */}
-            <div className="position-absolute top-0 start-0 w-100 h-100 d-flex align-items-center" style={{ zIndex: 1, paddingLeft: '10%' }}>
+            <div className="auth-panel">
                 
                 {/* 卡片本體：深色毛玻璃 */}
-                <div className="card border-0 shadow-lg" style={{
-                    width: '380px', borderRadius: '20px', padding: '40px',
+                <div className="card border-0 shadow-lg auth-card" style={{
+                    borderRadius: '20px', padding: '40px',
                     backgroundColor: 'rgba(15, 23, 42, 0.75)', // 用稍微帶點藍的深黑色
                     backdropFilter: 'blur(16px)', // 增加模糊度，質感更好
                     border: '1px solid rgba(255, 255, 255, 0.15)', // 邊框變細緻
@@ -148,7 +148,7 @@ export default function Login() {
                     {/* 增加展示區塊 */}
                     <div className="mt-4 pt-3 border-top border-secondary border-opacity-25 text-center">
                         <p className="text-white-50 small mb-2">展示用快速登入：</p>
-                        <div className="d-flex justify-content-center gap-2">
+                        <div className="d-flex justify-content-center gap-2 flex-wrap">
                             <button 
                                 type="button"
                                 className="btn btn-sm btn-outline-info"

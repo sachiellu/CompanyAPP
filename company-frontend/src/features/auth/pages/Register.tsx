@@ -58,7 +58,7 @@ export default function Register() {
     };
 
     return (
-        <div className="vh-100 vw-100 position-relative overflow-hidden bg-black">
+        <div className="auth-shell">
             {/* 背景層 */}
             <div style={{
                 position: 'absolute', top: 0, left: 0, width: '100%', height: '100%',
@@ -72,10 +72,10 @@ export default function Register() {
             </div>
 
             {/* 內容層 */}
-            <div className="position-absolute top-0 start-0 w-100 h-100 d-flex align-items-center" style={{ zIndex: 1, paddingLeft: '10%' }}>
+            <div className="auth-panel">
 
-                <div className="card border-0 shadow-lg" style={{
-                    width: '380px', borderRadius: '20px', padding: '40px',
+                <div className="card border-0 shadow-lg auth-card" style={{
+                    borderRadius: '20px', padding: '40px',
                     background: 'rgba(15, 23, 42, 0.75)', 
                     backdropFilter: 'blur(16px)',
                     border: '1px solid rgba(255, 255, 255, 0.15)'

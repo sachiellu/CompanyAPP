@@ -173,7 +173,43 @@ main {
     }
 }
 
+.auth-shell {
+    min-height: 100dvh;
+    width: 100%;
+    position: relative;
+    overflow: auto;
+    background: #000;
+}
+
+.auth-panel {
+    position: relative;
+    z-index: 1;
+    min-height: 100dvh;
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    padding: 24px 10%;
+    box-sizing: border-box;
+}
+
+.auth-card {
+    width: 380px;
+    max-width: 100%;
+    flex-shrink: 0;
+}
+
 @media (max-width: 767.98px) {
+    .auth-panel {
+        justify-content: center;
+        align-items: flex-start;
+        padding: 20px 16px 32px;
+    }
+
+    .auth-card {
+        width: 100%;
+        padding: 28px 20px !important;
+    }
+
     .app-sidebar {
         position: fixed;
         top: 0;

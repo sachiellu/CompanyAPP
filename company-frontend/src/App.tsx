@@ -7,7 +7,7 @@ import MainLayout from "./layouts/MainLayout";
 import AuthLayout from "./layouts/AuthLayout";
 import RequireAuth from "./layouts/RequireAuth";
 
-import Login from './features/auth/pages/Login_Glass(dark)'; // 確保login用對版本
+import Login from './features/auth/pages/Login';
 import Dashboard from './features/dashboard/pages/Dashboard';
 import Register from './features/auth/pages/Register';   
 

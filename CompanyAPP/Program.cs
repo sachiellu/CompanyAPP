@@ -129,7 +129,7 @@ builder.Services.AddDefaultIdentity<IdentityUser>(options =>
     .AddEntityFrameworkStores<CompanyAppContext>();
 
 builder.Services.AddTransient<IEmailSender, EmailSender>();
-// 設定 Cookie 安全性 (給 Razor Pages 用)
+// Identity 應用程式 Cookie（帳號鎖定等）；API 驗證走 JWT
 builder.Services.ConfigureApplicationCookie(options =>
 {
     options.Cookie.HttpOnly = true;

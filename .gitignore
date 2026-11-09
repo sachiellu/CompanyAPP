@@ -2,13 +2,15 @@
 .vs
 [Bb]in
 [Oo]bj
+*.user
+*.tmp
 
-# Node  React
+# Node / React
 node_modules
 dist
 .env
 
 # Database
-.db
-.db-shm
-.db-wal
+*.db
+*.db-shm
+*.db-wal
