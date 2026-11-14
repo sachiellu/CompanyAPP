@@ -17,9 +17,9 @@ export default function Login() {
         setLoading(true);
         try {
             const data = await authApi.login(email, password);
-            localStorage.setItem('token', data.token);
-            localStorage.setItem('userRole', data.role);
-            localStorage.setItem('userEmail', email);
+            localStorage.setItem('token', data.token || 'cookie-mode');
+            localStorage.setItem('userRole', data.role || 'User');
+            localStorage.setItem('userEmail', data.email || email);
             navigate('/');
         } catch (err) {
             console.error(err);
@@ -41,9 +41,9 @@ export default function Login() {
             // 2.  直接傳入參數，不要等 setEmail 更新，這樣絕對不會 401
             const data = await authApi.login(demoEmail, demoPass);
             
-            localStorage.setItem('token', data.token);
-            localStorage.setItem('userRole', data.role);
-            localStorage.setItem('userEmail', demoEmail);
+            localStorage.setItem('token', data.token || 'cookie-mode');
+            localStorage.setItem('userRole', data.role || 'User');
+            localStorage.setItem('userEmail', data.email || demoEmail);
             
             navigate('/');
         } catch (err) {
@@ -55,32 +55,9 @@ export default function Login() {
     };
 
     return (
-        <div className="auth-shell">
-
-            {/* 1. 背景層 */}
-            <div style={{
-                position: 'absolute', top: 0, left: 0, width: '100%', height: '100%',
-                backgroundImage: `url(${loginBg})`, backgroundSize: 'cover', backgroundPosition: 'center', zIndex: 0
-            }}>
-                {/* 1.1 背景遮罩：既然卡片是黑的，整體背景也稍微壓暗，讓水庫看起來更有質感 */}
-                <div style={{
-                    position: 'absolute', top: 0, left: 0, width: '100%', height: '100%',
-                    backgroundColor: 'rgba(0, 0, 0, 0.4)', // 改成黑色遮罩
-                    backdropFilter: 'blur(3px)'
-                }}></div>
-            </div>
-
-            {/* 2. 內容層 */}
+        <div className="auth-shell" style={{ backgroundImage: `url(${loginBg})` }}>
             <div className="auth-panel">
-                
-                {/* 卡片本體：深色毛玻璃 */}
-                <div className="card border-0 shadow-lg auth-card" style={{
-                    borderRadius: '20px', padding: '40px',
-                    backgroundColor: 'rgba(15, 23, 42, 0.75)', // 用稍微帶點藍的深黑色
-                    backdropFilter: 'blur(16px)', // 增加模糊度，質感更好
-                    border: '1px solid rgba(255, 255, 255, 0.15)', // 邊框變細緻
-                    boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.5)'
-                }}>
+                <div className="auth-card">
                     <div className="text-center mb-4">
                         {/* 如果你的 Logo 是黑底，可以給它一點白色光暈才不會融入背景 */}
                         <div className="d-inline-block rounded shadow-sm bg-black" style={{ padding: '2px', border: '1px solid rgba(255,255,255,0.2)'}}>
@@ -97,10 +74,12 @@ export default function Login() {
                             <label className="form-label fw-bold text-light small">帳號 / EMAIL</label>
                             {/* 輸入框改成半透明黑色，文字為白色 */}
                             <input
+                                type="email"
+                                autoComplete="username"
                                 className="form-control bg-dark bg-opacity-50 text-white border-secondary py-2"
                                 value={email}
                                 onChange={e => setEmail(e.target.value)}
-                                style={{ colorScheme: 'dark' }} // 讓瀏覽器知道這是深色模式
+                                style={{ colorScheme: 'dark' }}
                                 required
                             />
                         </div>
@@ -109,6 +88,7 @@ export default function Login() {
                             <label className="form-label fw-bold text-light small">登入密碼</label>
                             <input
                                 type="password"
+                                autoComplete="current-password"
                                 className="form-control bg-dark bg-opacity-50 text-white border-secondary py-2"
                                 value={password}
                                 onChange={e => setPassword(e.target.value)}
@@ -119,7 +99,7 @@ export default function Login() {
 
                         {/* 主按鈕：使用有漸層的科技水藍色 */}
                         <button
-                            className="btn w-100 py-2 fw-bold rounded-pill shadow mb-4 text-white"
+                            className="btn auth-submit py-2 fw-bold rounded-pill shadow mb-4 text-white"
                             type="submit"
                             disabled={loading}
                             style={{ 
@@ -145,18 +125,18 @@ export default function Login() {
                         
                     </form>
 
-                    {/* 增加展示區塊 */}
+                    {import.meta.env.DEV && (
                     <div className="mt-4 pt-3 border-top border-secondary border-opacity-25 text-center">
-                        <p className="text-white-50 small mb-2">展示用快速登入：</p>
+                        <p className="text-white-50 small mb-2">本機展示登入：</p>
                         <div className="d-flex justify-content-center gap-2 flex-wrap">
-                            <button 
+                            <button
                                 type="button"
                                 className="btn btn-sm btn-outline-info"
                                 onClick={() => handleDemoLogin('admin@default.com', 'Admin123!')}
                             >
                                 管理員 (Admin)
                             </button>
-                            <button 
+                            <button
                                 type="button"
                                 className="btn btn-sm btn-outline-light"
                                 onClick={() => handleDemoLogin('user@default.com', 'User123!')}
@@ -165,6 +145,7 @@ export default function Login() {
                             </button>
                         </div>
                     </div>
+                    )}
                     
                 </div>
             </div>

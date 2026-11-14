@@ -271,6 +271,9 @@ namespace CompanyAPP.Controllers.Api
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Export([FromBody] List<int>? ids)
         {
+            if (ids == null || !ids.Any())
+                return BadRequest(new { message = "請先選擇要匯出的員工" });
+
             var file = await _excelService.ExportToExcelAsync(ids);
 
             return File(

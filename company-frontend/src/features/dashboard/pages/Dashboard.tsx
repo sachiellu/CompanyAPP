@@ -88,7 +88,7 @@
                 {/* Dashboard Cards */}
                 <div className="row g-3 mb-4">
                     {dashboardCards.map((card, i) => (
-                        <div key={i} className="col-md-4">
+                        <div key={i} className="col-12 col-sm-6 col-lg-4">
                             <Link to={card.to} className="text-decoration-none text-dark">
                                 <div className="card dashboard-card shadow-sm border-0 p-3">
                                     <div className="d-flex align-items-center">
@@ -127,7 +127,7 @@
                     <div className="col-lg-8">
                         <div className="card shadow-sm border-0 p-3">
                             <h6 className="fw-bold mb-3">廠商員工分佈分析</h6>
-                            <div style={{ height: '260px' }}>
+                            <div className="dashboard-chart">
                                 <Bar data={chartConfig} options={{ responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }} />
                             </div>
                         </div>

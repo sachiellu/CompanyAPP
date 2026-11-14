@@ -58,28 +58,9 @@ export default function Register() {
     };
 
     return (
-        <div className="auth-shell">
-            {/* 背景層 */}
-            <div style={{
-                position: 'absolute', top: 0, left: 0, width: '100%', height: '100%',
-                backgroundImage: `url(${loginBg})`, backgroundSize: 'cover', backgroundPosition: 'center', zIndex: 0
-            }}>
-                <div style={{
-                    position: 'absolute', top: 0, left: 0, width: '100%', height: '100%',
-                    backgroundColor: 'rgba(0, 0, 0, 0.4)', 
-                    backdropFilter: 'blur(3px)'
-                }}></div>
-            </div>
-
-            {/* 內容層 */}
+        <div className="auth-shell" style={{ backgroundImage: `url(${loginBg})` }}>
             <div className="auth-panel">
-
-                <div className="card border-0 shadow-lg auth-card" style={{
-                    borderRadius: '20px', padding: '40px',
-                    background: 'rgba(15, 23, 42, 0.75)', 
-                    backdropFilter: 'blur(16px)',
-                    border: '1px solid rgba(255, 255, 255, 0.15)'
-                }}>
+                <div className="auth-card">
                     <div className="text-center mb-4">
                         <div className="d-inline-block rounded shadow-sm bg-black" style={{ padding: '2px', border: '1px solid rgba(255,255,255,0.2)'}}>
                             <img src={EsLogo} alt="Logo" style={{ width: '46px', height: '46px' }} />
@@ -125,7 +106,7 @@ export default function Register() {
                             />
                         </div>
 
-                        <button className="btn btn-primary w-100 py-2 fw-bold rounded-pill shadow-sm mb-4" type="submit" disabled={loading}>
+                        <button className="btn btn-primary auth-submit py-2 fw-bold rounded-pill shadow-sm mb-4" type="submit" disabled={loading}>
                             {loading ? <span className="spinner-border spinner-border-sm"></span> : "開通帳號"}
                         </button>
 

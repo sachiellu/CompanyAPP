@@ -101,10 +101,13 @@ const sortedCompanies = useMemo(() => {
     const { contextMenu, handleContextMenu } = useContextMenu();
 
     const handleExport = async (ids: number[]) => {
-        const exportList = ids.length > 0 ? ids : companies.map(c => c.id);
-        if (!confirm(`確定匯出 ${exportList.length} 筆資料？`)) return;
+        if (ids.length === 0) {
+            alert("請先勾選要匯出的廠商。");
+            return;
+        }
+        if (!confirm(`確定匯出 ${ids.length} 筆廠商資料？`)) return;
         try {
-            const res = await companyApi.exportExcel(exportList);
+            const res = await companyApi.exportExcel(ids);
             const blobData = res.data;
             
             const url = window.URL.createObjectURL(blobData);
@@ -120,7 +123,7 @@ const sortedCompanies = useMemo(() => {
             <div className="page-header-wrapper d-flex justify-content-between align-items-center mb-4">
                 <h2 className="text-dark fw-bold mb-0" style={{ fontSize: '1.25rem' }}>廠商總覽 {loading && "..."}</h2>
                 <div className="d-flex align-items-center gap-2">
-                    <input className="form-control form-control-sm" style={{ width: '400px' }} value={searchTerm} onChange={e => setSearchTerm(e.target.value)} placeholder="搜尋廠商..." />
+                    <input className="form-control form-control-sm toolbar-search" value={searchTerm} onChange={e => setSearchTerm(e.target.value)} placeholder="搜尋廠商..." />
                     <div className="dropdown" onMouseEnter={() => setShowDropdown(true)} onMouseLeave={() => setShowDropdown(false)}>
                         <button type="button" className="btn btn-sm btn-outline-secondary dropdown-toggle">功能</button>
                         <ul className={`dropdown-menu ${showDropdown ? 'show' : ''}`} style={{ marginTop: 0, fontSize: '13px' }}>

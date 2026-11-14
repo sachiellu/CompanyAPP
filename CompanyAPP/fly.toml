@@ -1,6 +1,5 @@
-# fly.toml app configuration file generated for companyapp-luyu on 2025-11-28T14:30:45+08:00
-#
-# See https://fly.io/docs/reference/configuration/ for information about how to use this file.
+# 從 repo 根目錄部署：flyctl deploy . --config CompanyAPP/fly.toml --dockerfile Dockerfile
+# 映像由根目錄 Dockerfile 建置（Node 22 + .NET 9）。
 #
 
 app = "companyapp-luyu"

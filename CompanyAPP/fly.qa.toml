@@ -1,3 +1,4 @@
+# QA。從 repo 根目錄：flyctl deploy . --config CompanyAPP/fly.qa.toml --dockerfile Dockerfile
 # QA 環境：與正式站 companyapp-luyu 分開的 Fly app
 app = "companyapp-qa"
 primary_region = "sin"

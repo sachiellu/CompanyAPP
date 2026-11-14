@@ -125,11 +125,14 @@ export default function EmployeeList() {
     };
 
     const handleExport = async (ids: number[]) => {
-        const exportList = ids.length > 0 ? ids : employees.map(e => e.id);
-        if (!window.confirm(`確定匯出 ${exportList.length} 筆員工資料？`)) return;
+        if (ids.length === 0) {
+            alert("請先勾選要匯出的員工。");
+            return;
+        }
+        if (!window.confirm(`確定匯出 ${ids.length} 筆員工資料？`)) return;
         
     try {
-            const res = await employeeApi.exportExcel(exportList);
+            const res = await employeeApi.exportExcel(ids);
             
             // ✨ 關鍵修正：不管 res.data 是什麼，手動把它封裝成 Blob
             // 如果 res.data 已經是 Blob，這行不會壞；如果它是 ArrayBuffer 或字串，這行會修好它。

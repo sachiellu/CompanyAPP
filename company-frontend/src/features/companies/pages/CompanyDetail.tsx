@@ -89,7 +89,7 @@ export default function CompanyDetail() {
                     <div className="card shadow-sm border-0 mb-4 text-start">
                         <div className="card-body p-4">
                             <div className="row align-items-center text-start">
-                                <div className="col-md-auto pe-4 border-end text-center" style={{ minWidth: '240px' }}>
+                                <div className="col-12 col-md-auto pe-md-4 border-end company-logo-col text-center" style={{ minWidth: '240px' }}>
                                     <div className="bg-light border mb-2 mx-auto d-flex align-items-center justify-content-center" style={{ width: '160px', height: '160px' }}>
                                         {company.logoPath ? (
                                             <img 
@@ -103,7 +103,7 @@ export default function CompanyDetail() {
                                     </div>
                                     <h5 className="fw-bold m-0 text-primary">{company.name}</h5>
                                 </div>
-                                <div className="col-md ps-4">
+                                <div className="col-12 col-md company-info-col ps-md-4">
                                     <div className="row g-3">
                                         <div className="col-md-6">
                                             <label className="small text-muted fw-bold d-block text-uppercase mb-1">統一編號</label>

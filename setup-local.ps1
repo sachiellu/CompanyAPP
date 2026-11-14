@@ -20,6 +20,16 @@ Assert-Command "dotnet"
 Assert-Command "node"
 Assert-Command "npm"
 
+$nodeVer = (& node -v).TrimStart("v")
+$parts = $nodeVer.Split(".")
+$major = [int]$parts[0]
+$minor = [int]$parts[1]
+if (-not (($major -gt 20) -or ($major -eq 20 -and $minor -ge 19))) {
+    Write-Host "本機 Node 是 $nodeVer，前端至少要 20.19（建議 22 LTS）。" -ForegroundColor Red
+    Write-Host "請到 https://nodejs.org 安裝 LTS 後重開終端機。" -ForegroundColor Yellow
+    exit 1
+}
+
 Write-Host "`n[1/4] 信任本機 HTTPS 開發憑證..." -ForegroundColor Cyan
 dotnet dev-certs https --trust | Out-Host
 
@@ -47,6 +57,10 @@ Write-Host @"
 
 然後開啟: http://localhost:5173
 預設管理員: admin@default.com / Admin123!
+
+測試：
+    dotnet test CompanyAPP.sln
+    cd company-frontend; npm run lint
 
 之後若要同步最新程式碼:
     git pull origin main

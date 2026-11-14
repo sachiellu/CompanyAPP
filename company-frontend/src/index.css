@@ -5,62 +5,27 @@
     font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
     line-height: 1.5;
     font-weight: 400;
-    /* 縮減數值以適配 100% 視角 */
     --header-height: 48px;
     --page-padding: 20px;
-    scrollbar-gutter: stable;
+}
+
+html,
+body,
+#root {
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    overflow-x: hidden;
+    overflow-y: auto;
 }
 
 body {
     margin: 0;
     padding: 0;
-    min-width: 320px;
     min-height: 100vh;
-    overflow-x: hidden;
-    font-size: 14px; /* 標準字體 */
+    font-size: 14px;
     background-color: #f8f9fa;
 }
-
-a {
-    font-weight: 500;
-    color: #646cff;
-    text-decoration: inherit;
-}
-
-    a:hover {
-        color: #535bf2;
-    }
-
-/* ==========================================================================
-   2. 組件基礎 (Components Base)：通用樣式
-   ========================================================================== */
-h1 {
-    font-size: 3.2em;
-    line-height: 1.1;
-    margin: 0;
-}
-
-button {
-    border-radius: 8px;
-    border: 1px solid transparent;
-    padding: 0.6em 1.2em;
-    font-size: 1em;
-    font-weight: 500;
-    font-family: inherit;
-    background-color: #1a1a1a;
-    cursor: pointer;
-    transition: border-color 0.25s;
-}
-
-    button:hover {
-        border-color: #646cff;
-    }
-
-    button:focus,
-    button:focus-visible {
-        outline: 4px auto -webkit-focus-ring-color;
-    }
-
 
 /* 針對所有的 main 區域強制預留捲軸空間 */
 main {
@@ -163,52 +128,117 @@ main {
         color: #213547;
         background-color: #ffffff;
     }
+}
 
-    a:hover {
-        color: #747bff;
-    }
-
-    button {
-        background-color: #f9f9f9;
-    }
+.auth-shell-host {
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    overflow-x: hidden;
 }
 
 .auth-shell {
     min-height: 100dvh;
     width: 100%;
+    max-width: 100%;
+    min-width: 0;
     position: relative;
-    overflow: auto;
-    background: #000;
+    overflow-x: hidden;
+    overflow-y: auto;
+    box-sizing: border-box;
+    background-color: #000;
+    background-size: cover;
+    background-position: center;
+}
+
+.auth-shell::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background-color: rgba(0, 0, 0, 0.4);
+    backdrop-filter: blur(3px);
+    pointer-events: none;
 }
 
 .auth-panel {
     position: relative;
     z-index: 1;
     min-height: 100dvh;
+    min-width: 0;
+    width: 100%;
+    max-width: 100%;
     display: flex;
     align-items: center;
-    justify-content: flex-start;
-    padding: 24px 10%;
+    justify-content: center;
+    padding: 16px;
     box-sizing: border-box;
 }
 
 .auth-card {
-    width: 380px;
-    max-width: 100%;
-    flex-shrink: 0;
+    display: block;
+    box-sizing: border-box;
+    width: 100%;
+    max-width: 380px;
+    min-width: 0;
+    flex-shrink: 1;
+    margin: 0;
+    padding: 24px 16px;
+    border-radius: 20px;
+    background-color: rgba(15, 23, 42, 0.75);
+    backdrop-filter: blur(16px);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
 }
 
-@media (max-width: 767.98px) {
+.auth-card .form-control {
+    display: block;
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
+}
+
+.auth-card .auth-submit {
+    width: 100%;
+}
+
+.dashboard-chart {
+    height: 260px;
+}
+
+.company-logo-upload {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+    min-width: 0;
+}
+
+.company-logo-upload__frame {
+    width: min(200px, 100%);
+    box-sizing: border-box;
+}
+
+.company-logo-upload__preview {
+    width: 100%;
+    aspect-ratio: 1;
+    max-height: 200px;
+    box-sizing: border-box;
+}
+
+/* 寬度夠大（≥768px）才靠左，避免手機一進來就套桌面邊距 */
+@media (min-width: 768px) {
     .auth-panel {
-        justify-content: center;
-        align-items: flex-start;
-        padding: 20px 16px 32px;
+        justify-content: flex-start;
+        padding: 24px 10%;
     }
 
     .auth-card {
-        width: 100%;
-        padding: 28px 20px !important;
+        padding: 40px;
     }
+}
+
+@media (max-width: 767.98px) {
 
     .app-sidebar {
         position: fixed;
@@ -220,6 +250,11 @@ main {
 
     .app-sidebar.is-open {
         transform: translateX(0);
+    }
+
+    .app-main,
+    .app-sidebar {
+        height: 100dvh;
     }
 
     .page-container {
@@ -238,8 +273,53 @@ main {
         font-size: 1.2rem !important;
     }
 
+    .page-header-wrapper > div {
+        width: 100%;
+        flex-wrap: wrap;
+    }
+
     .toolbar-search {
         max-width: none;
+        width: 100%;
+    }
+
+    .dashboard-chart {
+        height: 200px;
+    }
+
+    .table-responsive {
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .page-container .card.p-4 {
+        padding: 1.25rem !important;
+    }
+
+    .page-container form .d-flex.justify-content-end {
+        flex-direction: column;
+        align-items: stretch !important;
+    }
+
+    .page-container form .d-flex.justify-content-end .btn {
+        width: 100%;
+    }
+
+    .company-logo-col {
+        min-width: 0 !important;
+        border-right: none !important;
+        padding-right: 0.75rem !important;
+        padding-bottom: 1rem;
+        margin-bottom: 1rem;
+        border-bottom: 1px solid #dee2e6;
+    }
+
+    .company-info-col {
+        padding-left: 0.75rem !important;
+        padding-top: 0.5rem;
+    }
+
+    h4 {
+        overflow-wrap: anywhere;
     }
 }
 

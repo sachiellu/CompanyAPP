@@ -85,7 +85,7 @@ export default function EmployeeDetail() {
                                 <label className="text-muted small d-block mb-1 fw-bold">員工編號</label>
                                 <code className="fs-5 text-primary fw-bold">{employee.staffId || '待編'}</code>
                             </div>
-                            <div className="col-md-6 text-end">
+                            <div className="col-md-6 text-md-end">
                                 <label className="text-muted small d-block mb-1 fw-bold">狀態</label>
                                 <StatusBadge status={employee.status} />
                             </div>

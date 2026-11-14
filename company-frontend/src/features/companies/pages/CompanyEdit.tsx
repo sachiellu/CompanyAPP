@@ -193,7 +193,7 @@ export default function CompanyEdit() {
                     </div>
                 </div>
 
-                <div className="d-flex justify-content-end gap-3 mt-5 pt-3 border-top">
+                <div className="d-flex justify-content-end gap-3 mt-4 mt-md-5 pt-3 border-top">
                     <button type="submit" className="btn btn-sm btn-primary px-5 py-2 fw-bold shadow-sm" disabled={loading}>儲存所有修改</button>
                 </div>
             </form>

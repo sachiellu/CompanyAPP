@@ -162,6 +162,9 @@ namespace CompanyAPP.Controllers.Api
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Export([FromBody] List<int>? ids)
         {
+            if (ids == null || !ids.Any())
+                return BadRequest(new { message = "請先選擇要匯出的廠商" });
+
             var file = await _companyService.ExportToExcelAsync(ids);
             return File(file, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "Companies.xlsx");
         }

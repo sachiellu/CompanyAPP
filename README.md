@@ -4,7 +4,7 @@
 
 ### 前置需求
 - [.NET 9 SDK](https://dotnet.microsoft.com/download)
-- [Node.js 20+](https://nodejs.org/)
+- [Node.js 22 LTS](https://nodejs.org/)（本機 `npm run dev` 用；至少 20.19）
 - Git
 
 ### Clone
@@ -84,10 +84,10 @@ git push
 - **Excel:** ClosedXML
 
 ### 部署
-前後端一起部署：
-1. 前端 `npm run build` 產出靜態檔。
-2. 放到 .NET 的 `wwwroot`。
-3. 由 .NET 9 同時處理 API 與網頁，跑在 Fly.io。
+推上 `main` 後，Fly 遠端用根目錄 `Dockerfile` 建置：Node 22 編譯前端，再打包進 .NET 9。本機不必裝 Docker Desktop。
+
+本機開發（熱重載）開兩個終端機：`dotnet run` 與 `npm run dev`，瀏覽器開 http://localhost:5173。
+測試：`dotnet test CompanyAPP.sln`；前端檢查：`cd company-frontend` 後 `npm run lint`。
 
 舊版 MVC 請看 tag `v2.3-mvc` 或 branch `feature/react-modernization`。
 

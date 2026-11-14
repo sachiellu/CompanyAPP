@@ -1,0 +1,10 @@
+.git
+.vs
+**/.vs
+**/bin
+**/obj
+**/node_modules
+company-frontend/dist
+CompanyAPP.Tests
+*.md
+.github

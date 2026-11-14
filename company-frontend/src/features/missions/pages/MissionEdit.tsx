@@ -147,7 +147,7 @@ export default function MissionEdit() {
                     onChange={handleFieldChange}
                 />
 
-                <div className="d-flex justify-content-end gap-3 mt-5 pt-3 border-top">
+                <div className="d-flex justify-content-end gap-3 mt-4 mt-md-5 pt-3 border-top">
                     <button type="submit" className="btn btn-sm btn-primary px-5 py-2 fw-bold shadow-sm" disabled={loading || !missionLoaded}>
                         儲存任務變更
                     </button>

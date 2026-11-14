@@ -79,7 +79,7 @@ export default function MissionCreate() {
 
             <form onSubmit={handleSubmit} className="card shadow border-0 p-4 mx-auto" style={{ maxWidth: '850px' }}>
                 <MissionFormFields data={formData} companies={companies} employees={filteredEmployees} onChange={handleFieldChange} />
-                <div className="d-flex justify-content-end gap-3 mt-5 pt-3 border-top">
+                <div className="d-flex justify-content-end gap-3 mt-4 mt-md-5 pt-3 border-top">
                     <button type="submit" className="btn btn-sm btn-primary px-5 py-2 fw-bold shadow-sm" disabled={loading}>確認派工並儲存</button>
                 </div>
             </form>

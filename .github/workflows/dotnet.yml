@@ -148,7 +148,6 @@ jobs:
           exit 1
 
       - name: Create QA app if missing, then deploy
-        working-directory: ./CompanyAPP
         run: |
           set -euo pipefail
           flyctl auth whoami
@@ -166,7 +165,7 @@ jobs:
             flyctl apps create companyapp-qa --org personal
             flyctl volumes create companyapp_qa_data --region sin --size 1 --yes -a companyapp-qa
           fi
-          flyctl deploy --config fly.qa.toml --remote-only -a companyapp-qa
+          flyctl deploy . --config CompanyAPP/fly.qa.toml --dockerfile Dockerfile --remote-only -a companyapp-qa
 
   deploy-prod:
     name: Deploy Prod (companyapp-luyu)
@@ -202,7 +201,6 @@ jobs:
           exit 1
 
       - name: Deploy production
-        working-directory: ./CompanyAPP
         run: |
           set -euo pipefail
           flyctl auth whoami
@@ -216,4 +214,4 @@ jobs:
             echo "fly secrets set JwtSettings__Key=\"金鑰\" -a companyapp-luyu"
             exit 1
           fi
-          flyctl deploy --config fly.toml --remote-only -a companyapp-luyu
+          flyctl deploy . --config CompanyAPP/fly.toml --dockerfile Dockerfile --remote-only -a companyapp-luyu

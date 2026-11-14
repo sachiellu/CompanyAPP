@@ -93,7 +93,7 @@ export default function CompanyCreate() {
                 <h2 className="text-dark fw-bold mb-0" style={{ fontSize: '1.25rem' }}>
                     新增廠商資料 {loading && "..."}
                 </h2>
-                <Link to="/" className="btn btn-sm btn-outline-secondary px-3 shadow-sm text-nowrap">
+                <Link to="/companies" className="btn btn-sm btn-outline-secondary px-3 shadow-sm text-nowrap">
                     返回列表
                 </Link>
             </div>
@@ -106,12 +106,11 @@ export default function CompanyCreate() {
                 </div>
 
 
-                {/* 圖片上傳：尺寸縮減至 200px */}
                 <div className="border-top pt-4">
                     <label className="fw-bold mb-2 d-block text-muted small text-uppercase" style={{ fontSize: '11px' }}>公司 Logo 上傳</label>
-                    <div className="d-flex align-items-start gap-4">
-                        <div className="p-1 bg-white border shadow-sm flex-shrink-0">
-                            <div className="bg-light d-flex align-items-center justify-content-center overflow-hidden" style={{ width: '200px', height: '200px' }}>
+                    <div className="company-logo-upload">
+                        <div className="p-1 bg-white border shadow-sm company-logo-upload__frame">
+                            <div className="bg-light d-flex align-items-center justify-content-center overflow-hidden company-logo-upload__preview">
                                 {previewUrl ? (
                                     <img src={previewUrl} className="w-100 h-100 object-fit-contain" alt="preview" />
                                 ) : (
@@ -122,22 +121,19 @@ export default function CompanyCreate() {
                             </div>
                         </div>
 
-                        <div className="flex-grow-1">
-                            {/* 使用標準大小 input */}
-                            <input type="file" className="form-control form-control-sm mb-3 shadow-sm" accept="image/*" onChange={handleFileChange} />
-                            <div className="p-3 bg-light rounded border small text-muted" style={{ fontSize: '12px' }}>
-                                <h6 className="fw-bold mb-2 text-dark small">上傳須知：</h6>
-                                <ul className="mb-0 ps-3">
-                                    <li>支援格式：JPG, PNG, WEBP</li>
-                                    <li>建議比例：1:1 正方形</li>
-                                </ul>
-                            </div>
+                        <input type="file" className="form-control form-control-sm shadow-sm" accept="image/*" onChange={handleFileChange} />
+                        <div className="p-3 bg-light rounded border small text-muted" style={{ fontSize: '12px' }}>
+                            <h6 className="fw-bold mb-2 text-dark small">上傳須知：</h6>
+                            <ul className="mb-0 ps-3">
+                                <li>支援格式：JPG, PNG, WEBP</li>
+                                <li>建議比例：1:1 正方形</li>
+                            </ul>
                         </div>
                     </div>
                 </div>
 
                 {/* 底部按鈕：使用 btn-sm */}
-                <div className="d-flex justify-content-end gap-3 mt-5 pt-3 border-top">
+                <div className="d-flex justify-content-end gap-3 mt-4 mt-md-5 pt-3 border-top">
                     <button type="submit" className="btn btn-sm btn-primary px-5 py-2 fw-bold shadow-sm" disabled={loading}>
                         確認新增並儲存
                     </button>

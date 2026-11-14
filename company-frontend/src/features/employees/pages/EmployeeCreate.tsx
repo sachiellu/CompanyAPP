@@ -78,7 +78,7 @@ export default function EmployeeCreate() {
                     isEdit={false} // 這是新增頁面，所以 isEdit 是 false
                 />
 
-                <div className="d-flex justify-content-end mt-5 pt-3 border-top">
+                <div className="d-flex justify-content-end mt-4 mt-md-5 pt-3 border-top">
                     <button type="submit" className="btn btn-sm btn-primary px-5 py-2 fw-bold shadow-sm" disabled={loading}>
                         確認建立員工
                     </button>
