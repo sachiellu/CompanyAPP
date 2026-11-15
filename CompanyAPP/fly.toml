@@ -1,18 +1,14 @@
-# 從 repo 根目錄部署：flyctl deploy . --config CompanyAPP/fly.toml --dockerfile Dockerfile
-# 映像由根目錄 Dockerfile 建置（Node 22 + .NET 9）。
-#
+# 部署必須在 repo 根目錄（建置情境含 company-frontend）：
+#   flyctl deploy . --config CompanyAPP/fly.toml --dockerfile Dockerfile --remote-only
+# 不要在 CompanyAPP/ 裡單獨 deploy：根目錄 Dockerfile 才會編譯前端。
 
 app = "companyapp-luyu"
-primary_region = 'sin'
-
-[build]
-  dockerfile = "Dockerfile"
-
+primary_region = "sin"
 
 [http_service]
   internal_port = 8080
   force_https = true
-  auto_stop_machines = 'stop'
+  auto_stop_machines = "stop"
   auto_start_machines = true
   min_machines_running = 0
 
@@ -21,9 +17,9 @@ primary_region = 'sin'
   DATABASE_PATH = "/data/company.db"
   AppSettings__FrontendUrl = "https://companyapp-luyu.fly.dev"
 
-  [[vm]]
-  memory = '1gb'
-  cpu_kind = 'shared'
+[[vm]]
+  memory = "1gb"
+  cpu_kind = "shared"
   cpus = 1
 
 [mounts]

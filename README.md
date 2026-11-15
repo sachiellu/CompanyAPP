@@ -1,109 +1,64 @@
-## 本機開發設定
+# 企業資源管理（CompanyAPP）
 
-以本機為主、Git 同步為準。
+內部用的廠商、員工與任務派工系統。瀏覽器畫面是 React，資料與權限走 ASP.NET Core Web API；上線時打成一份映像，由 GitHub 推送主線後自動測試並佈到 Fly。
 
-### 前置需求
-- [.NET 9 SDK](https://dotnet.microsoft.com/download)
-- [Node.js 22 LTS](https://nodejs.org/)（本機 `npm run dev` 用；至少 20.19）
-- Git
+- 正式站：https://companyapp-luyu.fly.dev
+- 測試站：https://companyapp-qa.fly.dev
 
-### Clone
+先前 MVC 版本見 tag `v2.3-mvc`。
+
+## 架構
+
+| 層 | 做法 |
+|---|---|
+| 畫面 | React 19、TypeScript、Vite、Bootstrap 5 |
+| API | .NET 9 Web API、Entity Framework Core、SQLite |
+| 帳號 | ASP.NET Core Identity（鎖定、角色）；畫面不使用 Razor Identity |
+| 登入 | JWT 寫在 HttpOnly Cookie，前端不以 localStorage 當憑證；正式站簽章金鑰放在 Fly 機密，不進程式庫 |
+| 註冊 | 管理員建立員工後寄邀請信，從信件連結開通並綁定員工檔 |
+| 匯入 | 員工 Excel（ClosedXML）；失敗列回傳行號與原因，不整檔中止 |
+| 匯出 | 廠商／員工 Excel；必須先勾選，未勾選不匯出全部 |
+
+本機開發用兩個行程（熱重載）。雲端只用根目錄 `Dockerfile`：先以 Node 22 編譯前端，再 .NET 9 發布，把編譯結果放進網站靜態目錄。本機不必安裝 Docker Desktop。
+
+## 本機開發
+
+需要 .NET 9 SDK、[Node.js 22 LTS](https://nodejs.org/)（至少 20.19）、Git。
+
 ```powershell
 git clone -b main https://github.com/sachiellu/CompanyAPP.git
 cd CompanyAPP
 .\setup-local.ps1
 ```
 
-若資料夾已經有 repo：
+已有資料夾時：`git pull origin main` 後再跑 `.\setup-local.ps1`。
+
+兩個終端機：
+
 ```powershell
-git fetch origin
-git checkout main
-git pull origin main
-.\setup-local.ps1
-```
-
-### 手動設定
-```bash
-# 信任本機 HTTPS 憑證（登入 Cookie 需要 HTTPS）
-dotnet dev-certs https --trust
-
-# 後端
-dotnet restore CompanyAPP.sln
-
-# 前端
-cd company-frontend
-npm install
-```
-
-### 日常啟動（開兩個終端機）
-```powershell
-# 終端機 1：後端 API → https://localhost:5203
+# 後端 https://localhost:5203
 cd CompanyAPP
 dotnet run
 
-# 終端機 2：前端 → http://localhost:5173
+# 前端 http://localhost:5173
 cd company-frontend
 npm run dev
 ```
-瀏覽器開啟：http://localhost:5173  
-預設管理員：`admin@default.com` / `Admin123!`
 
-### 日常 Git 同步
+瀏覽器開 http://localhost:5173。示範帳號只在 Development 種子資料，見 `SeedData`。登入 Cookie 需要本機 HTTPS 憑證：`dotnet dev-certs https --trust`。
+
+## 測試與上線
+
 ```powershell
-git pull
-git add .
-git commit -m "你的說明"
-git push
+dotnet test CompanyAPP.sln
+cd company-frontend
+npm run lint
 ```
----
 
-## [v3.0] - 架構現代化：React + Web API 轉型
-本次更新將原有的單體 MVC 架構拆為前後端分離。
+推送到 `main` 後，GitHub Actions 會依序：編譯與測試 → SonarCloud → 佈測試站 → 佈正式站。任一步失敗不會略過。映像在 Fly 遠端建置，指令等同：
 
-### 核心變動
-- **前端：** 遷移至 React 19 + Vite + TypeScript，畫面使用 Bootstrap 5。
-- **登入：** JWT 改走 HttpOnly Cookie，不再把 Token 放進 localStorage。
-- **邀請制註冊：** 管理員預建員工、寄邀請信、從連結開通並綁定員工檔。
-- **Excel：** 匯入失敗會回傳行號與原因。
+```text
+flyctl deploy . --config CompanyAPP/fly.toml --dockerfile ./Dockerfile --remote-only
+```
 
-## 技術架構 (Tech Stack v3.0)
-
-### 前端 (Frontend)
-- **Framework:** React 19
-- **Build Tool:** Vite
-- **Language:** TypeScript
-- **Styling:** Bootstrap 5.3 + Bootstrap Icons
-- **HTTP Client:** Axios（withCredentials）
-- **Data Visualization:** Chart.js + react-chartjs-2
-
-### 後端 (Backend)
-- **Framework:** .NET 9.0 Web API
-- **Database:** SQLite（Entity Framework Core 9.0）
-- **帳號：** ASP.NET Core Identity（使用者與角色；畫面不走 Razor Pages）
-- **Auth:** JWT + HttpOnly Cookie
-- **Excel:** ClosedXML
-
-### 部署
-推上 `main` 後，Fly 遠端用根目錄 `Dockerfile` 建置：Node 22 編譯前端，再打包進 .NET 9。本機不必裝 Docker Desktop。
-
-本機開發（熱重載）開兩個終端機：`dotnet run` 與 `npm run dev`，瀏覽器開 http://localhost:5173。
-測試：`dotnet test CompanyAPP.sln`；前端檢查：`cd company-frontend` 後 `npm run lint`。
-
-舊版 MVC 請看 tag `v2.3-mvc` 或 branch `feature/react-modernization`。
-
----
-
-## [v3.1] - 2026-11 專案重新啟動 (Current)
-v3.0 架構不變。這次把測試與雲端部署接回來，並精簡主線上不再使用的檔案。
-
-### 這次修正
-- 接回自動化測試、程式品質分析，以及 QA／正式站部署。
-- 修好正式站任務詳情打不開的問題。
-- 帳號開通改為必須從邀請信進入。
-- 登出會真正結束登入；儀表板需登入才能看。
-- 金鑰不再放進程式庫。
-- 精簡主線：移除未使用的 Razor Identity 頁、登入畫面草稿、GitLab CI，以及重複的方案／工作流程檔。登入與註冊改為小螢幕置中。
-
-### 環境
-- QA：https://companyapp-qa.fly.dev
-- 正式站：https://companyapp-luyu.fly.dev
+建置情境是 repo 根目錄，才能複製 `company-frontend`。不要在 `CompanyAPP/` 子資料夾單獨部署。

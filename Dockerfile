@@ -1,5 +1,5 @@
-# 正式映像：先用 Node 22 編譯 SPA，再交給 .NET 9 發布。
-# 建置必須從 repo 根目錄開始（Fly / CI 皆然），本機不必裝 Docker Desktop。
+# 唯一的上線映像定義。從 repo 根目錄建置（GitHub Actions / Fly 皆然）。
+# flyctl deploy . --config CompanyAPP/fly.toml --dockerfile ./Dockerfile --remote-only
 
 FROM node:22-bookworm-slim AS frontend
 WORKDIR /frontend
