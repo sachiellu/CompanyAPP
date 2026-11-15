@@ -118,7 +118,7 @@ export default function Login() {
 
                         <div className="text-center">
                             <span className="text-white-50 small opacity-75">
-                                © 2025 企業資源管理系統 V1.0
+                                © 2026 企業資源管理系統 V1.0
                             </span>
                         </div>
 
