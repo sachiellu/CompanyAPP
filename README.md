@@ -68,7 +68,7 @@ cd company-frontend
 npm run dev
 ```
 
-瀏覽器開 http://localhost:5173。Development 才有示範帳，種子在 `SeedData`（管理員 `admin@default.com` / `Admin123!`）。
+瀏覽器開 http://localhost:5173。登入頁有一鍵展示登入（管理員／一般員工），不需輸入密碼。
 
 ### 測試
 
@@ -98,7 +98,7 @@ npm run lint
 
 ### 上線
 
-映像只有根目錄 `Dockerfile`：Node 22 編前端，再 `dotnet publish` 塞進 wwwroot。Push `main` 之後 GitHub Actions 依序跑編譯測試、SonarCloud、測試站、正式站，失敗不會略過。本機開發不用裝 Docker Desktop。建置要在 repo 最外層，才能複製 `company-frontend`，不要進 `CompanyAPP/` 單獨 deploy：
+映像只有根目錄 `Dockerfile`：Node 22 編前端，再 `dotnet publish` 塞進 wwwroot。Push `main` 之後 GitHub Actions 先編譯測試，再依序部署測試站與正式站（同一份程式，正式站不因測試站失敗而跳過）。SonarCloud 另開平行工作。本機開發不用裝 Docker Desktop。建置要在 repo 最外層，才能複製 `company-frontend`，不要進 `CompanyAPP/` 單獨 deploy：
 
 ```text
 flyctl deploy . --config CompanyAPP/fly.toml --dockerfile ./Dockerfile --remote-only

@@ -119,24 +119,15 @@ jobs:
           dotnet test CompanyAPP.sln --no-build --configuration Release --collect:"XPlat Code Coverage" -- DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.Format=opencover
           dotnet sonarscanner end /d:sonar.token="$SONAR_TOKEN"
 
-  deploy-qa:
-    name: Deploy QA (companyapp-qa)
+  deploy:
+    name: Deploy Fly (QA then Prod)
     needs: build-and-test
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
     runs-on: ubuntu-latest
-    timeout-minutes: 25
+    timeout-minutes: 45
     env:
-      FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN_QA }}
       JWT_KEY: ${{ secrets.JWT_KEY }}
     steps:
-      - name: Require FLY_API_TOKEN_QA
-        run: |
-          if [ -z "$FLY_API_TOKEN" ]; then
-            echo "GitHub Secret FLY_API_TOKEN_QA 是空的。"
-            echo "到 https://fly.io/dashboard 產生 token 後貼到 GitHub Secrets。"
-            exit 1
-          fi
-
       - uses: actions/checkout@v5
 
       - name: Install flyctl
@@ -150,21 +141,26 @@ jobs:
             echo "flyctl 安裝失敗（常見是 Fly/GitHub 504），第 ${i} 次，稍候重試"
             sleep $((i * 8))
           done
-          echo "flyctl 安裝連續失敗，這是 Fly 下載端暫時 504，不是 QA token 或 companyapp-qa 設定錯。"
+          echo "flyctl 安裝連續失敗，這是 Fly 下載端暫時 504。"
           exit 1
 
-      - name: Create QA app if missing, then deploy
+      - name: Deploy companyapp-qa
+        env:
+          FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN_QA }}
         run: |
           set -euo pipefail
+          if [ -z "$FLY_API_TOKEN" ]; then
+            echo "GitHub Secret FLY_API_TOKEN_QA 是空的，略過測試站。"
+            exit 0
+          fi
           flyctl auth whoami
           if flyctl secrets list -a companyapp-qa 2>/dev/null | grep -q JwtSettings__Key; then
             echo "Fly QA 已有 JwtSettings__Key"
           elif [ -n "${JWT_KEY:-}" ]; then
             flyctl secrets set JwtSettings__Key="$JWT_KEY" -a companyapp-qa
           else
-            echo "QA 缺少 JwtSettings__Key。在 GitHub Secrets 新增 JWT_KEY，或先執行："
-            echo "fly secrets set JwtSettings__Key=\"金鑰\" -a companyapp-qa"
-            exit 1
+            echo "QA 缺少 JwtSettings__Key，略過測試站。"
+            exit 0
           fi
           if ! flyctl status -a companyapp-qa >/dev/null 2>&1; then
             echo "companyapp-qa 不存在，以 org personal 重建"
@@ -173,43 +169,16 @@ jobs:
           fi
           flyctl deploy . --config CompanyAPP/fly.qa.toml --dockerfile ./Dockerfile --remote-only -a companyapp-qa
 
-  deploy-prod:
-    name: Deploy Prod (companyapp-luyu)
-    needs: [build-and-test, deploy-qa]
-    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
-    runs-on: ubuntu-latest
-    timeout-minutes: 25
-    env:
-      FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
-      JWT_KEY: ${{ secrets.JWT_KEY }}
-    steps:
-      - name: Require FLY_API_TOKEN
+      - name: Deploy companyapp-luyu
+        env:
+          FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
         run: |
+          set -euo pipefail
           if [ -z "$FLY_API_TOKEN" ]; then
             echo "GitHub Secret FLY_API_TOKEN 是空的。"
-            echo "這是正式站 companyapp-luyu 的 deploy token，不是 FLY_API_TOKEN_QA。"
+            echo "這是正式站 companyapp-luyu 的 deploy token。"
             exit 1
           fi
-
-      - uses: actions/checkout@v5
-
-      - name: Install flyctl
-        run: |
-          set -euo pipefail
-          for i in 1 2 3 4 5; do
-            if curl -fsSL https://fly.io/install.sh | sh; then
-              echo "$HOME/.fly/bin" >> "$GITHUB_PATH"
-              exit 0
-            fi
-            echo "flyctl 安裝失敗（常見是 Fly/GitHub 504），第 ${i} 次，稍候重試"
-            sleep $((i * 8))
-          done
-          echo "flyctl 安裝連續失敗，這是 Fly 下載端暫時 504，不是正式站 token 或 companyapp-luyu 設定錯。"
-          exit 1
-
-      - name: Deploy production
-        run: |
-          set -euo pipefail
           flyctl auth whoami
           flyctl status -a companyapp-luyu
           if flyctl secrets list -a companyapp-luyu 2>/dev/null | grep -q JwtSettings__Key; then

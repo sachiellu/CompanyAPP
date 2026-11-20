@@ -11,16 +11,20 @@ export default function Login() {
     const [loading, setLoading] = useState(false);
     const navigate = useNavigate();
 
+    const persistSession = (data: { token?: string; role?: string; email?: string }, fallbackEmail: string) => {
+        localStorage.setItem('token', data.token || 'cookie-mode');
+        localStorage.setItem('userRole', data.role || 'User');
+        localStorage.setItem('userEmail', data.email || fallbackEmail);
+        navigate('/');
+    };
+
     const handleLogin = async (e: React.FormEvent) => {
         
         e.preventDefault();
         setLoading(true);
         try {
             const data = await authApi.login(email, password);
-            localStorage.setItem('token', data.token || 'cookie-mode');
-            localStorage.setItem('userRole', data.role || 'User');
-            localStorage.setItem('userEmail', data.email || email);
-            navigate('/');
+            persistSession(data, email);
         } catch (err) {
             console.error(err);
             alert(extractErrorMessage(err));
@@ -29,26 +33,14 @@ export default function Login() {
         }
     };
 
-
-    // 展示登入
-    const handleDemoLogin = async (demoEmail: string, demoPass: string) => {
-        // 1. 先讓輸入框出現文字（視覺效果）
-        setEmail(demoEmail);
-        setPassword(demoPass);
+    const handleDemoLogin = async (role: 'Admin' | 'User') => {
         setLoading(true);
-
         try {
-            // 2.  直接傳入參數，不要等 setEmail 更新，這樣絕對不會 401
-            const data = await authApi.login(demoEmail, demoPass);
-            
-            localStorage.setItem('token', data.token || 'cookie-mode');
-            localStorage.setItem('userRole', data.role || 'User');
-            localStorage.setItem('userEmail', data.email || demoEmail);
-            
-            navigate('/');
+            const data = await authApi.demoLogin(role);
+            persistSession(data, data.email || role);
         } catch (err) {
             console.error(err);
-            alert("Demo 帳號登入失敗，請檢查 SeedData");
+            alert(extractErrorMessage(err));
         } finally {
             setLoading(false);
         }
@@ -125,27 +117,27 @@ export default function Login() {
                         
                     </form>
 
-                    {import.meta.env.DEV && (
                     <div className="mt-4 pt-3 border-top border-secondary border-opacity-25 text-center">
-                        <p className="text-white-50 small mb-2">本機展示登入：</p>
+                        <p className="text-white-50 small mb-2">展示用快速登入：</p>
                         <div className="d-flex justify-content-center gap-2 flex-wrap">
                             <button
                                 type="button"
                                 className="btn btn-sm btn-outline-info"
-                                onClick={() => handleDemoLogin('admin@default.com', 'Admin123!')}
+                                disabled={loading}
+                                onClick={() => handleDemoLogin('Admin')}
                             >
                                 管理員 (Admin)
                             </button>
                             <button
                                 type="button"
                                 className="btn btn-sm btn-outline-light"
-                                onClick={() => handleDemoLogin('user@default.com', 'User123!')}
+                                disabled={loading}
+                                onClick={() => handleDemoLogin('User')}
                             >
                                 一般員工 (User)
                             </button>
                         </div>
                     </div>
-                    )}
                     
                 </div>
             </div>

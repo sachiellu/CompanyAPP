@@ -87,6 +87,34 @@ namespace CompanyAPP.Controllers.Api
 
         public class LoginDto { public string Email { get; set; } = string.Empty; public string Password { get; set; } = string.Empty; }
 
+        public class DemoLoginDto { public string Role { get; set; } = "User"; }
+
+        [HttpPost("demo-login")]
+        [AllowAnonymous]
+        public async Task<IActionResult> DemoLogin([FromBody] DemoLoginDto? model)
+        {
+            var role = model?.Role?.Trim();
+            var email = role switch
+            {
+                "Admin" => "admin@default.com",
+                "User" => "user@default.com",
+                _ => null
+            };
+            if (email == null)
+                return BadRequest(new { message = "展示登入只支援管理員或一般員工" });
+
+            var user = await _userManager.FindByEmailAsync(email);
+            if (user == null)
+                return Unauthorized(new { message = "展示帳號尚未建立" });
+
+            if (await _userManager.IsLockedOutAsync(user))
+            {
+                await _userManager.SetLockoutEndDateAsync(user, null);
+            }
+
+            return await IssueLoginAsync(user);
+        }
+
         [HttpPost("login")]
         public async Task<IActionResult> Login([FromBody] LoginDto model)
         {
@@ -110,7 +138,11 @@ namespace CompanyAPP.Controllers.Api
             }
 
             await _userManager.ResetAccessFailedCountAsync(user);
+            return await IssueLoginAsync(user);
+        }
 
+        private async Task<IActionResult> IssueLoginAsync(IdentityUser user)
+        {
             var userRoles = await _userManager.GetRolesAsync(user);
             var jwtKey = _configuration["JwtSettings:Key"];
             if (string.IsNullOrWhiteSpace(jwtKey))
