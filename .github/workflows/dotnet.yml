@@ -120,11 +120,11 @@ jobs:
           dotnet sonarscanner end /d:sonar.token="$SONAR_TOKEN"
 
   deploy:
-    name: Deploy Fly (QA then Prod)
+    name: Deploy Fly (Prod)
     needs: build-and-test
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    timeout-minutes: 25
     env:
       JWT_KEY: ${{ secrets.JWT_KEY }}
     steps:
@@ -143,31 +143,6 @@ jobs:
           done
           echo "flyctl 安裝連續失敗，這是 Fly 下載端暫時 504。"
           exit 1
-
-      - name: Deploy companyapp-qa
-        env:
-          FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN_QA }}
-        run: |
-          set -euo pipefail
-          if [ -z "$FLY_API_TOKEN" ]; then
-            echo "GitHub Secret FLY_API_TOKEN_QA 是空的，略過測試站。"
-            exit 0
-          fi
-          flyctl auth whoami
-          if flyctl secrets list -a companyapp-qa 2>/dev/null | grep -q JwtSettings__Key; then
-            echo "Fly QA 已有 JwtSettings__Key"
-          elif [ -n "${JWT_KEY:-}" ]; then
-            flyctl secrets set JwtSettings__Key="$JWT_KEY" -a companyapp-qa
-          else
-            echo "QA 缺少 JwtSettings__Key，略過測試站。"
-            exit 0
-          fi
-          if ! flyctl status -a companyapp-qa >/dev/null 2>&1; then
-            echo "companyapp-qa 不存在，以 org personal 重建"
-            flyctl apps create companyapp-qa --org personal
-            flyctl volumes create companyapp_qa_data --region sin --size 1 --yes -a companyapp-qa
-          fi
-          flyctl deploy . --config CompanyAPP/fly.qa.toml --dockerfile ./Dockerfile --remote-only -a companyapp-qa
 
       - name: Deploy companyapp-luyu
         env:

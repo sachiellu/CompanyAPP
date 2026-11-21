@@ -2,8 +2,7 @@
 
 內部用的企業資源管理，模組包含廠商、員工、任務派工、帳號與操作稽核。前端 React 19 + TypeScript（Vite、Bootstrap 5、Axios、Chart.js），後端 ASP.NET Core .NET 9 Web API，資料 SQLite + EF Core。帳號用 Identity（角色、鎖定），登入 JWT 放 HttpOnly Cookie。原本是 MVC，拆開後的舊碼在 `v2.3-mvc`。
 
-正式站：https://companyapp-luyu.fly.dev  
-測試站：https://companyapp-qa.fly.dev
+正式站：https://companyapp-luyu.fly.dev
 
 ## 系統裡有什麼
 
@@ -98,7 +97,7 @@ npm run lint
 
 ### 上線
 
-映像只有根目錄 `Dockerfile`：Node 22 編前端，再 `dotnet publish` 塞進 wwwroot。Push `main` 之後 GitHub Actions 先編譯測試，再依序部署測試站與正式站（同一份程式，正式站不因測試站失敗而跳過）。SonarCloud 另開平行工作。本機開發不用裝 Docker Desktop。建置要在 repo 最外層，才能複製 `company-frontend`，不要進 `CompanyAPP/` 單獨 deploy：
+映像只有根目錄 `Dockerfile`：Node 22 編前端，再 `dotnet publish` 塞進 wwwroot。Push `main` 之後 GitHub Actions 編譯測試，通過後部署正式站。SonarCloud 另開平行工作。本機開發不用裝 Docker Desktop。建置要在 repo 最外層，才能複製 `company-frontend`，不要進 `CompanyAPP/` 單獨 deploy：
 
 ```text
 flyctl deploy . --config CompanyAPP/fly.toml --dockerfile ./Dockerfile --remote-only
