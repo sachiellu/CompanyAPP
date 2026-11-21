@@ -16,6 +16,7 @@ public class AuditLogsController : ControllerBase
     {
         // 抓取最新的 100 筆，使用 UtcNow 存檔的資料
         var logs = await _context.AuditLogs
+            .Where(x => !x.EntityName.StartsWith("Identity"))
             .OrderByDescending(x => x.Timestamp)
             .Take(100)
             .ToListAsync();

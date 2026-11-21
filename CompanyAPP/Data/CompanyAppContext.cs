@@ -37,12 +37,21 @@ namespace CompanyAPP.Data
             var auditEntries = new List<AuditEntry>();
             // 嘗試取得目前登入者資訊
             var user = _httpContextAccessor.HttpContext?.User;
-            var userName = user?.Identity?.Name ?? "Anonymous"; // 沒登入就顯示匿名
-            var userId = user?.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? "Unknown";
+            var authenticated = user?.Identity?.IsAuthenticated == true;
+            var userName = authenticated
+                ? (user!.FindFirst(ClaimTypes.Email)?.Value ?? user.Identity?.Name ?? "系統自動")
+                : "系統自動";
+            var userId = authenticated
+                ? (user!.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? "系統")
+                : "系統";
             foreach (var entry in ChangeTracker.Entries())
             {
-                // 如果是 AuditLog 自己，或是沒變動的，甚至是 Detached (沒追蹤) 的，都跳過
-                if (entry.Entity is AuditLog || entry.State == EntityState.Detached || entry.State == EntityState.Unchanged)
+                if (entry.State == EntityState.Detached || entry.State == EntityState.Unchanged)
+                    continue;
+                // 登入帳內部更新不記；廠商／員工／任務改由 AuditService 寫中文，避免同一動作兩筆
+                if (entry.Entity is AuditLog or Company or Employee or Mission)
+                    continue;
+                if (entry.Entity.GetType().Name.StartsWith("Identity", StringComparison.Ordinal))
                     continue;
 
                 var auditEntry = new AuditEntry(entry)

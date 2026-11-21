@@ -22,8 +22,15 @@ namespace CompanyAPP.Services.Common
         {
             // 獲取當前用戶資訊 (這是 Who/誰在操作 的關鍵)
             var user = _httpContextAccessor.HttpContext?.User;
-            var userId = user?.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? "System/Anonymous";
-            var userName = user?.FindFirst(ClaimTypes.Email)?.Value ?? "System/Anonymous";
+            var authenticated = user?.Identity?.IsAuthenticated == true;
+            var userId = authenticated
+                ? (user!.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? "系統")
+                : "系統";
+            var userName = authenticated
+                ? (user!.FindFirst(ClaimTypes.Email)?.Value
+                    ?? user.Identity?.Name
+                    ?? "系統自動")
+                : "系統自動";
 
             var log = new AuditLog
             {

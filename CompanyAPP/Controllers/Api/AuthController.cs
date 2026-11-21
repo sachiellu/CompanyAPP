@@ -151,7 +151,8 @@ namespace CompanyAPP.Controllers.Api
             var authClaims = new List<Claim>
             {
                 new Claim(ClaimTypes.NameIdentifier, user.Id),
-                new Claim(ClaimTypes.Name, user.UserName ?? ""),
+                new Claim(ClaimTypes.Name, user.UserName ?? user.Email ?? ""),
+                new Claim(ClaimTypes.Email, user.Email ?? user.UserName ?? ""),
                 new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
             };
 
