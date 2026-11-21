@@ -107,7 +107,10 @@ export default function AuditLogList() {
         setLoading(true);
         try {
             const res = await api.get<AuditLog[]>('/audit-logs');
-            const visible = (res.data || []).filter(log => !log.entityName?.startsWith('Identity'));
+            const visible = (res.data || []).filter(log =>
+                !log.entityName?.startsWith('Identity')
+                && !(log.changes || '').trim().startsWith('{')
+            );
             setLogs(visible);
         } catch (err) {
             console.error("讀取日誌失敗", err);
