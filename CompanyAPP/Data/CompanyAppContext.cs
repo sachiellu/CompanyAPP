@@ -49,7 +49,10 @@ namespace CompanyAPP.Data
                 if (entry.State == EntityState.Detached || entry.State == EntityState.Unchanged)
                     continue;
                 // 登入帳內部更新不記；廠商／員工／任務改由 AuditService 寫中文，避免同一動作兩筆
-                if (entry.Entity is AuditLog or Company or Employee or Mission)
+                if (entry.Entity is AuditLog
+                    || entry.Entity is CompanyAPP.Models.Company
+                    || entry.Entity is CompanyAPP.Models.Employee
+                    || entry.Entity is CompanyAPP.Models.Mission)
                     continue;
                 if (entry.Entity.GetType().Name.StartsWith("Identity", StringComparison.Ordinal))
                     continue;
