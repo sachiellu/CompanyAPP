@@ -37,7 +37,7 @@ export default function Sidebar({ open = false, onNavigate }: SidebarProps) {
 
     const adminSubItems: MenuItem[] = [
         { path: '/users', label: '帳號權限', roles: ['Admin'] },
-        { path: '/audit-logs', label: '系統操作日誌', roles: ['Admin'] },
+        { path: '/audit-logs', label: 'Audit log', roles: ['Admin'] },
     ];
 
     const [isAdminOpen, setIsAdminOpen] = useState(

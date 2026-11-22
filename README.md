@@ -4,6 +4,8 @@
 
 正式站：https://companyapp-luyu.fly.dev
 
+開發協作：設計看 [docs/SDD.md](docs/SDD.md)，測試節奏看 [docs/TDD.md](docs/TDD.md)。
+
 ## 系統裡有什麼
 
 - **儀表板：** 登入後的首頁，圖表看廠商／員工等概況。

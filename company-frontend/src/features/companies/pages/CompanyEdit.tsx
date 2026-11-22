@@ -81,18 +81,18 @@ export default function CompanyEdit() {
 
         // 不再使用 FormData，直接傳物件
         const payload = {
-            id: id,
+            id: Number(id),
             name: name,
             taxId: taxId,
             industry: industry,
             address: address,
-            foundedDate: foundedDate,
-            logoPath: existingLogo, // 這裡已經是上傳完後的 Cloudinary 網址了
-            contacts: contacts 
+            foundedDate: foundedDate || null,
+            logoPath: existingLogo,
+            contacts: contacts
         };
 
         try {
-            await api.post(`/companies/${id}`, payload); // 後端接收 [FromBody]
+            await api.put(`/companies/${id}`, payload);
             alert("修改成功！");
             navigate('/companies');
         } catch (err) {
